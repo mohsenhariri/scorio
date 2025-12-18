@@ -4,7 +4,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#license)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Julia 1.6+](https://img.shields.io/badge/julia-1.6+-9558B2.svg)](https://julialang.org/downloads/)
-[![Documentation](https://readthedocs.org/projects/scorio/badge/?version=latest)](https://scorio.readthedocs.io/)
+[![Python Docs](https://readthedocs.org/projects/scorio/badge/?version=latest)](https://scorio.readthedocs.io/en/latest/)
+[![Julia Docs](https://img.shields.io/badge/docs-Julia-9558B2.svg)](https://mohsenhariri.github.io/scorio/julia/)
 
 ---
 
@@ -149,7 +150,12 @@ Bayesian performance evaluation with uncertainty quantification using the Bayes@
 
 ## 📚 Documentation
 
-Full documentation is available at: [https://scorio.readthedocs.io/](https://scorio.readthedocs.io/)
+| Language | Documentation | Status |
+|----------|--------------|--------|
+| **Python** | [scorio.readthedocs.io](https://scorio.readthedocs.io/en/latest/) | [![ReadTheDocs](https://readthedocs.org/projects/scorio/badge/?version=latest)](https://scorio.readthedocs.io/en/latest/) |
+| **Julia** | [mohsenhariri.github.io/scorio/julia](https://mohsenhariri.github.io/scorio/julia/) | [![GitHub Pages](https://img.shields.io/badge/docs-stable-blue.svg)](https://mohsenhariri.github.io/scorio/julia/) |
+
+**Landing Page**: [mohsenhariri.github.io/scorio](https://mohsenhariri.github.io/scorio/)
 
 ---
 
@@ -175,9 +181,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Links
 
-- **Documentation**: [https://scorio.readthedocs.io/](https://scorio.readthedocs.io/)
-- **Repository**: [https://github.com/mohsenhariri/scorio](https://github.com/mohsenhariri/scorio)
-- **Issues**: [https://github.com/mohsenhariri/scorio/issues](https://github.com/mohsenhariri/scorio/issues)
-- **Paper**: [https://arxiv.org/abs/2510.04265](https://arxiv.org/abs/2510.04265)
+- **Landing Page**: [mohsenhariri.github.io/scorio](https://mohsenhariri.github.io/scorio/)
+- **Python Docs**: [scorio.readthedocs.io](https://scorio.readthedocs.io/en/latest/)
+- **Julia Docs**: [mohsenhariri.github.io/scorio/julia](https://mohsenhariri.github.io/scorio/julia/)
+- **Repository**: [github.com/mohsenhariri/scorio](https://github.com/mohsenhariri/scorio)
+- **Issues**: [github.com/mohsenhariri/scorio/issues](https://github.com/mohsenhariri/scorio/issues)
+- **Paper**: [arxiv.org/abs/2510.04265](https://arxiv.org/abs/2510.04265)
 
 
