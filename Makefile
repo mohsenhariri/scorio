@@ -52,6 +52,9 @@ docs-clean:
 docs-serve:
 	python -m http.server --directory docs/_build/html 4000
 
+landing-serve:
+	python -m http.server --directory docs-landing 4002
+
 # Julia commands
 julia-install:
 	julia --project=$(JULIA_PROJECT) -e 'using Pkg; Pkg.instantiate()'
