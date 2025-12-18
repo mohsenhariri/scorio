@@ -1,6 +1,6 @@
 name = "Scorio"
 uuid = "8b85e2e0-9a7f-4d8f-8e1e-3c5c7d5e8e0a"
-authors = ["Mohsen Hariri <mohsen.hariri@gmail.com>"]
+authors = ["Mohsen Hariri <mohsen.hariri@case.edu>"]
 version = "0.1.0"
 
 [compat]

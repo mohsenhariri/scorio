@@ -1,8 +1,8 @@
 # Scorio.jl
 
-`Scorio.jl` is a Julia implementation of the Bayes@N framework introduced in [Don't Pass@k: A Bayesian Framework for Large Language Model Evaluation](https://arxiv.org/abs/2504.11651)
+`Scorio.jl` is a Julia implementation of the Bayes@N framework introduced in [Don't Pass@k: A Bayesian Framework for Large Language Model Evaluation](https://arxiv.org/abs/2510.04265)
 
-[![arXiv](https://img.shields.io/badge/arXiv-2504.11651-b31b1b.svg)](https://arxiv.org/abs/2504.11651)
+[![arXiv](https://img.shields.io/badge/arXiv-2510.04265-b31b1b.svg)](https://arxiv.org/abs/2510.04265)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#license)
 
 ---
@@ -41,6 +41,21 @@ Pkg.develop(path="/path/to/Scorio.jl")
 
 #### `avg(R) -> Float64`
 - Returns the naive mean of elements in `R`. For binary accuracy, encode incorrect=0, correct=1.
+
+#### `pass_at_k(R, k) -> Float64`
+- Unbiased Pass@k estimator. Computes the probability that at least one of k randomly selected samples is correct, averaged over all M systems.
+
+#### `pass_hat_k(R, k) -> Float64`
+- Pass^k (Pass-hat@k): probability that all k selected trials are correct.
+
+#### `g_pass_at_k(R, k) -> Float64`
+- Alias for `pass_hat_k`.
+
+#### `g_pass_at_k_tao(R, k, tao) -> Float64`
+- G-Pass@k_τ: Generalized Pass@k with threshold τ. Computes the probability that at least ⌈τ·k⌉ of k randomly selected samples are correct.
+
+#### `mg_pass_at_k(R, k) -> Float64`
+- mG-Pass@k: mean Generalized Pass@k. Computes the mean of G-Pass@k_τ over τ ∈ [0.5, 1.0], providing a comprehensive stability metric.
 
 ### Ranking Functions
 
@@ -94,9 +109,9 @@ If you use `Scorio.jl` or Bayes@N, please cite:
 @article{hariri2025dontpassk,
   title   = {Don't Pass@k: A Bayesian Framework for Large Language Model Evaluation},
   author  = {Hariri, Mohsen and Samandar, Amirhossein and Hinczewski, Michael and Chaudhary, Vipin},
-  journal = {arXiv preprint arXiv:2504.11651},
+  journal = {arXiv preprint arXiv:2510.04265},
   year    = {2025},
-  url     = {https://mohsenhariri.github.io/bayes-kit/}
+  url     = {https://mohsenhariri.github.io/scorio/
 }
 ```
 
@@ -106,8 +121,8 @@ MIT License. See the `LICENSE` file for details.
 
 ## Support
 
-- Documentation and updates: https://mohsenhariri.github.io/bayes-kit/
-- Issues and feature requests: https://github.com/mohsenhariri/bayes-kit/issues
+- Documentation and updates: https://mohsenhariri.github.io/scorio/
+- Issues and feature requests: https://github.com/mohsenhariri/scorio/issues
 
 ## Related Packages
 

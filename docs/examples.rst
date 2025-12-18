@@ -121,7 +121,7 @@ Analyzing pass rates with different k values:
        pass_k = eval.pass_at_k(R, k)
        print(f"Pass@{k}: {pass_k:.4f}")
 
-Example 6: Majority-Weighted Evaluation
+Example 6: mG-Pass@k
 ----------------------------------------
 
 Using mG-Pass@k for consistency measurement:

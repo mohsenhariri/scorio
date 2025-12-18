@@ -4,13 +4,18 @@
 A Julia package implementing the Bayes@N framework for evaluating Large Language Models and other systems.
 
 Based on the paper: "Don't Pass@k: A Bayesian Framework for Large Language Model Evaluation"
-https://arxiv.org/abs/2504.11651
+https://arxiv.org/abs/2510.04265
 
 # Main APIs
 
 ## Evaluation Functions (from `eval` submodule)
 - `bayes(R, w, R0=nothing)`: Bayesian performance evaluation with uncertainty quantification
 - `avg(R)`: Simple average of outcomes
+- `pass_at_k(R, k)`: Unbiased Pass@k estimator
+- `pass_hat_k(R, k)`: Pass^k (Pass-hat@k) estimator
+- `g_pass_at_k(R, k)`: Alias for pass_hat_k
+- `g_pass_at_k_tao(R, k, tao)`: Generalized Pass@k with threshold τ
+- `mg_pass_at_k(R, k)`: mean Generalized Pass@k
 
 ## Ranking Functions (from `rank` submodule)
 - `elo()`: ELO ranking (not yet implemented)
@@ -72,7 +77,7 @@ include("rank.jl")
 include("utils.jl")
 
 # Re-export main APIs
-export bayes, avg, pass_at  # from eval.jl
+export bayes, avg, pass_at_k, pass_hat_k, g_pass_at_k, g_pass_at_k_tao, mg_pass_at_k  # from eval.jl
 export elo  # from rank.jl
 export competition_ranks_from_scores  # from utils.jl
 

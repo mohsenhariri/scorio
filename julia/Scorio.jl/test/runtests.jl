@@ -80,9 +80,68 @@ using Scorio
         @test ranks4 == [1, 1, 3]
     end
     
-    @testset "pass_at() placeholder" begin
-        # Should raise an error
-        @test_throws ErrorException pass_at()
+    @testset "pass_at_k() function" begin
+        R = [0 1 1 0 1;
+             1 1 0 1 1]
+        
+        # k=1
+        @test pass_at_k(R, 1) ≈ 0.7
+        
+        # k=2
+        @test pass_at_k(R, 2) ≈ 0.95
+        
+        # Error handling
+        @test_throws ErrorException pass_at_k(R, 0)
+        @test_throws ErrorException pass_at_k(R, 6)
+    end
+
+    @testset "pass_hat_k() function" begin
+        R = [0 1 1 0 1;
+             1 1 0 1 1]
+        
+        # k=1
+        @test pass_hat_k(R, 1) ≈ 0.7
+        
+        # k=2
+        @test pass_hat_k(R, 2) ≈ 0.45
+        
+        # Alias check
+        @test g_pass_at_k(R, 2) == pass_hat_k(R, 2)
+        
+        # Error handling
+        @test_throws ErrorException pass_hat_k(R, 0)
+        @test_throws ErrorException pass_hat_k(R, 6)
+    end
+
+    @testset "g_pass_at_k_tao() function" begin
+        R = [0 1 1 0 1;
+             1 1 0 1 1]
+        
+        # Test from Python docstring
+        @test g_pass_at_k_tao(R, 2, 0.5) ≈ 0.95 atol=0.001
+        @test g_pass_at_k_tao(R, 2, 1.0) ≈ 0.45 atol=0.001
+        
+        # tao=0 should be equivalent to pass_at_k
+        @test g_pass_at_k_tao(R, 2, 0.0) ≈ pass_at_k(R, 2) atol=0.001
+        
+        # Error handling
+        @test_throws ErrorException g_pass_at_k_tao(R, 2, -0.1)
+        @test_throws ErrorException g_pass_at_k_tao(R, 2, 1.1)
+        @test_throws ErrorException g_pass_at_k_tao(R, 0, 0.5)
+        @test_throws ErrorException g_pass_at_k_tao(R, 6, 0.5)
+    end
+
+    @testset "mg_pass_at_k() function" begin
+        R = [0 1 1 0 1;
+             1 1 0 1 1]
+        
+        # Test from Python docstring
+        @test mg_pass_at_k(R, 2) ≈ 0.45 atol=0.001
+        @test mg_pass_at_k(R, 3) ≈ 0.166667 atol=0.001
+        
+        # Error handling
+        @test_throws ErrorException mg_pass_at_k(R, 0)
+        @test_throws ErrorException mg_pass_at_k(R, 6)
     end
     
     @testset "elo() placeholder" begin
@@ -94,7 +153,11 @@ using Scorio
         # Test that main functions are exported
         @test isdefined(Scorio, :bayes)
         @test isdefined(Scorio, :avg)
-        @test isdefined(Scorio, :pass_at)
+        @test isdefined(Scorio, :pass_at_k)
+        @test isdefined(Scorio, :pass_hat_k)
+        @test isdefined(Scorio, :g_pass_at_k)
+        @test isdefined(Scorio, :g_pass_at_k_tao)
+        @test isdefined(Scorio, :mg_pass_at_k)
         @test isdefined(Scorio, :elo)
         @test isdefined(Scorio, :competition_ranks_from_scores)
     end

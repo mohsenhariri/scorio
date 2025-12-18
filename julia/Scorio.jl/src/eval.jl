@@ -3,28 +3,51 @@
 
 Performance evaluation using the Bayes@N framework.
 
+# References
+Hariri, M., Samandar, A., Hinczewski, M., & Chaudhary, V. (2025).
+Don't Pass@k: A Bayesian Framework for Large Language Model Evaluation.
+*arXiv preprint arXiv:2510.04265*.
+https://arxiv.org/abs/2510.04265
+
 # Arguments
-- `R::AbstractMatrix{Int}`: M×N int matrix with entries in {0,…,C}. Row α are the N outcomes for system α.
-- `w::AbstractVector{<:Real}`: length-(C+1) weight vector (w0,…,wC) that maps category k to score wk.
-- `R0::Union{AbstractMatrix{Int}, Nothing}`: optional M×D int matrix supplying D prior outcomes per row. If omitted, D=0.
+- `R::AbstractMatrix{<:Integer}`: ``M \\times N`` int matrix with entries in ``\\{0,\\ldots,C\\}``.
+  Row ``\\alpha`` are the N outcomes for system ``\\alpha``.
+- `w::AbstractVector{<:Real}`: length ``(C+1)`` weight vector ``(w_0,\\ldots,w_C)`` that maps
+  category k to score ``w_k``.
+- `R0::Union{AbstractMatrix{<:Integer}, Nothing}`: optional ``M \\times D`` int matrix supplying 
+  D prior outcomes per row. If omitted, ``D=0``.
 
 # Returns
-- `(mu, sigma)`: performance metric estimate and its uncertainty.
+- `Tuple{Float64, Float64}`: ``(\\mu, \\sigma)`` performance metric estimate and its uncertainty.
 
 # Notation
-δ_{a,b} is the Kronecker delta. For each row α and class k∈{0,…,C}:
-- n_{αk}  = Σ_{i=1..N} δ_{k, R_{αi}}                    (counts in R)
-- n^0_{αk} = 1 + Σ_{i=1..D} δ_{k, R^0_{αi}}             (Dirichlet(+1) prior)
-- ν_{αk}   = n_{αk} + n^0_{αk}
+``\\delta_{a,b}`` is the Kronecker delta. For each row ``\\alpha`` and class ``k \\in \\{0,\\ldots,C\\}``:
 
-T = 1 + C + D + N  (effective sample size; scalar)
+```math
+n_{\\alpha k} = \\sum_{i=1}^N \\delta_{k, R_{\\alpha i}} \\quad \\text{(counts in R)}
+```
 
-# Estimates
-μ = w0 + (1/(M·T)) · Σ_{α=1..M} Σ_{j=0..C} ν_{αj} (w_j − w0)
+```math
+n^0_{\\alpha k} = 1 + \\sum_{i=1}^D \\delta_{k, R^0_{\\alpha i}} \\quad \\text{(Dirichlet(+1) prior)}
+```
 
-σ = sqrt{ (1/(M^2·(T+1))) · Σ_{α=1..M} [
-          Σ_{j} (ν_{αj}/T) (w_j − w0)^2
-          − ( Σ_{j} (ν_{αj}/T) (w_j − w0) )^2 ] }
+```math
+\\nu_{\\alpha k} = n_{\\alpha k} + n^0_{\\alpha k}
+```
+
+Effective sample size: ``T = 1 + C + D + N`` (scalar)
+
+# Formula
+
+```math
+\\mu = w_0 + \\frac{1}{M \\cdot T} \\sum_{\\alpha=1}^M \\sum_{j=0}^C \\nu_{\\alpha j} (w_j - w_0)
+```
+
+```math
+\\sigma = \\sqrt{ \\frac{1}{M^2(T+1)} \\sum_{\\alpha=1}^M \\left[
+    \\sum_j \\frac{\\nu_{\\alpha j}}{T} (w_j - w_0)^2
+    - \\left( \\sum_j \\frac{\\nu_{\\alpha j}}{T} (w_j - w_0) \\right)^2 \\right] }
+```
 
 # Examples
 ```julia
@@ -114,12 +137,31 @@ end
 """
     avg(R::AbstractArray{<:Real}) -> Float64
 
-Returns the naive mean of elements in R. For binary accuracy, encode incorrect=0, correct=1.
+Simple average of all entries in R.
+
+Computes the arithmetic mean of all entries in the result matrix.
+
+# Arguments
+- `R::AbstractArray{<:Real}`: ``M \\times N`` result matrix with entries in ``\\{0, 1\\}``.
+  Row ``\\alpha`` are the N outcomes for system ``\\alpha``.
+
+# Returns
+- `Float64`: The arithmetic mean of all entries in R.
+
+# Notation
+``R_{\\alpha i}`` is the outcome for system ``\\alpha`` on trial ``i``.
+
+# Formula
+
+```math
+\\text{avg} = \\frac{1}{M \\cdot N} \\sum_{\\alpha=1}^{M} \\sum_{i=1}^{N} R_{\\alpha i}
+```
 
 # Examples
 ```julia
-R = [0 1 1 0; 1 1 1 1]
-avg(R)  # Returns 0.75
+R = [0 1 1 0 1;
+     1 1 0 1 1]
+avg(R)  # Returns 0.7
 ```
 """
 function avg(R::AbstractArray{<:Real})::Float64
@@ -128,12 +170,333 @@ end
 
 
 """
-    pass_at(args...; kwargs...)
+    pass_at_k(R::AbstractMatrix{<:Integer}, k::Integer) -> Float64
 
-Not yet implemented. Placeholder for future functionality.
+Unbiased Pass@k estimator.
+
+Computes the probability that at least one of k randomly selected samples
+is correct, averaged over all M systems.
+
+# References
+Chen, M., Tworek, J., Jun, H., et al. (2021).
+Evaluating Large Language Models Trained on Code.
+*arXiv preprint arXiv:2107.03374*.
+https://arxiv.org/abs/2107.03374
+
+# Arguments
+- `R::AbstractMatrix{<:Integer}`: ``M \\times N`` binary matrix with entries in ``\\{0, 1\\}``.
+  ``R_{\\alpha i} = 1`` if trial ``i`` for system ``\\alpha`` passed, 0 otherwise.
+- `k::Integer`: Number of samples to select (``1 \\le k \\le N``).
+
+# Returns
+- `Float64`: The average Pass@k score across all M systems.
+
+# Notation
+For each row ``\\alpha``:
+
+```math
+\\nu_\\alpha = \\sum_{i=1}^{N} R_{\\alpha i} \\quad \\text{(number of correct samples)}
+```
+
+``C(a, b)`` denotes the binomial coefficient ``\\binom{a}{b}``.
+
+# Formula
+
+```math
+\\text{Pass@k}_\\alpha = 1 - \\frac{C(N - \\nu_\\alpha, k)}{C(N, k)}
+```
+
+```math
+\\text{Pass@k} = \\frac{1}{M} \\sum_{\\alpha=1}^{M} \\text{Pass@k}_\\alpha
+```
+
+# Examples
+```julia
+R = [0 1 1 0 1;
+     1 1 0 1 1]
+pass_at_k(R, 1)  # Returns 0.7
+pass_at_k(R, 2)  # Returns 0.95
+```
 """
-function pass_at(args...; kwargs...)
-    error("Not yet implemented.")
+function pass_at_k(R::AbstractMatrix{<:Integer}, k::Integer)::Float64
+    M, N = size(R)
+    if !(1 <= k <= N)
+        error("k must satisfy 1 <= k <= N (N=$N); got k=$k")
+    end
+    
+    nu = vec(sum(R, dims=2))
+    denom = binomial(BigInt(N), k)
+    
+    # vals = 1 - comb(N - nu, k) / denom
+    # We need to handle element-wise operations. 
+    # Note: binomial(n, k) returns 0 if k > n, which handles the case where N - nu < k correctly.
+    # Use BigInt to avoid overflow for large N
+    vals = [1.0 - float(binomial(BigInt(N - n), k)) / denom for n in nu]
+    
+    return sum(vals) / M
 end
 
-export bayes, avg, pass_at
+
+"""
+    pass_hat_k(R::AbstractMatrix{<:Integer}, k::Integer) -> Float64
+
+Pass^k (Pass-hat@k): probability that all k selected trials are correct.
+
+Computes the probability that k randomly selected samples are ALL correct,
+averaged over all M systems. Also known as G-Pass@k.
+
+# References
+Yao, S., Shinn, N., Razavi, P., & Narasimhan, K. (2024).
+τ-bench: A Benchmark for Tool-Agent-User Interaction in Real-World Domains.
+*arXiv preprint arXiv:2406.12045*.
+https://arxiv.org/abs/2406.12045
+
+# Arguments
+- `R::AbstractMatrix{<:Integer}`: ``M \\times N`` binary matrix with entries in ``\\{0, 1\\}``.
+  ``R_{\\alpha i} = 1`` if trial ``i`` for system ``\\alpha`` passed, 0 otherwise.
+- `k::Integer`: Number of samples to select (``1 \\le k \\le N``).
+
+# Returns
+- `Float64`: The average Pass^k score across all M systems.
+
+# Notation
+For each row ``\\alpha``:
+
+```math
+\\nu_\\alpha = \\sum_{i=1}^{N} R_{\\alpha i} \\quad \\text{(number of correct samples)}
+```
+
+``C(a, b)`` denotes the binomial coefficient ``\\binom{a}{b}``.
+
+# Formula
+
+```math
+\\text{Pass}\\hat{\\text{@}}\\text{k}_\\alpha = \\frac{C(\\nu_\\alpha, k)}{C(N, k)}
+```
+
+```math
+\\text{Pass}\\hat{\\text{@}}\\text{k} = \\frac{1}{M} \\sum_{\\alpha=1}^{M} \\text{Pass}\\hat{\\text{@}}\\text{k}_\\alpha
+```
+
+# Examples
+```julia
+R = [0 1 1 0 1;
+     1 1 0 1 1]
+pass_hat_k(R, 1)  # Returns 0.7
+pass_hat_k(R, 2)  # Returns 0.45
+```
+"""
+function pass_hat_k(R::AbstractMatrix{<:Integer}, k::Integer)::Float64
+    M, N = size(R)
+    if !(1 <= k <= N)
+        error("k must satisfy 1 <= k <= N (N=$N); got k=$k")
+    end
+    
+    nu = vec(sum(R, dims=2))
+    denom = binomial(BigInt(N), k)
+    
+    # vals = comb(nu, k) / denom
+    # Use BigInt to avoid overflow for large N
+    vals = [float(binomial(BigInt(n), k)) / denom for n in nu]
+    
+    return sum(vals) / M
+end
+
+
+"""
+    g_pass_at_k(R::AbstractMatrix{<:Integer}, k::Integer) -> Float64
+
+Alias for `pass_hat_k`. See [`pass_hat_k`](@ref) for documentation.
+
+This function is provided for compatibility with literature that uses
+the G-Pass@k naming convention.
+"""
+function g_pass_at_k(R::AbstractMatrix{<:Integer}, k::Integer)::Float64
+    return pass_hat_k(R, k)
+end
+
+
+"""
+    g_pass_at_k_tao(R::AbstractMatrix{<:Integer}, k::Integer, tao::Real) -> Float64
+
+G-Pass@k_τ: Generalized Pass@k with threshold τ.
+
+Computes the probability that at least ``\\lceil \\tau \\cdot k \\rceil`` of k randomly selected
+samples are correct, averaged over all M systems.
+
+# References
+Liu, J., Liu, H., Xiao, L., et al. (2024).
+Are Your LLMs Capable of Stable Reasoning?
+*arXiv preprint arXiv:2412.13147*.
+https://arxiv.org/abs/2412.13147
+
+# Arguments
+- `R::AbstractMatrix{<:Integer}`: ``M \\times N`` binary matrix with entries in ``\\{0, 1\\}``.
+  ``R_{\\alpha i} = 1`` if trial ``i`` for system ``\\alpha`` passed, 0 otherwise.
+- `k::Integer`: Number of samples to select (``1 \\le k \\le N``).
+- `tao::Real`: Threshold parameter ``\\tau \\in [0, 1]``. Requires at least
+  ``\\lceil \\tau \\cdot k \\rceil`` successes.
+  When ``\\tau = 0``, equivalent to Pass@k.
+  When ``\\tau = 1``, equivalent to Pass^k.
+
+# Returns
+- `Float64`: The average G-Pass@k_τ score across all M systems.
+
+# Notation
+For each row ``\\alpha``:
+
+```math
+\\nu_\\alpha = \\sum_{i=1}^{N} R_{\\alpha i} \\quad \\text{(number of correct samples)}
+```
+
+``C(a, b)`` denotes the binomial coefficient ``\\binom{a}{b}``.
+
+``j_0 = \\lceil \\tau \\cdot k \\rceil`` is the minimum number of successes required.
+
+# Formula
+
+```math
+\\text{G-Pass@k}_{\\tau, \\alpha} = \\sum_{j=j_0}^{k} \\frac{C(\\nu_\\alpha, j) \\cdot C(N - \\nu_\\alpha, k - j)}{C(N, k)}
+```
+
+```math
+\\text{G-Pass@k}_\\tau = \\frac{1}{M} \\sum_{\\alpha=1}^{M} \\text{G-Pass@k}_{\\tau, \\alpha}
+```
+
+# Examples
+```julia
+R = [0 1 1 0 1;
+     1 1 0 1 1]
+g_pass_at_k_tao(R, 2, 0.5)  # Returns ≈ 0.95
+g_pass_at_k_tao(R, 2, 1.0)  # Returns ≈ 0.45
+```
+"""
+function g_pass_at_k_tao(R::AbstractMatrix{<:Integer}, k::Integer, tao::Real)::Float64
+    M, N = size(R)
+    
+    if !(0.0 <= tao <= 1.0)
+        error("tao must be in [0, 1]; got $tao")
+    end
+    if !(1 <= k <= N)
+        error("k must satisfy 1 <= k <= N (N=$N); got k=$k")
+    end
+    
+    # Edge case: if tao -> 0, return pass_at_k(R, k)
+    if tao <= 0.0
+        return pass_at_k(R, k)
+    end
+    
+    nu = vec(sum(R, dims=2))
+    denom = binomial(BigInt(N), k)
+    
+    j0 = Int(ceil(tao * k))
+    if j0 > k
+        return 0.0
+    end
+    
+    vals = zeros(Float64, M)
+    for j in j0:k
+        for (idx, n) in enumerate(nu)
+            vals[idx] += float(binomial(BigInt(n), j) * binomial(BigInt(N - n), k - j)) / denom
+        end
+    end
+    
+    return sum(vals) / M
+end
+
+
+"""
+    mg_pass_at_k(R::AbstractMatrix{<:Integer}, k::Integer) -> Float64
+
+mG-Pass@k: mean Generalized Pass@k.
+
+Computes the mean of G-Pass@k_τ over the range τ ∈ [0.5, 1.0], inspired by the
+mean Average Precision (mAP) metric. This provides a comprehensive metric that
+integrates performance potential and stability across multiple thresholds.
+
+# References
+Liu, J., Liu, H., Xiao, L., et al. (2024).
+Are Your LLMs Capable of Stable Reasoning?
+*arXiv preprint arXiv:2412.13147*.
+https://arxiv.org/abs/2412.13147
+
+# Arguments
+- `R::AbstractMatrix{<:Integer}`: ``M \\times N`` binary matrix with entries in ``\\{0, 1\\}``.
+  ``R_{\\alpha i} = 1`` if trial ``i`` for system ``\\alpha`` passed, 0 otherwise.
+- `k::Integer`: Number of samples to select (``1 \\le k \\le N``).
+
+# Returns
+- `Float64`: The average mG-Pass@k score across all M systems.
+
+# Notation
+For each row ``\\alpha``:
+
+```math
+\\nu_\\alpha = \\sum_{i=1}^{N} R_{\\alpha i} \\quad \\text{(number of correct samples)}
+```
+
+``m = \\lceil k/2 \\rceil`` is the majority threshold (the integration starts at ``\\tau = 0.5``).
+
+The metric is defined as the integral of G-Pass@k_τ over τ ∈ [0.5, 1.0]:
+
+```math
+\\text{mG-Pass@k} = 2 \\int_{0.5}^{1.0} \\text{G-Pass@k}_\\tau \\, d\\tau
+```
+
+# Formula
+The discrete approximation used in computation:
+
+```math
+\\text{mG-Pass@k}_\\alpha = \\frac{2}{k} \\sum_{j=m+1}^{k} (j - m) \\cdot P(X = j)
+```
+
+where ``X \\sim \\text{Hypergeometric}(N, \\nu_\\alpha, k)`` and the probability mass function is:
+
+```math
+P(X = j) = \\frac{C(\\nu_\\alpha, j) \\cdot C(N - \\nu_\\alpha, k - j)}{C(N, k)}
+```
+
+The final metric is averaged over all systems:
+
+```math
+\\text{mG-Pass@k} = \\frac{1}{M} \\sum_{\\alpha=1}^{M} \\text{mG-Pass@k}_\\alpha
+```
+
+# Examples
+```julia
+R = [0 1 1 0 1;
+     1 1 0 1 1]
+mg_pass_at_k(R, 2)  # Returns ≈ 0.45
+mg_pass_at_k(R, 3)  # Returns ≈ 0.166667
+```
+"""
+function mg_pass_at_k(R::AbstractMatrix{<:Integer}, k::Integer)::Float64
+    M, N = size(R)
+    
+    if !(1 <= k <= N)
+        error("k must satisfy 1 <= k <= N (N=$N); got k=$k")
+    end
+    
+    nu = vec(sum(R, dims=2))
+    denom = binomial(BigInt(N), k)
+    
+    majority = Int(ceil(0.5 * k))
+    if majority >= k
+        return 0.0
+    end
+    
+    vals = zeros(Float64, M)
+    # mG per-question = (2/k) * E[(X - majority)_+], X ~ Hypergeom(N, nu, k)
+    for j in (majority + 1):k
+        for (idx, n) in enumerate(nu)
+            pmf = float(binomial(BigInt(n), j) * binomial(BigInt(N - n), k - j)) / denom
+            vals[idx] += (j - majority) * pmf
+        end
+    end
+    
+    vals .*= 2.0 / k
+    return sum(vals) / M
+end
+
+
+export bayes, avg, pass_at_k, pass_hat_k, g_pass_at_k, g_pass_at_k_tao, mg_pass_at_k

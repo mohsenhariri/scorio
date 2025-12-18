@@ -1,0 +1,5 @@
+# Scorio.jl
+
+```@docs
+Scorio
+```
