@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the associated paper."
+title: "Scorio: Official Implementation of Bayes@N for LLM Evaluation"
+type: software
+authors:
+  - family-names: Hariri
+    given-names: Mohsen
+  - family-names: Samandar
+    given-names: Amirhossein
+  - family-names: Hinczewski
+    given-names: Michael
+  - family-names: Chaudhary
+    given-names: Vipin
+version: 0.1.0
+url: "https://github.com/mohsenhariri/scorio"
+
+preferred-citation:
+  type: article
+  title: "Don’t Pass@k: A Bayesian Framework for Large Language Model Evaluation"
+  authors:
+    - family-names: Hariri
+      given-names: Mohsen
+    - family-names: Samandar
+      given-names: Amirhossein
+    - family-names: Hinczewski
+      given-names: Michael
+    - family-names: Chaudhary
+      given-names: Vipin
+  doi: 10.48550/arXiv.2510.04265
+  url: "https://arxiv.org/abs/2510.04265"
+  year: 2025

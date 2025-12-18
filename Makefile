@@ -22,6 +22,7 @@ clean:
 	find . -type f -name "*.pyc" -delete
 
 build: clean
+	pip install --upgrade build
 	python -m build
 
 install:
