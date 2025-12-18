@@ -1,7 +1,8 @@
 
 SRC:=scorio/
+JULIA_PROJECT:=julia/Scorio.jl
 
-.PHONY: format format-check lint clean build install test pkg-check pkg-publish-test pkg-publish docs docs-clean help
+.PHONY: format format-check lint clean build install test pkg-check pkg-publish-test pkg-publish docs docs-clean help julia-test julia-docs julia-docs-clean julia-install test-comparison
 
 format-check:
 	isort --check-only $(SRC)
@@ -50,3 +51,22 @@ docs-clean:
 
 docs-serve:
 	python -m http.server --directory docs/_build/html 4000
+
+# Julia commands
+julia-install:
+	julia --project=$(JULIA_PROJECT) -e 'using Pkg; Pkg.instantiate()'
+	julia --project=$(JULIA_PROJECT)/docs -e 'using Pkg; Pkg.develop(path="$(JULIA_PROJECT)"); Pkg.instantiate()'
+
+julia-test:
+	julia --project=$(JULIA_PROJECT) -e 'using Pkg; Pkg.test()'
+
+julia-docs:
+	julia --project=$(JULIA_PROJECT)/docs $(JULIA_PROJECT)/docs/make.jl
+
+julia-docs-clean:
+	rm -rf $(JULIA_PROJECT)/docs/build
+
+julia-docs-serve:
+	python -m http.server --directory $(JULIA_PROJECT)/docs/build 4001
+
+julia-clean: julia-docs-clean

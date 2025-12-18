@@ -381,10 +381,11 @@ def g_pass_at_k_tao(R: np.ndarray, k: int, tao: float) -> float:
 
 def mg_pass_at_k(R: np.ndarray, k: int) -> float:
     """
-    mG-Pass@k: Majority-weighted Generalized Pass@k.
+    mG-Pass@k: mean Generalized Pass@k.
 
-    Measures how much the number of correct samples exceeds the majority
-    threshold :math:`\\lceil k/2 \\rceil`, weighted by the hypergeometric distribution.
+    Computes the mean of G-Pass@k_τ over the range τ ∈ [0.5, 1.0], inspired by the
+    mean Average Precision (mAP) metric. This provides a comprehensive metric that
+    integrates performance potential and stability across multiple thresholds.
 
     References:
         Liu, J., Liu, H., Xiao, L., et al. (2024).
@@ -408,21 +409,22 @@ def mg_pass_at_k(R: np.ndarray, k: int) -> float:
 
             \\nu_\\alpha = \\sum_{i=1}^{N} R_{\\alpha i} \\quad \\text{(number of correct samples)}
 
-        :math:`X \\sim \\text{Hypergeometric}(N, \\nu_\\alpha, k)` is the number of successes
-        when drawing :math:`k` samples without replacement from a population of size :math:`N`
-        containing :math:`\\nu_\\alpha` successes.
+        :math:`m = \\lceil k/2 \\rceil` is the majority threshold (the integration starts at :math:`\\tau = 0.5`).
 
-        :math:`(\\cdot)_+ = \\max(\\cdot, 0)` denotes the positive part function.
+        The metric is defined as the integral of G-Pass@k_τ over τ ∈ [0.5, 1.0]:
 
-        :math:`m = \\lceil k/2 \\rceil` is the majority threshold.
-
-    Formula:
         .. math::
 
-            \\text{mG-Pass@k}_\\alpha = \\frac{2}{k} \\cdot \\mathbb{E}[(X - m)_+]
-            = \\frac{2}{k} \\sum_{j=m+1}^{k} (j - m) \\cdot P(X = j)
+            \\text{mG-Pass@k} = 2 \\int_{0.5}^{1.0} \\text{G-Pass@k}_\\tau \\, d\\tau
 
-        where the probability mass function is:
+    Formula:
+        The discrete approximation used in computation:
+
+        .. math::
+
+            \\text{mG-Pass@k}_\\alpha = \\frac{2}{k} \\sum_{j=m+1}^{k} (j - m) \\cdot P(X = j)
+
+        where :math:`X \\sim \\text{Hypergeometric}(N, \\nu_\\alpha, k)` and the probability mass function is:
 
         .. math::
 
@@ -471,6 +473,7 @@ __all__ = [
     "bayes",
     "pass_at_k",
     "pass_hat_k",
+    "g_pass_at_k",
     "g_pass_at_k_tao",
     "mg_pass_at_k",
 ]
