@@ -1,7 +1,7 @@
 """
     Scorio
 
-A Julia package implementing the Bayes@N framework for evaluating Large Language Models and other systems.
+A Julia package implementing the Bayes@N framework for evaluating Large Language Models.
 
 Based on the paper: "Don't Pass@k: A Bayesian Framework for Large Language Model Evaluation"
 https://arxiv.org/abs/2510.04265
@@ -69,7 +69,7 @@ Pkg.develop(path="/path/to/Scorio.jl")
 module Scorio
 
 # Version
-const VERSION = v"0.1.0"
+const VERSION = v"0.2.0"
 
 # Include submodules
 include("eval.jl")

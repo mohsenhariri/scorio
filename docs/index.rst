@@ -36,7 +36,7 @@ Quick Start
    import numpy as np
    from scorio import eval
 
-   # Binary outcomes: M=2 systems, N=5 trials
+   # Binary outcomes: M=2 questions, N=5 trials
    R = np.array([[0, 1, 1, 0, 1],
                  [1, 1, 0, 1, 1]])
 

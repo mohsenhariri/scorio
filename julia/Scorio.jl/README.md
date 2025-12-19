@@ -43,7 +43,7 @@ Pkg.develop(path="/path/to/Scorio.jl")
 - Returns the naive mean of elements in `R`. For binary accuracy, encode incorrect=0, correct=1.
 
 #### `pass_at_k(R, k) -> Float64`
-- Unbiased Pass@k estimator. Computes the probability that at least one of k randomly selected samples is correct, averaged over all M systems.
+- Unbiased Pass@k estimator. Computes the probability that at least one of k randomly selected samples is correct, averaged over all M questions.
 
 #### `pass_hat_k(R, k) -> Float64`
 - Pass^k (Pass-hat@k): probability that all k selected trials are correct.

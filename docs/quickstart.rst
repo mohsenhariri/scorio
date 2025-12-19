@@ -13,8 +13,8 @@ scorio works with outcome matrices:
 
 - **R**: M × N integer matrix where:
   
-  - M = number of systems/models being evaluated
-  - N = number of trials/samples per system
+  - M = number of questions being evaluated
+  - N = number of trials/samples per question
   - Entries are categories in {0, ..., C}
 
 - **w**: Weight vector of length C+1 mapping categories to scores
@@ -29,7 +29,7 @@ For binary outcomes (correct/incorrect):
    import numpy as np
    from scorio import eval
 
-   # 2 systems, 5 trials each
+   # 2 question, 5 trials each
    # 0 = incorrect, 1 = correct
    R = np.array([[0, 1, 1, 0, 1],
                  [1, 1, 0, 1, 1]])
@@ -69,7 +69,7 @@ Incorporate prior outcomes:
                  [1, 1, 0, 2, 2]])
    w = np.array([0.0, 0.5, 1.0])
 
-   # Prior outcomes (2 trials per system)
+   # Prior outcomes (2 trials per question)
    R0 = np.array([[0, 2],
                   [1, 2]])
 

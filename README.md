@@ -120,7 +120,7 @@ println("Average: $accuracy")
 #### `bayes(R, w, R0=None)`
 Bayesian performance evaluation with uncertainty quantification using the Bayes@N framework.
 
-- **`R`**: `M × N` integer matrix with entries in `{0, ..., C}` (outcomes for M systems over N trials)
+- **`R`**: `M × N` integer matrix with entries in `{0, ..., C}` (outcomes for M questions over N trials)
 - **`w`**: length `C+1` float vector of rubric weights mapping categories to scores
 - **`R0`** (optional): `M × D` integer matrix of prior outcomes
 - **Returns**: `(mu, sigma)` - posterior estimate and uncertainty
@@ -131,8 +131,8 @@ Bayesian performance evaluation with uncertainty quantification using the Bayes@
 - **Categories**: Encode outcomes per trial as integers in `{0, ..., C}`
 - **Weights**: Choose rubric weights `w` of length `C+1` (e.g., `[0, 1]` for binary outcomes)
 - **Shapes**: 
-  - `R` is `M × N` (M systems, N trials)
-  - `R0` is `M × D` (M systems, D prior trials)
+  - `R` is `M × N` (M questions, N trials)
+  - `R0` is `M × D` (M questions, D prior trials)
   - Both must share the same `M` and category set
 
 ---

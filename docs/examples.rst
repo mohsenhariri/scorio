@@ -164,25 +164,25 @@ Full evaluation pipeline:
    print("\n1. Simple Metrics:")
    for i in range(M):
        avg = eval.avg(R[i:i+1])
-       print(f"   System {i+1} average: {avg:.3f}")
+       print(f"   Question {i+1} average: {avg:.3f}")
 
    # 2. Bayesian evaluation
    print("\n2. Bayesian Evaluation:")
    for i in range(M):
        mu, sigma = eval.bayes(R[i:i+1], w)
-       print(f"   System {i+1}: μ={mu:.3f}, σ={sigma:.3f}")
+       print(f"   Question {i+1}: μ={mu:.3f}, σ={sigma:.3f}")
 
    # 3. Pass@k metrics
    print("\n3. Pass@k Metrics (k=5):")
    for i in range(M):
        pass_k = eval.pass_at_k(R[i:i+1], k=5)
        pass_hat = eval.pass_hat_k(R[i:i+1], k=5)
-       print(f"   System {i+1}: Pass@5={pass_k:.3f}, Pass^5={pass_hat:.3f}")
+       print(f"   Question {i+1}: Pass@5={pass_k:.3f}, Pass^5={pass_hat:.3f}")
 
    # 4. Stability analysis
    print("\n4. Stability Analysis (mG-Pass@k, k=3):")
    for i in range(M):
        mg = eval.mg_pass_at_k(R[i:i+1], k=3)
-       print(f"   System {i+1}: {mg:.3f}")
+       print(f"   Question {i+1}: {mg:.3f}")
 
    print("=" * 50)

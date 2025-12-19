@@ -31,7 +31,7 @@ def bayes(
 
     Args:
         R: :math:`M \\times N` int matrix with entries in :math:`\\{0,\\ldots,C\\}`.
-           Row :math:`\\alpha` are the N outcomes for system :math:`\\alpha`.
+           Row :math:`\\alpha` are the N outcomes for question :math:`\\alpha`.
         w: length :math:`(C+1)` weight vector :math:`(w_0,\\ldots,w_C)` that maps
            category k to score :math:`w_k`.
         R0: optional :math:`M \\times D` int matrix supplying D prior outcomes per row.
@@ -147,13 +147,13 @@ def avg(R: np.ndarray) -> float:
 
     Args:
         R: :math:`M \\times N` result matrix with entries in :math:`\\{0, 1\\}`.
-           Row :math:`\\alpha` are the N outcomes for system :math:`\\alpha`.
+           Row :math:`\\alpha` are the N outcomes for question :math:`\\alpha`.
 
     Returns:
         float: The arithmetic mean of all entries in R.
 
     Notation:
-        :math:`R_{\\alpha i}` is the outcome for system :math:`\\alpha` on trial :math:`i`.
+        :math:`R_{\\alpha i}` is the outcome for question :math:`\\alpha` on trial :math:`i`.
 
     Formula:
         .. math::
@@ -176,7 +176,7 @@ def pass_at_k(R: np.ndarray, k: int) -> float:
     Unbiased Pass@k estimator.
 
     Computes the probability that at least one of k randomly selected samples
-    is correct, averaged over all M systems.
+    is correct, averaged over all M questions.
 
     References:
         Chen, M., Tworek, J., Jun, H., et al. (2021).
@@ -186,12 +186,12 @@ def pass_at_k(R: np.ndarray, k: int) -> float:
 
     Args:
         R: :math:`M \\times N` binary matrix with entries in :math:`\\{0, 1\\}`.
-           :math:`R_{\\alpha i} = 1` if trial :math:`i` for system :math:`\\alpha` passed,
+           :math:`R_{\\alpha i} = 1` if trial :math:`i` for question :math:`\\alpha` passed,
            0 otherwise.
         k: Number of samples to select (:math:`1 \\le k \\le N`).
 
     Returns:
-        float: The average Pass@k score across all M systems.
+        float: The average Pass@k score across all M questions.
 
     Notation:
         For each row :math:`\\alpha`:
@@ -235,7 +235,7 @@ def pass_hat_k(R: np.ndarray, k: int) -> float:
     Pass^k (Pass-hat@k): probability that all k selected trials are correct.
 
     Computes the probability that k randomly selected samples are ALL correct,
-    averaged over all M systems. Also known as G-Pass@k.
+    averaged over all M questions. Also known as G-Pass@k.
 
     References:
         Yao, S., Shinn, N., Razavi, P., & Narasimhan, K. (2024).
@@ -245,12 +245,12 @@ def pass_hat_k(R: np.ndarray, k: int) -> float:
 
     Args:
         R: :math:`M \\times N` binary matrix with entries in :math:`\\{0, 1\\}`.
-           :math:`R_{\\alpha i} = 1` if trial :math:`i` for system :math:`\\alpha` passed,
+           :math:`R_{\\alpha i} = 1` if trial :math:`i` for question :math:`\\alpha` passed,
            0 otherwise.
         k: Number of samples to select (:math:`1 \\le k \\le N`).
 
     Returns:
-        float: The average Pass^k score across all M systems.
+        float: The average Pass^k score across all M questions.
 
     Notation:
         For each row :math:`\\alpha`:
@@ -304,7 +304,7 @@ def g_pass_at_k_tao(R: np.ndarray, k: int, tao: float) -> float:
     G-Pass@k_τ: Generalized Pass@k with threshold τ.
 
     Computes the probability that at least :math:`\\lceil \\tau \\cdot k \\rceil` of k randomly selected
-    samples are correct, averaged over all M systems.
+    samples are correct, averaged over all M questions.
 
     References:
         Liu, J., Liu, H., Xiao, L., et al. (2024).
@@ -314,7 +314,7 @@ def g_pass_at_k_tao(R: np.ndarray, k: int, tao: float) -> float:
 
     Args:
         R: :math:`M \\times N` binary matrix with entries in :math:`\\{0, 1\\}`.
-           :math:`R_{\\alpha i} = 1` if trial :math:`i` for system :math:`\\alpha` passed,
+           :math:`R_{\\alpha i} = 1` if trial :math:`i` for question :math:`\\alpha` passed,
            0 otherwise.
         k: Number of samples to select (:math:`1 \\le k \\le N`).
         tao: Threshold parameter :math:`\\tau \\in [0, 1]`. Requires at least
@@ -323,7 +323,7 @@ def g_pass_at_k_tao(R: np.ndarray, k: int, tao: float) -> float:
              When :math:`\\tau = 1`, equivalent to Pass^k.
 
     Returns:
-        float: The average G-Pass@k_τ score across all M systems.
+        float: The average G-Pass@k_τ score across all M questions.
 
     Notation:
         For each row :math:`\\alpha`:
@@ -395,12 +395,12 @@ def mg_pass_at_k(R: np.ndarray, k: int) -> float:
 
     Args:
         R: :math:`M \\times N` binary matrix with entries in :math:`\\{0, 1\\}`.
-           :math:`R_{\\alpha i} = 1` if trial :math:`i` for system :math:`\\alpha` passed,
+           :math:`R_{\\alpha i} = 1` if trial :math:`i` for question :math:`\\alpha` passed,
            0 otherwise.
         k: Number of samples to select (:math:`1 \\le k \\le N`).
 
     Returns:
-        float: The average mG-Pass@k score across all M systems.
+        float: The average mG-Pass@k score across all M questions.
 
     Notation:
         For each row :math:`\\alpha`:
@@ -430,7 +430,7 @@ def mg_pass_at_k(R: np.ndarray, k: int) -> float:
 
             P(X = j) = \\frac{C(\\nu_\\alpha, j) \\cdot C(N - \\nu_\\alpha, k - j)}{C(N, k)}
 
-        The final metric is averaged over all systems:
+        The final metric is averaged over all questions:
 
         .. math::
 

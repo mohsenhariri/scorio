@@ -11,7 +11,7 @@ https://arxiv.org/abs/2510.04265
 
 # Arguments
 - `R::AbstractMatrix{<:Integer}`: ``M \\times N`` int matrix with entries in ``\\{0,\\ldots,C\\}``.
-  Row ``\\alpha`` are the N outcomes for system ``\\alpha``.
+  Row ``\\alpha`` are the N outcomes for question ``\\alpha``.
 - `w::AbstractVector{<:Real}`: length ``(C+1)`` weight vector ``(w_0,\\ldots,w_C)`` that maps
   category k to score ``w_k``.
 - `R0::Union{AbstractMatrix{<:Integer}, Nothing}`: optional ``M \\times D`` int matrix supplying 
@@ -143,13 +143,13 @@ Computes the arithmetic mean of all entries in the result matrix.
 
 # Arguments
 - `R::AbstractArray{<:Real}`: ``M \\times N`` result matrix with entries in ``\\{0, 1\\}``.
-  Row ``\\alpha`` are the N outcomes for system ``\\alpha``.
+  Row ``\\alpha`` are the N outcomes for question ``\\alpha``.
 
 # Returns
 - `Float64`: The arithmetic mean of all entries in R.
 
 # Notation
-``R_{\\alpha i}`` is the outcome for system ``\\alpha`` on trial ``i``.
+``R_{\\alpha i}`` is the outcome for question ``\\alpha`` on trial ``i``.
 
 # Formula
 
@@ -175,7 +175,7 @@ end
 Unbiased Pass@k estimator.
 
 Computes the probability that at least one of k randomly selected samples
-is correct, averaged over all M systems.
+is correct, averaged over all M questions.
 
 # References
 Chen, M., Tworek, J., Jun, H., et al. (2021).
@@ -185,11 +185,11 @@ https://arxiv.org/abs/2107.03374
 
 # Arguments
 - `R::AbstractMatrix{<:Integer}`: ``M \\times N`` binary matrix with entries in ``\\{0, 1\\}``.
-  ``R_{\\alpha i} = 1`` if trial ``i`` for system ``\\alpha`` passed, 0 otherwise.
+  ``R_{\\alpha i} = 1`` if trial ``i`` for question ``\\alpha`` passed, 0 otherwise.
 - `k::Integer`: Number of samples to select (``1 \\le k \\le N``).
 
 # Returns
-- `Float64`: The average Pass@k score across all M systems.
+- `Float64`: The average Pass@k score across all M questions.
 
 # Notation
 For each row ``\\alpha``:
@@ -243,7 +243,7 @@ end
 Pass^k (Pass-hat@k): probability that all k selected trials are correct.
 
 Computes the probability that k randomly selected samples are ALL correct,
-averaged over all M systems. Also known as G-Pass@k.
+averaged over all M questions. Also known as G-Pass@k.
 
 # References
 Yao, S., Shinn, N., Razavi, P., & Narasimhan, K. (2024).
@@ -253,11 +253,11 @@ https://arxiv.org/abs/2406.12045
 
 # Arguments
 - `R::AbstractMatrix{<:Integer}`: ``M \\times N`` binary matrix with entries in ``\\{0, 1\\}``.
-  ``R_{\\alpha i} = 1`` if trial ``i`` for system ``\\alpha`` passed, 0 otherwise.
+  ``R_{\\alpha i} = 1`` if trial ``i`` for question ``\\alpha`` passed, 0 otherwise.
 - `k::Integer`: Number of samples to select (``1 \\le k \\le N``).
 
 # Returns
-- `Float64`: The average Pass^k score across all M systems.
+- `Float64`: The average Pass^k score across all M questions.
 
 # Notation
 For each row ``\\alpha``:
@@ -322,7 +322,7 @@ end
 G-Pass@k_τ: Generalized Pass@k with threshold τ.
 
 Computes the probability that at least ``\\lceil \\tau \\cdot k \\rceil`` of k randomly selected
-samples are correct, averaged over all M systems.
+samples are correct, averaged over all M questions.
 
 # References
 Liu, J., Liu, H., Xiao, L., et al. (2024).
@@ -332,7 +332,7 @@ https://arxiv.org/abs/2412.13147
 
 # Arguments
 - `R::AbstractMatrix{<:Integer}`: ``M \\times N`` binary matrix with entries in ``\\{0, 1\\}``.
-  ``R_{\\alpha i} = 1`` if trial ``i`` for system ``\\alpha`` passed, 0 otherwise.
+  ``R_{\\alpha i} = 1`` if trial ``i`` for question ``\\alpha`` passed, 0 otherwise.
 - `k::Integer`: Number of samples to select (``1 \\le k \\le N``).
 - `tao::Real`: Threshold parameter ``\\tau \\in [0, 1]``. Requires at least
   ``\\lceil \\tau \\cdot k \\rceil`` successes.
@@ -340,7 +340,7 @@ https://arxiv.org/abs/2412.13147
   When ``\\tau = 1``, equivalent to Pass^k.
 
 # Returns
-- `Float64`: The average G-Pass@k_τ score across all M systems.
+- `Float64`: The average G-Pass@k_τ score across all M questions.
 
 # Notation
 For each row ``\\alpha``:
@@ -422,11 +422,11 @@ https://arxiv.org/abs/2412.13147
 
 # Arguments
 - `R::AbstractMatrix{<:Integer}`: ``M \\times N`` binary matrix with entries in ``\\{0, 1\\}``.
-  ``R_{\\alpha i} = 1`` if trial ``i`` for system ``\\alpha`` passed, 0 otherwise.
+  ``R_{\\alpha i} = 1`` if trial ``i`` for question ``\\alpha`` passed, 0 otherwise.
 - `k::Integer`: Number of samples to select (``1 \\le k \\le N``).
 
 # Returns
-- `Float64`: The average mG-Pass@k score across all M systems.
+- `Float64`: The average mG-Pass@k score across all M questions.
 
 # Notation
 For each row ``\\alpha``:
@@ -456,7 +456,7 @@ where ``X \\sim \\text{Hypergeometric}(N, \\nu_\\alpha, k)`` and the probability
 P(X = j) = \\frac{C(\\nu_\\alpha, j) \\cdot C(N - \\nu_\\alpha, k - j)}{C(N, k)}
 ```
 
-The final metric is averaged over all systems:
+The final metric is averaged over all questions:
 
 ```math
 \\text{mG-Pass@k} = \\frac{1}{M} \\sum_{\\alpha=1}^{M} \\text{mG-Pass@k}_\\alpha
