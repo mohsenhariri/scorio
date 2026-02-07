@@ -1,6 +1,7 @@
 # Scorio
 
 [![arXiv](https://img.shields.io/badge/arXiv-2510.04265-b31b1b.svg)](https://arxiv.org/abs/2510.04265)
+[![ICLR 2026](https://img.shields.io/badge/ICLR-2026-blue.svg)](https://iclr.cc/virtual/2026/poster/10009669)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#license)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Julia 1.6+](https://img.shields.io/badge/julia-1.6+-9558B2.svg)](https://julialang.org/downloads/)
@@ -9,7 +10,13 @@
 
 ---
 
-## 📦 Packages
+## News
+
+- **February 2026** 🎉: Our paper ["Don't Pass@k: A Bayesian Framework for Large Language Model Evaluation"](https://iclr.cc/virtual/2026/poster/10009669) has been accepted to **ICLR 2026**!
+
+---
+
+## Packages
 
 This repository contains two packages:
 
@@ -18,7 +25,7 @@ This repository contains two packages:
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Python (scorio)
 
@@ -137,7 +144,7 @@ Bayesian performance evaluation with uncertainty quantification using the Bayes@
 
 ---
 
-## 📝 Requirements
+## Requirements
 
 ### Python
 - Python 3.9 - 3.13
@@ -148,7 +155,7 @@ Bayesian performance evaluation with uncertainty quantification using the Bayes@
 
 ---
 
-## 📚 Documentation
+## Documentation
 
 | Language | Documentation | Status |
 |----------|--------------|--------|
@@ -159,27 +166,28 @@ Bayesian performance evaluation with uncertainty quantification using the Bayes@
 
 ---
 
-## 📄 Citation
+## Citation
 
 If you use Scorio in your research, please cite:
 
 ```bibtex
-@article{hariri2025don,
+@inproceedings{hariri2026don,
   title={Don't Pass@k: A Bayesian Framework for Large Language Model Evaluation},
   author={Hariri, Mohsen and Samandar, Amirhossein and Hinczewski, Michael and Chaudhary, Vipin},
-  journal={arXiv preprint arXiv:2510.04265},
-  year={2025}
+  booktitle={International Conference on Learning Representations (ICLR)},
+  year={2026},
+  url={https://arxiv.org/abs/2510.04265}
 }
 ```
 
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🔗 Links
+## Links
 
 - **Landing Page**: [mohsenhariri.github.io/scorio](https://mohsenhariri.github.io/scorio/)
 - **Python Docs**: [scorio.readthedocs.io](https://scorio.readthedocs.io/en/latest/)
