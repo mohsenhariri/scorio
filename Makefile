@@ -15,6 +15,9 @@ format:
 lint:
 	mypy $(SRC)
 
+sync-version:
+	python scripts/sync_version.py
+
 clean:
 	rm -rf build/
 	rm -rf dist/

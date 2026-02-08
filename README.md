@@ -1,6 +1,7 @@
 # Scorio
 
-[![arXiv](https://img.shields.io/badge/arXiv-2510.04265-b31b1b.svg)](https://arxiv.org/abs/2510.04265)
+[![arXiv (Bayes Evaluation)](https://img.shields.io/badge/arXiv-2510.04265-b31b1b.svg)](https://arxiv.org/abs/2510.04265)
+[![arXiv (Bayes Ranking)](https://img.shields.io/badge/arXiv-2510.04265-b31b1b.svg)](https://arxiv.org/abs/2510.04265)
 [![ICLR 2026](https://img.shields.io/badge/ICLR-2026-blue.svg)](https://iclr.cc/virtual/2026/poster/10009669)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#license)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
@@ -13,6 +14,8 @@
 ## News
 
 - **February 2026** 🎉: Our paper ["Don't Pass@k: A Bayesian Framework for Large Language Model Evaluation"](https://iclr.cc/virtual/2026/poster/10009669) has been accepted to **ICLR 2026**!
+
+- **February 2026** ✨: New paper released: ["Ranking Reasoning LLMs under Test-Time Scaling"](https://arxiv.org/abs/2510.04265)
 
 ---
 
@@ -168,18 +171,31 @@ Bayesian performance evaluation with uncertainty quantification using the Bayes@
 
 ## Citation
 
-If you use Scorio in your research, please cite:
+If you use Scorio in your research, please cite the relevant papers:
+
+### Bayesian Evaluation Framework
 
 ```bibtex
 @inproceedings{hariri2026don,
   title={Don't Pass@k: A Bayesian Framework for Large Language Model Evaluation},
   author={Hariri, Mohsen and Samandar, Amirhossein and Hinczewski, Michael and Chaudhary, Vipin},
-  booktitle={International Conference on Learning Representations (ICLR)},
+  booktitle={The Fourteenth International Conference on Learning Representations},
   year={2026},
   url={https://arxiv.org/abs/2510.04265}
 }
 ```
 
+### Ranking Methods
+
+```bibtex
+@article{hariri2025ranking,
+  title={Ranking Reasoning LLMs under Test-Time Scaling},
+  author={Hariri, Mohsen and Hinczewski, Michael and Ma, Jing and Chaudhary, Vipin},
+  journal={arXiv preprint arXiv:2510.04265},
+  year={2025},
+  url={https://arxiv.org/abs/2510.04265}
+}
+```
 
 ## License
 
@@ -194,6 +210,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Julia Docs**: [mohsenhariri.github.io/scorio/julia](https://mohsenhariri.github.io/scorio/julia/)
 - **Repository**: [github.com/mohsenhariri/scorio](https://github.com/mohsenhariri/scorio)
 - **Issues**: [github.com/mohsenhariri/scorio/issues](https://github.com/mohsenhariri/scorio/issues)
-- **Paper**: [arxiv.org/abs/2510.04265](https://arxiv.org/abs/2510.04265)
+- **Papers**:
+  - [Don't Pass@k (ICLR 2026)](https://iclr.cc/virtual/2026/poster/10009669) | [arXiv](https://arxiv.org/abs/2510.04265)
+  - [Ranking Reasoning LLMs](https://arxiv.org/abs/2510.04265)
 
 
