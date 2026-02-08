@@ -1,20 +1,85 @@
+# Contributing to Scorio
+
+## Development Setup
+
+### Prerequisites
+
+- Python 3.10+
+- [uv](https://github.com/astral-sh/uv)
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/mohsenhariri/scorio.git
+cd scorio
+```
+
+2. Create a virtual environment:
+
+**Using uv:**
+```bash
+uv venv
+source .venv/bin/activate  # Linux/macOS
+# .venv\Scripts\activate   # Windows
+```
+
+**Using venv:**
+```bash
+python -m venv .venv
+source .venv/bin/activate  # Linux/macOS
+# .venv\Scripts\activate   # Windows
+```
+
+3. Install with dev dependencies:
+
+**Using uv:**
+```bash
+uv pip install -e ".[dev]"
+```
+
+**Using pip:**
+```bash
+pip install -e ".[dev]"
+```
+
+### Dependencies
+
+**Runtime:**
+- numpy, scipy
+
+**Development:**
+- pytest, black, isort, mypy, build, twine, sphinx
+
 ## Code Style
 
-- Follow **PEP 8**
-- Formatter: **Black**
-- Imports are sorted with **isort**
+- Follow PEP 8
+- Format with Black
+- Sort imports with isort
+
+```bash
+black scorio/
+isort scorio/
+mypy scorio/
+```
+
+## Testing
+
+```bash
+pytest
+```
 
 ## Docstrings
 
-- Use **Google-style docstrings**
-- Public APIs must be documented
-- Use type hints for all public functions
+- Use Google-style docstrings
+- Document all public APIs
+- Include type hints
 
 ## Documentation
 
-- Full documentation: https://scorio.readthedocs.io/
-- Docs are built with Sphinx + Napoleon
-- MathJax is enabled for LaTeX math rendering
-- To build docs locally: `make docs`
+Build docs locally:
+```bash
+make docs
+```
 
-
+Full documentation: https://scorio.readthedocs.io/

@@ -4,7 +4,7 @@
 [![arXiv (Bayes Ranking)](https://img.shields.io/badge/arXiv-2510.04265-b31b1b.svg)](https://arxiv.org/abs/2510.04265)
 [![ICLR 2026](https://img.shields.io/badge/ICLR-2026-blue.svg)](https://iclr.cc/virtual/2026/poster/10009669)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#license)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Julia 1.6+](https://img.shields.io/badge/julia-1.6+-9558B2.svg)](https://julialang.org/downloads/)
 [![Python Docs](https://readthedocs.org/projects/scorio/badge/?version=latest)](https://scorio.readthedocs.io/en/latest/)
 [![Julia Docs](https://img.shields.io/badge/docs-Julia-9558B2.svg)](https://mohsenhariri.github.io/scorio/julia/)
@@ -150,7 +150,7 @@ Bayesian performance evaluation with uncertainty quantification using the Bayes@
 ## Requirements
 
 ### Python
-- Python 3.9 - 3.13
+- Python 3.10+
 - NumPy 2.0+
 
 ### Julia

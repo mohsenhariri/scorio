@@ -16,7 +16,7 @@
 pip install scorio
 ```
 
-Requires Python 3.9–3.13 and NumPy.
+Requires Python 3.10+ and NumPy.
 
 ## Data and shape conventions
 

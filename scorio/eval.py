@@ -1,5 +1,5 @@
 import math
-from typing import Optional, Tuple
+from typing import Optional
 
 import numpy as np
 from scipy.special import comb
@@ -16,10 +16,8 @@ def _as_2d_int_matrix(R: np.ndarray) -> np.ndarray:
 
 
 def bayes(
-    R: np.ndarray,
-    w: np.ndarray,
-    R0: Optional[np.ndarray] = None,
-) -> Tuple[float, float]:
+    R: np.ndarray, w: np.ndarray, R0: Optional[np.ndarray] = None
+) -> tuple[float, float]:
     """
     Performance evaluation using the Bayes@N framework.
 
@@ -299,7 +297,7 @@ def g_pass_at_k(R: np.ndarray, k: int) -> float:
     return pass_hat_k(R, k)
 
 
-def g_pass_at_k_tao(R: np.ndarray, k: int, tao: float) -> float:
+def g_pass_at_k_tau(R: np.ndarray, k: int, tau: float) -> float:
     """
     G-Pass@k_τ: Generalized Pass@k with threshold τ.
 
@@ -317,7 +315,7 @@ def g_pass_at_k_tao(R: np.ndarray, k: int, tao: float) -> float:
            :math:`R_{\\alpha i} = 1` if trial :math:`i` for question :math:`\\alpha` passed,
            0 otherwise.
         k: Number of samples to select (:math:`1 \\le k \\le N`).
-        tao: Threshold parameter :math:`\\tau \\in [0, 1]`. Requires at least
+        tau: Threshold parameter :math:`\\tau \\in [0, 1]`. Requires at least
              :math:`\\lceil \\tau \\cdot k \\rceil` successes.
              When :math:`\\tau = 0`, equivalent to Pass@k.
              When :math:`\\tau = 1`, equivalent to Pass^k.
@@ -349,27 +347,27 @@ def g_pass_at_k_tao(R: np.ndarray, k: int, tao: float) -> float:
         >>> import numpy as np
         >>> R = np.array([[0, 1, 1, 0, 1],
         ...               [1, 1, 0, 1, 1]])
-        >>> round(g_pass_at_k_tao(R, 2, 0.5), 6)
+        >>> round(g_pass_at_k_tau(R, 2, 0.5), 6)
         0.95
-        >>> round(g_pass_at_k_tao(R, 2, 1.0), 6)
+        >>> round(g_pass_at_k_tau(R, 2, 1.0), 6)
         0.45
     """
     R = _as_2d_int_matrix(R)
     M, N = R.shape
 
-    if not (0.0 <= tao <= 1.0):
-        raise ValueError(f"tao must be in [0, 1]; got {tao}")
+    if not (0.0 <= tau <= 1.0):
+        raise ValueError(f"tau must be in [0, 1]; got {tau}")
     if not (1 <= k <= N):
         raise ValueError(f"k must satisfy 1 <= k <= N (N={N}); got k={k}")
 
-    # Edge case: if tao -> 0, return pass_at_k(R, k)
-    if tao <= 0.0:
+    # Edge case: if tau -> 0, return pass_at_k(R, k)
+    if tau <= 0.0:
         return pass_at_k(R, k)
 
     nu = np.sum(R, axis=1)
     denom = comb(N, k)
 
-    j0 = int(math.ceil(tao * k))
+    j0 = int(math.ceil(tau * k))
     if j0 > k:
         return 0.0
 
@@ -474,6 +472,6 @@ __all__ = [
     "pass_at_k",
     "pass_hat_k",
     "g_pass_at_k",
-    "g_pass_at_k_tao",
+    "g_pass_at_k_tau",
     "mg_pass_at_k",
 ]

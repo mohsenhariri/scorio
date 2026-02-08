@@ -13,7 +13,6 @@ readme = { file = "README_PyPI.md", content-type = "text/markdown" }
 description = "Bayesian evaluation and ranking toolkit"
 keywords = ["bayesian", "statistics", "ranking", "evaluation", "machine learning", "large language models"]
 classifiers = [
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -28,7 +27,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
-requires-python = ">=3.9,<3.14"
+requires-python = ">=3.10"
 dynamic = ["version"]
 dependencies = ["numpy", "scipy"]
 
@@ -39,7 +38,7 @@ Issues = "https://github.com/mohsenhariri/scorio/issues"
 Documentation = "https://scorio.readthedocs.io/"
 
 [project.optional-dependencies]
-dev = ["pytest>=7.0", "black>=24.0", "isort>=5.0", "mypy>=1.0"]
+dev = ["pytest>=9.0.2", "black>=26.1.0", "isort>=7.0.0", "mypy>=1.18.1", "build>=1.4.0", "twine>=6.2.0", "sphinx>=9.1.0", "sphinx-rtd-theme>=3.1.0", "sphinx-autodoc-typehints>=3.6.2"]
 
 [tool.setuptools.dynamic]
 version = {file = "VERSION"}
@@ -54,7 +53,7 @@ line-length = 88
 profile = "black"
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
