@@ -4,7 +4,7 @@ Installation
 Requirements
 ------------
 
-- Python 3.10+
+- Python 3.9 - 3.13
 - NumPy 2.0+
 - SciPy
 

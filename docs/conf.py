@@ -37,6 +37,12 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 
+# Configure RTD theme options
+html_theme_options = {
+    'collapse_navigation': True,
+    'navigation_depth': 3,
+}
+
 # -- Napoleon settings -------------------------------------------------------
 napoleon_google_docstring = True
 napoleon_numpy_docstring = False
@@ -56,6 +62,16 @@ napoleon_attr_annotations = True
 # -- Autodoc settings --------------------------------------------------------
 autodoc_member_order = "bysource"
 autodoc_typehints = "description"
+
+# Configure default options for autodoc directives
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": False,
+    "show-inheritance": True,
+}
+
+# Hide class members from TOC (but still show them in the documentation)
+toc_object_entries_show_parents = "hide"
 
 # -- Intersphinx settings ----------------------------------------------------
 intersphinx_mapping = {
