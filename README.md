@@ -17,6 +17,8 @@
 
 - **February 2026** 🎉: Our paper ["Don't Pass@k: A Bayesian Framework for Large Language Model Evaluation"](https://iclr.cc/virtual/2026/poster/10009669) has been accepted to **ICLR 2026**!
 
+- **February 2026** 🔜: Reasoning traces will be released in ~2 weeks.
+
 ---
 
 ## Packages
