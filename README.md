@@ -13,9 +13,9 @@
 
 ## News
 
-- **February 2026** 🎉: Our paper ["Don't Pass@k: A Bayesian Framework for Large Language Model Evaluation"](https://iclr.cc/virtual/2026/poster/10009669) has been accepted to **ICLR 2026**!
-
 - **February 2026** ✨: New paper released: ["Ranking Reasoning LLMs under Test-Time Scaling"](https://arxiv.org/abs/2510.04265)
+
+- **February 2026** 🎉: Our paper ["Don't Pass@k: A Bayesian Framework for Large Language Model Evaluation"](https://iclr.cc/virtual/2026/poster/10009669) has been accepted to **ICLR 2026**!
 
 ---
 
@@ -188,11 +188,11 @@ If you use Scorio in your research, please cite the relevant papers:
 ### Ranking Methods
 
 ```bibtex
-@article{hariri2025ranking,
+@article{hariri2026ranking,
   title={Ranking Reasoning LLMs under Test-Time Scaling},
   author={Hariri, Mohsen and Hinczewski, Michael and Ma, Jing and Chaudhary, Vipin},
   journal={arXiv preprint arXiv:2510.04265},
-  year={2025},
+  year={2026},
   url={https://arxiv.org/abs/2510.04265}
 }
 ```

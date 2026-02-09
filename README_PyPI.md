@@ -16,7 +16,7 @@
 pip install scorio
 ```
 
-Requires Python 3.10+ and NumPy.
+Requires Python 3.10+, NumPy, SciPy.
 
 ## Data and shape conventions
 
@@ -74,12 +74,12 @@ print(mu2, sigma2)    # expected ~ (0.5625, 0.091998)
 If you use `scorio` or Bayes@N, please cite:
 
 ```
-@article{hariri2025dontpassk,
-  title   = {Don't Pass@k: A Bayesian Framework for Large Language Model Evaluation},
-  author  = {Hariri, Mohsen and Samandar, Amirhossein and Hinczewski, Michael and Chaudhary, Vipin},
-  journal={arXiv preprint arXiv:2510.04265},
-  year    = {2025},
-  url     = {https://scorio.readthedocs.io/}
+@inproceedings{hariri2026don,
+  title={Don't Pass@k: A Bayesian Framework for Large Language Model Evaluation},
+  author={Hariri, Mohsen and Samandar, Amirhossein and Hinczewski, Michael and Chaudhary, Vipin},
+  booktitle={The Fourteenth International Conference on Learning Representations},
+  year={2026},
+  url={https://arxiv.org/abs/2510.04265}
 }
 ```
 
