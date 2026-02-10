@@ -546,7 +546,6 @@ def rao_kupper_map(
 def _estimate_bt_ml(wins: np.ndarray, max_iter: int = 500) -> np.ndarray:
     """Estimate Bradley-Terry strengths via maximum likelihood."""
     n = wins.shape[0]
-    max_iter = _validate_max_iter(max_iter)
 
     if float(np.sum(wins)) <= 0.0:
         return np.ones(n, dtype=float)
@@ -585,7 +584,6 @@ def _estimate_bt_ml(wins: np.ndarray, max_iter: int = 500) -> np.ndarray:
 def _estimate_bt_map(wins: np.ndarray, prior: Prior, max_iter: int = 500) -> np.ndarray:
     """Estimate Bradley-Terry strengths via MAP with configurable prior."""
     n = wins.shape[0]
-    max_iter = _validate_max_iter(max_iter)
     no_decisive_outcomes = float(np.sum(wins)) <= 0.0
 
     if (
@@ -639,7 +637,6 @@ def _estimate_bt_davidson(
     """Estimate Bradley-Terry-Davidson strengths with tie parameter."""
     n = wins.shape[0]
     eps = 1e-10
-    max_iter = _validate_max_iter(max_iter)
 
     if float(np.sum(wins)) <= 0.0:
         return np.ones(n, dtype=float)
@@ -698,7 +695,6 @@ def _estimate_bt_davidson_map(
     """Estimate Bradley-Terry-Davidson strengths with tie parameter via MAP."""
     n = wins.shape[0]
     eps = 1e-10
-    max_iter = _validate_max_iter(max_iter)
     no_decisive_outcomes = float(np.sum(wins)) <= 0.0
 
     if (
@@ -770,7 +766,6 @@ def _estimate_rao_kupper_ml(
 ) -> np.ndarray:
     n = wins.shape[0]
     eps = 1e-12
-    max_iter = _validate_max_iter(max_iter)
 
     kappa = _validate_tie_strength(tie_strength)
 
@@ -837,7 +832,6 @@ def _estimate_rao_kupper_map(
 ) -> np.ndarray:
     n = wins.shape[0]
     eps = 1e-12
-    max_iter = _validate_max_iter(max_iter)
 
     kappa = _validate_tie_strength(tie_strength)
 

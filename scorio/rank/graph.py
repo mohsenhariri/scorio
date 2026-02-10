@@ -42,7 +42,6 @@ def _pairwise_win_probabilities(R: np.ndarray) -> np.ndarray:
 
     Returns a matrix P of shape (L, L) with P[i, j] in [0, 1] and P[i, i] = 0.5.
     """
-    R = validate_input(R)
     wins, ties = build_pairwise_counts(R)
     total = wins + wins.T + ties
 

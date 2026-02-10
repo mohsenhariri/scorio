@@ -59,13 +59,8 @@ from scorio.utils import rank_scores
 
 from ._base import build_pairwise_wins, validate_input
 from .priors import (
-    CauchyPrior,
-    CustomPrior,
-    EmpiricalPrior,
     GaussianPrior,
-    LaplacePrior,
     Prior,
-    UniformPrior,
 )
 
 
@@ -106,13 +101,6 @@ def _coerce_prior(prior: Prior | float) -> Prior:
         )
 
     return prior
-
-
-def _require_optimization_success(result, context: str):
-    """Raise a clear error if numerical optimization did not converge."""
-    if not result.success:
-        raise RuntimeError(f"{context} optimization failed: {result.message}")
-    return result
 
 
 def _logsumexp(values: np.ndarray) -> float:
@@ -173,8 +161,6 @@ def _extract_winners_losers_events(
             if winners.size in (0, L):
                 continue
             losers = np.flatnonzero(R[:, m, n] == 0)
-            if losers.size == 0:
-                continue
             events.append((winners.astype(int), losers.astype(int)))
     return events
 
@@ -578,9 +564,6 @@ def _mm_plackett_luce(
         Hunter, D. R. (2004). MM algorithms for generalized Bradley-Terry
         models. The Annals of Statistics, 32(1), 384-406.
     """
-    max_iter = _validate_positive_int("max_iter", max_iter)
-    tol = _validate_positive_float("tol", tol, minimum=0.0)
-
     L = wins.shape[0]
 
     # Initialize with win proportions
@@ -646,7 +629,6 @@ def _estimate_pl_map(wins: np.ndarray, prior: Prior, max_iter: int = 500) -> np.
     Returns:
         Strength parameters π of shape (L,).
     """
-    max_iter = _validate_positive_int("max_iter", max_iter)
     L = wins.shape[0]
 
     def negative_log_posterior(log_pi):
@@ -680,7 +662,8 @@ def _estimate_pl_map(wins: np.ndarray, prior: Prior, max_iter: int = 500) -> np.
         method="L-BFGS-B",
         options={"maxiter": max_iter},
     )
-    _require_optimization_success(result, "plackett_luce_map")
+    if not result.success:
+        raise RuntimeError(f"plackett_luce_map optimization failed: {result.message}")
 
     log_pi = result.x
     log_pi = log_pi - log_pi.mean()
@@ -736,13 +719,12 @@ def _estimate_davidson_luce_ml(
 
     Events are (winners, losers); the comparison set is winners ∪ losers.
     """
-    max_iter = _validate_positive_int("max_iter", max_iter)
     L = int(n_models)
     if not events:
         return np.ones(L) / L, np.ones(max(max_tie_order - 1, 1))
 
-    # Use a fixed comparison set per event (all items in that trial)
-    comparison_sets = [np.unique(np.concatenate([w, l])) for w, l in events]
+    # In this binary setting, each event partitions all models into winners/losers.
+    comparison_set = np.arange(L, dtype=int)
 
     def negative_log_likelihood(params: np.ndarray) -> float:
         log_alpha = params[:L]
@@ -751,7 +733,7 @@ def _estimate_davidson_luce_ml(
         log_alpha = log_alpha - log_alpha.mean()
 
         nll = 0.0
-        for (winners, _), comp in zip(events, comparison_sets):
+        for winners, _ in events:
             t = winners.size
             if t < 1 or t > max_tie_order:
                 continue
@@ -760,7 +742,7 @@ def _estimate_davidson_luce_ml(
             log_numerator = log_delta_t + float(log_alpha[winners].mean())
 
             log_denom = _log_denominator_davidson_luce(
-                log_alpha, log_delta_params, comp, max_tie_order=max_tie_order
+                log_alpha, log_delta_params, comparison_set, max_tie_order=max_tie_order
             )
 
             nll -= log_numerator - log_denom
@@ -777,7 +759,8 @@ def _estimate_davidson_luce_ml(
         method="L-BFGS-B",
         options={"maxiter": max_iter},
     )
-    _require_optimization_success(result, "davidson_luce")
+    if not result.success:
+        raise RuntimeError(f"davidson_luce optimization failed: {result.message}")
 
     log_alpha_hat = result.x[:L]
     log_alpha_hat = log_alpha_hat - log_alpha_hat.mean()
@@ -796,12 +779,11 @@ def _estimate_davidson_luce_map(
     max_tie_order: int,
     max_iter: int = 500,
 ) -> tuple[np.ndarray, np.ndarray]:
-    max_iter = _validate_positive_int("max_iter", max_iter)
     L = int(n_models)
     if not events:
         return np.ones(L) / L, np.ones(max(max_tie_order - 1, 1))
 
-    comparison_sets = [np.unique(np.concatenate([w, l])) for w, l in events]
+    comparison_set = np.arange(L, dtype=int)
 
     def negative_log_posterior(params: np.ndarray) -> float:
         log_alpha = params[:L]
@@ -810,7 +792,7 @@ def _estimate_davidson_luce_map(
         log_alpha = log_alpha - log_alpha.mean()
 
         nll = 0.0
-        for (winners, _), comp in zip(events, comparison_sets):
+        for winners, _ in events:
             t = winners.size
             if t < 1 or t > max_tie_order:
                 continue
@@ -819,7 +801,7 @@ def _estimate_davidson_luce_map(
             log_numerator = log_delta_t + float(log_alpha[winners].mean())
 
             log_denom = _log_denominator_davidson_luce(
-                log_alpha, log_delta_params, comp, max_tie_order=max_tie_order
+                log_alpha, log_delta_params, comparison_set, max_tie_order=max_tie_order
             )
             nll -= log_numerator - log_denom
 
@@ -835,7 +817,8 @@ def _estimate_davidson_luce_map(
         method="L-BFGS-B",
         options={"maxiter": max_iter},
     )
-    _require_optimization_success(result, "davidson_luce_map")
+    if not result.success:
+        raise RuntimeError(f"davidson_luce_map optimization failed: {result.message}")
 
     log_alpha_hat = result.x[:L]
     log_alpha_hat = log_alpha_hat - log_alpha_hat.mean()
@@ -852,7 +835,6 @@ def _estimate_btl_ml(
     n_models: int,
     max_iter: int = 500,
 ) -> np.ndarray:
-    max_iter = _validate_positive_int("max_iter", max_iter)
     L = int(n_models)
     if not events:
         return np.ones(L) / L
@@ -862,8 +844,6 @@ def _estimate_btl_ml(
 
         nll = 0.0
         for winners, losers in events:
-            if winners.size == 0 or losers.size == 0:
-                continue
             log_sum_losers = _logsumexp(log_pi[losers])
             nll -= float(np.sum(log_pi[winners]))
             nll += float(np.sum(np.logaddexp(log_pi[winners], log_sum_losers)))
@@ -877,7 +857,8 @@ def _estimate_btl_ml(
         method="L-BFGS-B",
         options={"maxiter": max_iter},
     )
-    _require_optimization_success(result, "bradley_terry_luce")
+    if not result.success:
+        raise RuntimeError(f"bradley_terry_luce optimization failed: {result.message}")
 
     log_pi_hat = result.x - result.x.mean()
     return np.exp(np.clip(log_pi_hat, -30.0, 30.0))
@@ -889,7 +870,6 @@ def _estimate_btl_map(
     prior: Prior,
     max_iter: int = 500,
 ) -> np.ndarray:
-    max_iter = _validate_positive_int("max_iter", max_iter)
     L = int(n_models)
     if not events:
         return np.ones(L) / L
@@ -899,8 +879,6 @@ def _estimate_btl_map(
 
         nll = 0.0
         for winners, losers in events:
-            if winners.size == 0 or losers.size == 0:
-                continue
             log_sum_losers = _logsumexp(log_pi[losers])
             nll -= float(np.sum(log_pi[winners]))
             nll += float(np.sum(np.logaddexp(log_pi[winners], log_sum_losers)))
@@ -914,7 +892,10 @@ def _estimate_btl_map(
         method="L-BFGS-B",
         options={"maxiter": max_iter},
     )
-    _require_optimization_success(result, "bradley_terry_luce_map")
+    if not result.success:
+        raise RuntimeError(
+            f"bradley_terry_luce_map optimization failed: {result.message}"
+        )
 
     log_pi_hat = result.x - result.x.mean()
     return np.exp(np.clip(log_pi_hat, -30.0, 30.0))

@@ -62,6 +62,7 @@ napoleon_attr_annotations = True
 # -- Autodoc settings --------------------------------------------------------
 autodoc_member_order = "bysource"
 autodoc_typehints = "description"
+autodoc_preserve_defaults = True
 
 # Configure default options for autodoc directives
 autodoc_default_options = {
