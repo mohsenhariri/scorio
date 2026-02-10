@@ -1,1 +1,2 @@
 prune references
+exclude scorio/rank/README.md

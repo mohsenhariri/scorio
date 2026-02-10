@@ -40,7 +40,13 @@ This repository contains two packages:
 # Install from PyPI
 pip install scorio
 
-# Install from repository
+# Install latest from GitHub 
+pip install "git+https://github.com/mohsenhariri/scorio.git"
+
+# Install a specific tag
+pip install "git+https://github.com/mohsenhariri/scorio.git@v0.2.0"
+
+# Install from local repository
 pip install -e .
 
 ```
@@ -215,5 +221,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Papers**:
   - [Don't Pass@k (ICLR 2026)](https://iclr.cc/virtual/2026/poster/10009669) | [arXiv](https://arxiv.org/abs/2510.04265)
   - [Ranking Reasoning LLMs](https://arxiv.org/abs/2510.04265)
-
 
