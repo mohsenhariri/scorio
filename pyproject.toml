@@ -46,6 +46,9 @@ version = {file = "VERSION"}
 [tool.setuptools.packages.find]
 include = ["scorio*"]
 
+[tool.setuptools.exclude-package-data]
+scorio = ["rank/README.md"]
+
 [tool.black]
 line-length = 88
 
