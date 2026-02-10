@@ -4,6 +4,14 @@ scorio.rank
 .. automodule:: scorio.rank
    :no-members:
 
+Notation
+--------
+
+All ranking methods use response tensors :math:`R \in \{0,1\}^{L \times M \times N}`,
+with :math:`L` models, :math:`M` questions, and :math:`N` trials per question.
+Methods compute raw scores :math:`s_l` and then convert scores to ranks with
+``scorio.utils.rank_scores``.
+
 Prior Classes
 -------------
 
@@ -32,7 +40,7 @@ Rank Centrality Methods
    :members:
    :show-inheritance:
 
-Hodgerank
+HodgeRank
 ---------
 
 .. automodule:: scorio.rank.hodge_rank
@@ -91,8 +99,8 @@ Voting Methods
    :members:
    :show-inheritance:
 
-Listwise / Setwise Choice Models
---------------------------------
+Listwise and Setwise Choice Models
+----------------------------------
 
 .. automodule:: scorio.rank.listwise
    :members:

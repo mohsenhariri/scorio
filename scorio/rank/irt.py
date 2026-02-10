@@ -1,28 +1,35 @@
 """
 Item Response Theory (IRT) ranking methods.
 
-IRT models estimate latent ability :math:`\\theta_l` for each model and item
-parameters for each question (difficulty :math:`b_m`, discrimination
-:math:`a_m`, and optional pseudo-guessing :math:`c_m`).
+This module estimates latent model abilities and question parameters under
+binary IRT families.
 
-A general binary-response IRT form is:
+Notation
+--------
+
+Let :math:`R \\in \\{0,1\\}^{L \\times M \\times N}` and
+:math:`k_{lm}=\\sum_{n=1}^{N} R_{lmn}`.
+Model abilities are :math:`\\theta_l`; item parameters include difficulty
+:math:`b_m`, discrimination :math:`a_m`, and optional pseudo-guessing
+:math:`c_m`.
+
+A general binary IRT response model is
 
 .. math::
-    P(\\text{correct} \\mid \\theta_l, a_m, b_m, c_m)
-    = c_m + (1-c_m)
-    \\sigma\\left(a_m\\left(\\theta_l - b_m\\right)\\right)
+    P(R_{lmn}=1 \\mid \\theta_l, a_m, b_m, c_m)
+    = c_m + (1-c_m)\\sigma\\left(a_m(\\theta_l-b_m)\\right).
 
-Common special cases:
+Special cases:
 
-- 1PL (Rasch): :math:`a_m = 1` and :math:`c_m = 0`.
-- 2PL: :math:`c_m = 0` with free :math:`a_m` and :math:`b_m`.
+- 1PL (Rasch): :math:`a_m=1`, :math:`c_m=0`.
+- 2PL: :math:`c_m=0`, free :math:`a_m` and :math:`b_m`.
 - 3PL: free :math:`a_m`, :math:`b_m`, and :math:`c_m`.
 
-Models are ranked by their estimated ability parameters.
+Rankings are induced by ability scores :math:`s_l`, typically
+:math:`s_l=\\hat\\theta_l` or a posterior summary of :math:`\\theta_l`.
 
-This module provides MLE/JMLE and MAP estimation. The 2PL/3PL estimators expose
-optional regularization controls for numerical stability. MAP methods provide
-configurable priors on abilities. EAP estimates are available via marginal MLE.
+The module includes maximum-likelihood and joint maximum-likelihood estimators,
+MAP variants with configurable priors, and MML-EAP estimators.
 """
 
 import numpy as np
@@ -153,7 +160,7 @@ def _validate_dynamic_score_target(score_target: str) -> str:
         raise ValueError(
             "score_target must be one of "
             "{'initial', 'final', 'mean', 'gain'} "
-            "(aliases: baseline/start, end, average, delta/trend)."
+            "(aliases: baseline, start, end, average, delta, trend)."
         )
     return target
 
@@ -516,7 +523,7 @@ def dynamic_irt(
             If ``None``, uses equally spaced times in ``[0, 1]``.
             Used only for longitudinal variants.
         score_target: Longitudinal score extracted from ability paths for
-            ranking in growth/state-space variants. One of
+            ranking in growth and state-space variants. One of
             ``{"initial", "final", "mean", "gain"}``.
         slope_reg: Non-negative L2 regularization weight on growth slopes.
             Used only for ``variant="growth"``.
@@ -1024,7 +1031,7 @@ def _estimate_state_space_abilities(
 
         nll = -np.sum(R_float * np.log(prob) + (1 - R_float) * np.log(1 - prob))
 
-        # Random-walk / Brownian-motion smoothness over irregular or regular grids:
+        # Random-walk (Brownian-motion) smoothness over irregular or regular grids:
         # penalize squared increments scaled by the time step.
         step = (theta[:, 1:] - theta[:, :-1]) / np.sqrt(dt)[None, :]
         nll += state_reg * np.sum(step**2)
@@ -1362,7 +1369,7 @@ def _estimate_3pl_abilities_map(
             k_correct * np.log(prob) + (n_trials - k_correct) * np.log(1 - prob)
         )
 
-        # Priors / regularization.
+        # Priors and regularization.
         nll += prior.penalty(theta)
         nll += reg_discrimination * np.sum(log_a**2)
         if fix_guessing is None:

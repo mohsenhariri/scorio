@@ -1,22 +1,23 @@
 """
 Voting-based ranking methods.
 
-These methods adapt classic social choice rules to Scorio's test-time scaling
-setting, where observations are a binary tensor :math:`R` of shape
-:math:`(L, M, N)`.
+This module adapts social-choice rules to model ranking from response tensors.
 
-We treat each question :math:`m` as a "voter" that ranks models by their
-per-question correct count
+Notation
+--------
+
+Let :math:`R \\in \\{0,1\\}^{L \\times M \\times N}` and define question-level
+grades
 
 .. math::
-    k_{lm} = \\sum_{n=1}^{N} R_{lmn} \\in \\{0, 1, \\ldots, N\\},
+    k_{lm} = \\sum_{n=1}^{N} R_{lmn} \\in \\{0,1,\\ldots,N\\}.
 
-and then apply standard voting rules to these per-question (weak) rankings.
+Each question :math:`m` is treated as one voter over models based on
+:math:`k_{:m}`. Voting rules produce scores :math:`s_l` from these per-question
+preferences, then ranks are derived from :math:`s`.
 
-Notes:
-    - When :math:`N = 1`, these rules largely collapse to accuracy-based
-      ordering because each question induces only a 2-level ranking
-      (correct vs incorrect).
+When :math:`N=1`, each question induces a two-level ordering (correct versus
+incorrect), so many voting rules reduce to simple majority-style behavior.
 """
 
 from functools import cmp_to_key

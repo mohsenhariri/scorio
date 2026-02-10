@@ -1,17 +1,23 @@
 """
 Rank Centrality: ranking from pairwise comparisons.
 
-Implements the Rank Centrality algorithm from:
-    Negahban, Oh, & Shah (2017). "Rank Centrality: Ranking from Pairwise Comparisons".
+This module implements the Markov-chain estimator of Negahban, Oh, and Shah
+(2017).
 
-In scorio's evaluation setting, the input is a binary tensor `R` of shape (L, M, N)
-where `R[l, m, n] = 1` means model `l` solved question `m` on trial `n`.
+Notation
+--------
 
-We convert `R` into pairwise outcomes:
-    i beats j  ⇔  R[i,m,n]=1 and R[j,m,n]=0
+Let :math:`R \\in \\{0,1\\}^{L \\times M \\times N}`. For each pair
+:math:`(i,j)`, let :math:`W_{ij}` be decisive wins of :math:`i` over :math:`j`.
+Define the pairwise empirical probabilities :math:`\\widehat{P}_{i\\succ j}`
+from decisive outcomes (optionally tie adjusted).
 
-Rank Centrality constructs a Markov chain whose stationary distribution is used
-as the score vector.
+Rank Centrality builds a row-stochastic transition matrix :math:`P` with
+off-diagonal mass proportional to :math:`\\widehat{P}_{j\\succ i}` and ranks by
+the stationary distribution :math:`\\pi`:
+
+.. math::
+    \\pi^\\top P = \\pi^\\top, \\qquad \\sum_i \\pi_i = 1.
 """
 
 import numpy as np

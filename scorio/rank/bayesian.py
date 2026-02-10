@@ -1,9 +1,25 @@
 """
 Bayesian ranking methods.
 
-These methods use Bayesian inference to estimate model abilities,
-providing natural uncertainty quantification and principled handling
-of limited data.
+These methods rank models using posterior summaries rather than point
+estimates alone.
+
+Notation
+--------
+
+Let :math:`R \\in \\{0,1\\}^{L \\times M \\times N}`.
+Each method introduces latent model parameters :math:`\\theta_l`, computes a
+posterior :math:`p(\\theta \\mid R)`, and ranks with posterior scores
+:math:`s_l`.
+
+The generic form is
+
+.. math::
+    s_l = \\mathbb{E}\\!\\left[g(\\theta_l) \\mid R\\right]
+    \\quad\\text{or}\\quad
+    s_l = \\mathbb{Q}_q\\!\\left(g(\\theta_l) \\mid R\\right),
+
+where :math:`\\mathbb{Q}_q` denotes a posterior quantile.
 """
 
 import numpy as np

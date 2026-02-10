@@ -1,9 +1,26 @@
 """
 Sequential pairwise rating methods.
 
-These methods adapt classical rating systems (Elo, TrueSkill, and Glicko)
-to binary model-outcome tensors by inducing head-to-head results from each
-question-trial slice.
+This module adapts Elo, TrueSkill, and Glicko to binary response tensors by
+streaming induced pairwise outcomes.
+
+Notation
+--------
+
+Let :math:`R \\in \\{0,1\\}^{L \\times M \\times N}`.
+For each event :math:`(m,n)` and each pair :math:`(i,j)`, define an observed
+pair score :math:`S_{ij}^{(m,n)} \\in \\{0, 0.5, 1\\}` according to the
+configured tie policy.
+
+Each method updates latent rating states :math:`\\Theta_i` sequentially:
+
+.. math::
+    \\Theta_i^{(t+1)}
+    = \\mathcal{U}_i\\left(\\Theta^{(t)}, S^{(t)}; \\psi\\right),
+    \\qquad
+    s_i = h(\\Theta_i^{(T)}),
+
+where :math:`s_i` is the final score used for ranking.
 """
 
 import numpy as np

@@ -1,23 +1,23 @@
-r"""
+"""
 Pointwise ranking methods.
 
-Pointwise (item-wise) ranking methods assign each model a **single scalar score** by aggregating its per-item performance over the evaluation set, **without directly comparing models to each other** on any item.
+Pointwise methods aggregate each model's item-level performance into one scalar
+without explicit head-to-head modeling.
 
-Concretely, given per-question accuracies \( a_{lm} \) (e.g., the mean of \( R_{lmn} \) over trials), a pointwise method computes a score of the form:
+Notation
+--------
 
-\[
-S_l = \sum_{m=1}^M w_m \, g(a_{lm}, \phi_m)
-\]
+Let :math:`R \\in \\{0,1\\}^{L \\times M \\times N}` and define
+:math:`k_{lm}=\\sum_{n=1}^{N} R_{lmn}`,
+:math:`\\widehat{p}_{lm}=k_{lm}/N`.
 
-where:
+The pointwise score template is
 
-- \( \phi_m \) is an item-level statistic estimated from the dataset
-  (e.g., solve rate \( p_m \), a discrimination index, or an uncertainty measure),
-- \( g(\cdot) \) is a fixed transformation (often the identity),
-- \( w_m \) are nonnegative weights (often normalized to sum to 1).
+.. math::
+    s_l = \\sum_{m=1}^{M} w_m \\, g\\!\\left(\\widehat{p}_{lm}, \\phi_m\\right),
 
-The defining characteristic is that ranking is induced solely by these **per-model aggregate scores**, rather than by explicit pairwise win/loss outcomes between models.
-
+where :math:`\\phi_m` is an item statistic, :math:`g` is a fixed transform,
+and :math:`w_m` are nonnegative weights.
 """
 
 import numpy as np
@@ -64,14 +64,14 @@ def inverse_difficulty(
         shape ``(L,)``.
 
     Notation:
-        ``R[l, m, n]`` is the binary outcome for model ``l``, question ``m``,
-        and trial ``n``. Let
-        ``p_hat[l, m] = (1/N) * sum_n R[l, m, n]`` and
-        ``p[m] = (1/(L N)) * sum_{l,n} R[l, m, n]``.
+        ``k_lm = sum_{n=1}^N R_lmn`` and
+        ``p_hat_lm = k_lm / N``.
+        The global per-question solve rate is
+        ``p_bar_m = (1/L) * sum_l p_hat_lm``.
 
     Formula:
         .. math::
-            w_m \\propto \\frac{1}{\\operatorname{clip}(p_m, a, b)},
+            w_m \\propto \\frac{1}{\\operatorname{clip}(\\bar p_m, a, b)},
             \\quad \\sum_{m=1}^{M} w_m = 1
 
         .. math::

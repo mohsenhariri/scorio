@@ -1,8 +1,22 @@
 """
-Ranking methods based on evaluation metrics.
+Evaluation-metric ranking methods.
 
-Each function computes a per-model scalar metric from ``R`` and converts
-those scores to ranks with ``scorio.utils.rank_scores``.
+These methods map each model's responses to a scalar score and then convert
+scores to ranks with :func:`scorio.utils.rank_scores`.
+
+Notation
+--------
+
+Let :math:`R \\in \\{0,1,\\ldots,C\\}^{L \\times M \\times N}` denote model
+outcomes, and define per-question correct-count summaries
+:math:`k_{lm}=\\sum_{n=1}^{N} R_{lmn}` when outcomes are binary.
+
+The module follows the score template
+
+.. math::
+    s_l = \\frac{1}{M}\\sum_{m=1}^{M} g_m(k_{lm}, N; \\psi),
+
+where :math:`g_m` depends on the selected evaluation metric.
 """
 
 import numpy as np

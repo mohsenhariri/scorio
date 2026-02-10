@@ -1,7 +1,18 @@
 """
-Base utilities for ranking methods.
+Common utilities for ranking methods.
 
-This module provides common utilities used across all ranking methods.
+Notation used across ``scorio.rank``:
+
+- :math:`R \\in \\{0,1\\}^{L \\times M \\times N}` is the response tensor.
+- :math:`R_{lmn}=1` indicates a correct response by model :math:`l` on
+  question :math:`m` and trial :math:`n`.
+- :math:`W_{ij}` denotes decisive pairwise wins of model :math:`i` over
+  model :math:`j`.
+- :math:`T_{ij}` denotes pairwise ties between models :math:`i` and
+  :math:`j`.
+
+The helper routines in this module build validated tensor representations and
+the sufficient pairwise count matrices used by many ranking estimators.
 """
 
 import numpy as np

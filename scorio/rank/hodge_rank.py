@@ -1,31 +1,33 @@
 r"""
 HodgeRank: statistical ranking via combinatorial Hodge theory.
 
-Based on:
-    Jiang, Lim, Yao, Ye (2009). "Statistical ranking and combinatorial Hodge theory".
+This module implements the weighted :math:`\ell_2` HodgeRank estimator from
+Jiang, Lim, Yao, and Ye (2009).
 
-This implements the core :math:`\ell_2` HodgeRank estimator: given a (possibly
-incomplete) pairwise comparison graph with an observed skew-symmetric edge flow
-:math:`\bar{Y}` (average pairwise rankings) and symmetric edge weights
-:math:`w_{ij}`, it solves
+Notation
+--------
 
-.. math::
-    s^{\star}
-    =
-    \arg\min_s \lVert \operatorname{grad}(s) - \bar{Y} \rVert_{2,w}^2
+Let :math:`R \in \{0,1\}^{L \times M \times N}` and define decisive wins
+:math:`W_{ij}` and ties :math:`T_{ij}` from pairwise model comparisons.
+From these counts, construct a skew-symmetric edge flow :math:`Y` and
+nonnegative symmetric edge weights :math:`w_{ij}`.
 
-The normal equations reduce to a weighted graph Laplacian system:
+HodgeRank estimates a potential vector :math:`s \in \mathbb{R}^L` by
 
 .. math::
-    s^{\star} = -\Delta_0^{\dagger}\operatorname{div}(\bar{Y})
+    s^\star
+    \in \arg\min_{s}
+    \sum_{i<j} w_{ij}\left((s_j-s_i)-Y_{ij}\right)^2.
 
-where :math:`\Delta_0` is the weighted graph Laplacian and :math:`\dagger`
-denotes the Moore-Penrose pseudoinverse.
+This yields the weighted Laplacian normal equations
 
-In scorio's evaluation setting, the input is a binary tensor :math:`R` of shape
-:math:`(L, M, N)` where :math:`R_{lmn} = 1` means model :math:`l` solved
-question :math:`m` on trial :math:`n`. We form pairwise statistics
-:math:`\bar{Y}_{ij}` using the paper's binary comparison statistic.
+.. math::
+    \Delta_0 s^\star = -\operatorname{div}(Y), \qquad
+    s^\star = -\Delta_0^{\dagger}\operatorname{div}(Y),
+
+where :math:`\Delta_0^{\dagger}` is the Moore-Penrose pseudoinverse.
+Only score differences are identifiable; adding a constant to :math:`s`
+does not change the ranking.
 """
 
 import numpy as np

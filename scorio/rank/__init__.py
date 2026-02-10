@@ -1,31 +1,35 @@
 """Ranking methods for comparing multiple models.
 
-This module provides a collection of ranking methods for evaluating and comparing
-LLMs used in "Ranking Reasoning LLMs under Test-Time Scaling".
+This package implements ranking estimators for binary response tensors
+used in ``scorio`` evaluation workflows.
 
-All ranking methods expect a 3D numpy array :math:`R` of shape :math:`(L, M, N)` where:
+Notation
+--------
 
-- :math:`L` = number of models to rank
-- :math:`M` = number of questions
-- :math:`N` = number of independent trials per question (e.g., using top-p sampling)
+All methods use the same core notation:
 
-For longitudinal variants of :func:`scorio.rank.dynamic_irt` (``variant="growth"``
-or ``variant="state_space"``), axis :math:`N` is interpreted as ordered
-measurement occasions instead of i.i.d. trials.
+- :math:`R \\in \\{0,1\\}^{L \\times M \\times N}` is the response tensor.
+- :math:`L` is the number of models.
+- :math:`M` is the number of questions.
+- :math:`N` is the number of trials per question.
+- :math:`R_{lmn}=1` means model :math:`l` solves question :math:`m` on trial
+  :math:`n`.
 
-The entry :math:`R_{lmn} = 1` if model :math:`l` answered question :math:`m` correctly
-on trial :math:`n`, else :math:`R_{lmn} = 0`. For single-trial scenarios (:math:`N=1`),
-you can pass a 2D array of shape :math:`(L, M)` which will be automatically converted
-to :math:`(L, M, 1)`.
+For single-trial input, ``(L, M)`` is promoted to ``(L, M, 1)``.
 
-Ranking methods compute raw model scores (e.g., estimated strengths :math:`\\pi_l`,
-posterior means, or metric-based scores) and derive rankings from those scores. By
-default, methods return a 1D numpy array of shape :math:`(L,)` containing the ranking
-(using the 'competition' ranking from `scorio.utils.rank_scores`). Set
-`return_scores=True` to return a tuple `(ranking, scores)` where `ranking` is a 1D
-array of ranks and `scores` is the corresponding raw scores. To convert raw scores to
-different ranking variants, use `scorio.utils.rank_scores()` which returns a mapping
-of ranking variants (e.g., 'competition', 'dense', 'ordinal').
+Longitudinal variants of :func:`scorio.rank.dynamic_irt`
+(``variant="growth"`` and ``variant="state_space"``) interpret axis
+:math:`N` as ordered measurement time rather than i.i.d. trials.
+
+Every ranking method computes raw scores :math:`s_l` and then maps those
+scores to ranks:
+
+.. math::
+    s_l = f_l(R; \\psi), \\qquad
+    r = \\operatorname{rank\\_scores}(s)[\\text{method}]
+
+By default, methods return ``r`` as a one-dimensional array of shape ``(L,)``.
+With ``return_scores=True``, methods return ``(r, s)``.
 
 Available Methods
 -----------------
@@ -54,7 +58,7 @@ Seriation-based: `serial_rank`.
 
 Hodge-theoretic: `hodge_rank`.
 
-Listwise/setwise choice models (Luce family): `plackett_luce`, `plackett_luce_map`,
+Listwise and setwise choice models (Luce family): `plackett_luce`, `plackett_luce_map`,
 `davidson_luce`, `davidson_luce_map`, `bradley_terry_luce`, `bradley_terry_luce_map`.
 
 Examples
@@ -113,7 +117,7 @@ from .irt import (
     rasch_mml_credible,
 )
 
-# Listwise / setwise choice models
+# Listwise and setwise choice models
 from .listwise import (
     bradley_terry_luce,
     bradley_terry_luce_map,
@@ -129,7 +133,7 @@ from .pairwise import elo, glicko, trueskill
 # Pointwise methods
 from .pointwise import inverse_difficulty
 
-# # Prior classes for MAP estimation
+# Prior classes for MAP estimation
 from .priors import (
     CauchyPrior,
     CustomPrior,

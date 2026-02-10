@@ -46,33 +46,40 @@ pkg-publish-test: pkg-check
 pkg-publish: pkg-check
 	twine upload dist/* --verbose
 
-docs:
+
+jl-install:
+	julia --project=$(JULIA_PROJECT) -e 'using Pkg; Pkg.instantiate()'
+	julia --project=$(JULIA_PROJECT)/docs -e 'using Pkg; Pkg.develop(path="$(JULIA_PROJECT)"); Pkg.instantiate()'
+
+jl-test:
+	julia --project=$(JULIA_PROJECT) -e 'using Pkg; Pkg.test()'
+
+# Documentation
+
+## Read the Docs
+py-docs-build:
 	cd docs && make html
 
-docs-clean:
+py-docs-clean:
 	cd docs && make clean
 
-docs-serve:
+py-docs-serve:
 	python -m http.server --directory docs/_build/html 4000
+
+## Julia Docs
+jl-docs-build:
+	julia --project=$(JULIA_PROJECT)/docs $(JULIA_PROJECT)/docs/make.jl
+
+jl-docs-clean:
+	rm -rf $(JULIA_PROJECT)/docs/build
+
+jl-docs-serve:
+	python -m http.server --directory $(JULIA_PROJECT)/docs/build 4001
 
 landing-serve:
 	python -m http.server --directory docs-landing 4002
 
-# Julia commands
-julia-install:
-	julia --project=$(JULIA_PROJECT) -e 'using Pkg; Pkg.instantiate()'
-	julia --project=$(JULIA_PROJECT)/docs -e 'using Pkg; Pkg.develop(path="$(JULIA_PROJECT)"); Pkg.instantiate()'
 
-julia-test:
-	julia --project=$(JULIA_PROJECT) -e 'using Pkg; Pkg.test()'
 
-julia-docs:
-	julia --project=$(JULIA_PROJECT)/docs $(JULIA_PROJECT)/docs/make.jl
 
-julia-docs-clean:
-	rm -rf $(JULIA_PROJECT)/docs/build
 
-julia-docs-serve:
-	python -m http.server --directory $(JULIA_PROJECT)/docs/build 4001
-
-julia-clean: julia-docs-clean

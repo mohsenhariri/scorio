@@ -1,26 +1,25 @@
 r"""
-SerialRank: spectral ranking using seriation.
+SerialRank: spectral ranking by seriation.
 
-Based on:
-    Fogel, d'Aspremont, Vojnovic (2014/2016). "SerialRank: Spectral Ranking using Seriation".
+This module implements the SerialRank construction of
+Fogel, d'Aspremont, and Vojnovic.
 
-Given a pairwise comparison matrix :math:`C` (skew-symmetric, with entries in
-:math:`\{-1, 0, 1\}` or more generally in :math:`[-1, 1]`), SerialRank builds a
-similarity matrix
+Notation
+--------
+
+Let :math:`R \in \{0,1\}^{L \times M \times N}` and build a skew-symmetric
+pairwise comparison matrix :math:`C`, with :math:`C_{ij}>0` indicating
+evidence that model :math:`i` is stronger than model :math:`j`.
+
+SerialRank forms
 
 .. math::
-    S = \frac{1}{2}\left(n \mathbf{1}\mathbf{1}^{\top} + C C^{\top}\right)
+    S = \frac{1}{2}\left(L\mathbf{1}\mathbf{1}^{\top} + C C^{\top}\right),
+    \qquad
+    L_S = \operatorname{diag}(S\mathbf{1}) - S,
 
-and ranks items by sorting the Fiedler vector (second-smallest eigenvector) of
-the graph Laplacian
-
-.. math::
-    L_S = \operatorname{diag}(S\mathbf{1}) - S.
-
-In scorio's setting, the input is a binary tensor :math:`R` of shape
-:math:`(L, M, N)` where :math:`R_{lmn} = 1` means model :math:`l` solved
-question :math:`m` on trial :math:`n`. We derive pairwise comparisons from the
-number of decisive wins/losses between models.
+and ranks models by sorting a Fiedler vector of :math:`L_S` (the eigenvector
+associated with the second-smallest eigenvalue).
 """
 
 import numpy as np
@@ -35,7 +34,7 @@ def _comparison_matrix_from_counts(
     wins: np.ndarray, ties: np.ndarray, comparison: str
 ) -> np.ndarray:
     """
-    Build a skew-symmetric comparison matrix C from pairwise win/tie counts.
+    Build a skew-symmetric comparison matrix C from pairwise win and tie counts.
 
     C[i,j] > 0  => i is preferred to j.
     """

@@ -1,42 +1,38 @@
 """
-Listwise / setwise probabilistic choice models (Luce family).
+Listwise and setwise probabilistic choice models (Luce family).
 
-In Scorio's binary tensor setting :math:`R \\in \\{0,1\\}^{L \\times M \\times N}`,
-each event ``(m, n)`` induces a two-level partition of models:
-winner set :math:`W_{mn}` (correct models) and loser set :math:`L_{mn}`
-(incorrect models).
+In the binary tensor setting :math:`R \\in \\{0,1\\}^{L \\times M \\times N}`,
+each event :math:`(m,n)` induces a winner set :math:`W_{mn}` (correct models)
+and loser set :math:`L_{mn}` (incorrect models).
 
-Luce-family models assign positive strengths :math:`\\pi_i` and define choice
-probabilities over comparison sets. The core Luce form is
+Luce-family models assign positive strengths :math:`\\pi_i` and define
+selection probabilities over comparison sets:
 
 .. math::
     \\Pr(i \\mid S) = \\frac{\\pi_i}{\\sum_{j \\in S} \\pi_j}.
 
-For a strict ranking :math:`i_1 \\succ i_2 \\succ \\cdots \\succ i_K`, the
-Plackett-Luce probability is
+For strict orderings :math:`i_1 \\succ i_2 \\succ \\cdots \\succ i_K`, the
+Plackett-Luce likelihood is
 
 .. math::
     \\Pr(i_1 \\succ i_2 \\succ \\cdots \\succ i_K)
     = \\prod_{k=1}^{K}
     \\frac{\\pi_{i_k}}{\\sum_{j=k}^{K} \\pi_{i_j}}.
 
-There are multiple reasonable constructions for Scorio data:
+This module uses three constructions:
 
-- **Pairwise reduction (wins only):**
-  Reduce ``R`` to pairwise win counts and fit Bradley-Terry/Plackett-Luce.
-  In this fully observed binary setting, PL-ML on pairwise wins is equivalent
-  to BT-ML and ignores within-level ties.
-- **Setwise/listwise with ties (two-level partitions):**
-  Keep winner and loser sets as one event and fit Davidson-Luce, which
-  explicitly models ties within winner sets.
-- **Setwise choice construction (BTL):**
-  Convert each winner into a Luce choice from candidate set
-  ``{winner} union {losers}`` and fit a Bradley-Terry-Luce-style
-  **composite likelihood** (rank-breaking construction).
+- **Pairwise reduction (wins only)**:
+  reduce :math:`R` to decisive pairwise counts and fit the Bradley-Terry form
+  of Plackett-Luce.
+- **Setwise likelihood with ties**:
+  treat each observed winner set as one tied choice event using
+  Davidson-Luce normalization.
+- **Setwise composite likelihood**:
+  convert each winner into a Luce choice from ``{winner} union {losers}``
+  (Bradley-Terry-Luce rank breaking).
 
-This module uses the efficient MM (minorization-maximization) algorithm from
-Hunter (2004) for PL/BT-style estimation, and L-BFGS optimization for the
-setwise/tie-aware models.
+Estimation uses MM updates for the Plackett-Luce pairwise reduction and
+L-BFGS optimization for the setwise models.
 
 References:
     Plackett, R. L. (1975). The Analysis of Permutations.
@@ -458,7 +454,7 @@ def bradley_terry_luce(
 
     Method context:
         For each event ``(W, L)``, each winner ``i in W`` is treated as a Luce
-        choice from ``{i} union L``. This yields a rank-breaking / composite-
+        choice from ``{i} union L``. This yields a rank-breaking composite
         likelihood objective (not a normalized probability for the whole winner
         set ``W`` as a single event).
 
@@ -543,7 +539,7 @@ def _mm_plackett_luce(
     wins: np.ndarray, max_iter: int = 500, tol: float = 1e-8
 ) -> np.ndarray:
     """
-    MM algorithm for Plackett-Luce / Bradley-Terry MLE.
+    MM algorithm for Plackett-Luce and Bradley-Terry MLE.
 
     The MM algorithm from Hunter (2004) iteratively updates strength
     parameters using a guaranteed-to-converge update rule:

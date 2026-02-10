@@ -1,4 +1,4 @@
-"""Shared type aliases"""
+"""Shared type aliases for ranking and tie-handling policies."""
 
 from typing import Literal, TypeAlias
 

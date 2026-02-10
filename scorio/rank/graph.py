@@ -1,8 +1,23 @@
 """
 Graph-based ranking methods.
 
-These methods construct graphs from pairwise comparisons and use
-various graph algorithms to derive rankings.
+These methods convert pairwise outcomes into a graph or Markov chain and rank
+models with stationary-distribution, spectral, or equilibrium concepts.
+
+Notation
+--------
+
+Let :math:`R \\in \\{0,1\\}^{L \\times M \\times N}` and define decisive wins
+:math:`W_{ij}` and ties :math:`T_{ij}`. A shared empirical pairwise relation is
+
+.. math::
+    \\widehat{P}_{i\\succ j}
+    = \\frac{W_{ij} + \\tfrac12 T_{ij}}
+           {W_{ij} + W_{ji} + T_{ij}}.
+
+Graph methods construct an operator :math:`\\mathcal{G}(\\widehat{P})` and rank
+from a derived score vector :math:`s`, such as a stationary distribution,
+principal eigenvector, or game-theoretic equilibrium score.
 """
 
 import numpy as np
@@ -36,7 +51,7 @@ def _pairwise_win_probabilities(R: np.ndarray) -> np.ndarray:
     """
     Build the empirical pairwise win-probability matrix from the response tensor.
 
-    Using the pairwise win/tie counts from Section 2 (Representation) of the
+    Using the pairwise win and tie counts from Section 2 (Representation) of the
     manuscript, define for i != j:
 
         P̂_{i≻j} = (W_{ij} + 1/2 T_{ij}) / (W_{ij} + W_{ji} + T_{ij}).
@@ -92,7 +107,7 @@ def pagerank(
         Build a directed graph where edge ``j -> i`` has weight
         ``P_hat[i, j]`` (losers link to winners). Column-normalize to obtain a
         transition matrix and run the damped PageRank fixed point with a
-        teleportation/source vector ``e``.
+        teleportation vector ``e``.
 
     Args:
         R: Binary outcome tensor with shape ``(L, M, N)`` or matrix
@@ -209,7 +224,7 @@ def spectral(
         Form a nonnegative matrix ``W`` with off-diagonal entries
         ``W[i, j] = P_hat[i, j]`` and diagonal self-loop mass equal to row sum.
         The normalized dominant right eigenvector is the score vector.
-        This is an eigenvector/Perron-style spectral ranking heuristic.
+        This is an eigenvector-based Perron-style spectral ranking heuristic.
 
     Args:
         R: Binary outcome tensor with shape ``(L, M, N)`` or matrix
@@ -296,7 +311,7 @@ def alpharank(
         finite population and compute the stationary distribution of the induced
         Markov chain. This corresponds to the single-population setting from
         the AlphaRank framework (the paper's general method also covers
-        multi-population/asymmetric games).
+        multi-population and asymmetric games).
 
     Args:
         R: Binary outcome tensor with shape ``(L, M, N)`` or matrix
@@ -380,8 +395,8 @@ def alpharank(
         return float(np.clip(out, 0.0, 1.0))
 
     C = np.zeros((L, L), dtype=float)
-    for s in range(L):  # resident / current
-        for r in range(L):  # mutant / next
+    for s in range(L):  # resident state
+        for r in range(L):  # mutant candidate
             if r == s:
                 continue
             C[s, r] = eta * rho(P_hat[r, s])
