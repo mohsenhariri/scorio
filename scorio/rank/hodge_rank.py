@@ -1,25 +1,31 @@
-"""
+r"""
 HodgeRank: statistical ranking via combinatorial Hodge theory.
 
 Based on:
     Jiang, Lim, Yao, Ye (2009). "Statistical ranking and combinatorial Hodge theory".
 
-This implements the core l2 HodgeRank estimator: given a (possibly incomplete)
-pairwise comparison graph with an observed skew-symmetric edge flow Ȳ (average
-pairwise rankings) and symmetric edge weights w_ij, it solves
+This implements the core :math:`\ell_2` HodgeRank estimator: given a (possibly
+incomplete) pairwise comparison graph with an observed skew-symmetric edge flow
+:math:`\bar{Y}` (average pairwise rankings) and symmetric edge weights
+:math:`w_{ij}`, it solves
 
-    s* = argmin_s || grad(s) - Ȳ ||_{2,w}^2
+.. math::
+    s^{\star}
+    =
+    \arg\min_s \lVert \operatorname{grad}(s) - \bar{Y} \rVert_{2,w}^2
 
-The normal equations reduce to a (weighted) graph Laplacian system:
+The normal equations reduce to a weighted graph Laplacian system:
 
-    s* = -Δ0^{†} div(Ȳ)
+.. math::
+    s^{\star} = -\Delta_0^{\dagger}\operatorname{div}(\bar{Y})
 
-where Δ0 is the weighted graph Laplacian and † denotes the Moore–Penrose
-pseudoinverse.
+where :math:`\Delta_0` is the weighted graph Laplacian and :math:`\dagger`
+denotes the Moore-Penrose pseudoinverse.
 
-In scorio's evaluation setting, the input is a binary tensor `R` of shape (L, M, N)
-where `R[l, m, n] = 1` means model `l` solved question `m` on trial `n`.
-We form pairwise statistics Ȳ_ij using the paper's "binary comparison" statistic.
+In scorio's evaluation setting, the input is a binary tensor :math:`R` of shape
+:math:`(L, M, N)` where :math:`R_{lmn} = 1` means model :math:`l` solved
+question :math:`m` on trial :math:`n`. We form pairwise statistics
+:math:`\bar{Y}_{ij}` using the paper's binary comparison statistic.
 """
 
 import numpy as np
