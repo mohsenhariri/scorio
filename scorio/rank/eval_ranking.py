@@ -13,6 +13,7 @@ from scorio.utils import rank_scores
 
 from ._base import validate_input
 
+
 def mean(
     R: np.ndarray,
     method: str = "competition",
@@ -239,8 +240,7 @@ def pass_at_k(
         >>> ranks.tolist()
         [1, 2]
 
-    Notes:
-        ``k`` is validated by :func:`scorio.eval.pass_at_k` per model.
+
     """
     R = validate_input(R)
     L, _, _ = R.shape
@@ -364,8 +364,6 @@ def g_pass_at_k_tau(
         >>> rank.g_pass_at_k_tau(R, k=2, tau=1.0).tolist() == rank.pass_hat_k(R, 2).tolist()
         True
 
-    Notes:
-        ``tau=0`` is treated as Pass@k by definition in Scorio.
     """
     R = validate_input(R)
     L, _, _ = R.shape
@@ -434,9 +432,6 @@ def mg_pass_at_k(
         >>> ranks.tolist()
         [1, 2]
 
-    Notes:
-        The implementation follows the paper's discrete formula rather than a
-        numerical integral over ``tau``.
     """
     R = validate_input(R)
     L, _, _ = R.shape
