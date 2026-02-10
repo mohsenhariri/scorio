@@ -30,6 +30,7 @@ from scipy.stats import rankdata
 from scorio.utils import rank_scores
 
 from ._base import validate_input
+from ._types import RankMethod
 
 
 def _per_question_correct_counts(R: np.ndarray) -> np.ndarray:
@@ -119,7 +120,7 @@ def _topological_level_scores(adj: np.ndarray) -> np.ndarray:
 
 def borda(
     R: np.ndarray,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
@@ -192,7 +193,7 @@ def borda(
 
 def copeland(
     R: np.ndarray,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
@@ -277,7 +278,7 @@ def copeland(
 
 def win_rate(
     R: np.ndarray,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
@@ -351,7 +352,7 @@ def minimax(
     R: np.ndarray,
     variant: str = "margin",
     tie_policy: str = "half",
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
@@ -440,7 +441,7 @@ def minimax(
 def schulze(
     R: np.ndarray,
     tie_policy: str = "half",
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
@@ -524,7 +525,7 @@ def ranked_pairs(
     R: np.ndarray,
     strength: str = "margin",
     tie_policy: str = "half",
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
@@ -624,7 +625,7 @@ def ranked_pairs(
 def kemeny_young(
     R: np.ndarray,
     tie_policy: str = "half",
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     time_limit: float | None = None,
     tie_aware: bool = True,
@@ -850,7 +851,7 @@ def kemeny_young(
 def nanson(
     R: np.ndarray,
     rank_ties: str = "average",
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
@@ -929,7 +930,7 @@ def nanson(
 def baldwin(
     R: np.ndarray,
     rank_ties: str = "average",
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
@@ -1007,7 +1008,7 @@ def baldwin(
 
 def majority_judgment(
     R: np.ndarray,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """

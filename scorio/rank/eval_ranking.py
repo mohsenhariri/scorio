@@ -12,11 +12,12 @@ from scorio import eval
 from scorio.utils import rank_scores
 
 from ._base import validate_input
+from ._types import RankMethod
 
 
 def mean(
     R: np.ndarray,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
@@ -75,7 +76,7 @@ def bayes(
     w: np.ndarray,
     R0: np.ndarray | None = None,
     quantile: float | None = None,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
@@ -192,7 +193,7 @@ def bayes(
 def pass_at_k(
     R: np.ndarray,
     k: int,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
@@ -252,7 +253,7 @@ def pass_at_k(
 def pass_hat_k(
     R: np.ndarray,
     k: int,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
@@ -309,7 +310,7 @@ def g_pass_at_k_tau(
     R: np.ndarray,
     k: int,
     tau: float,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
@@ -377,7 +378,7 @@ def g_pass_at_k_tau(
 def mg_pass_at_k(
     R: np.ndarray,
     k: int,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """

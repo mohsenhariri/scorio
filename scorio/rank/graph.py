@@ -11,6 +11,7 @@ from scipy.optimize import linprog
 from scorio.utils import rank_scores
 
 from ._base import build_pairwise_counts, validate_input
+from ._types import RankMethod
 
 
 def _validate_positive_int(name: str, value: int, min_value: int = 1) -> int:
@@ -54,7 +55,7 @@ def _pairwise_win_probabilities(R: np.ndarray) -> np.ndarray:
 
 
 def _power_stationary_distribution_row_stochastic(
-    C: np.ndarray, *, max_iter: int = 100_000, tol: float = 1e-12
+    C: np.ndarray, max_iter: int = 100_000, tol: float = 1e-12
 ) -> np.ndarray:
     """Stationary distribution π for a row-stochastic C via π <- π C."""
     C = np.asarray(C, dtype=float)
@@ -80,9 +81,8 @@ def pagerank(
     damping: float = 0.85,
     max_iter: int = 100,
     tol: float = 1e-6,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
-    *,
     teleport: np.ndarray | None = None,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
@@ -199,7 +199,7 @@ def spectral(
     R: np.ndarray,
     max_iter: int = 10_000,
     tol: float = 1e-12,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
@@ -284,7 +284,7 @@ def alpharank(
     population_size: int = 50,
     max_iter: int = 100_000,
     tol: float = 1e-12,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
@@ -404,7 +404,7 @@ def nash(
     solver: str = "lp",
     score_type: str = "vs_equilibrium",
     return_equilibrium: bool = False,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> (
     np.ndarray

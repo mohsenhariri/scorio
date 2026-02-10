@@ -60,6 +60,7 @@ from scipy.optimize import minimize
 from scorio.utils import rank_scores
 
 from ._base import build_pairwise_counts, build_pairwise_wins, validate_input
+from ._types import RankMethod
 from .priors import GaussianPrior, Prior
 
 
@@ -111,7 +112,7 @@ def _coerce_prior(prior: Prior | float) -> Prior:
 
 def bradley_terry(
     R: np.ndarray,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
@@ -184,7 +185,7 @@ def bradley_terry(
 def bradley_terry_map(
     R: np.ndarray,
     prior: Prior | float = 1.0,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
@@ -263,7 +264,7 @@ def bradley_terry_map(
 
 def bradley_terry_davidson(
     R: np.ndarray,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
@@ -330,7 +331,7 @@ def bradley_terry_davidson(
 def bradley_terry_davidson_map(
     R: np.ndarray,
     prior: Prior | float = 1.0,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
@@ -404,7 +405,7 @@ def bradley_terry_davidson_map(
 def rao_kupper(
     R: np.ndarray,
     tie_strength: float = 1.1,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
@@ -481,7 +482,7 @@ def rao_kupper_map(
     R: np.ndarray,
     tie_strength: float = 1.1,
     prior: Prior | float = 1.0,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:

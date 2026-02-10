@@ -58,13 +58,14 @@ from scipy.optimize import minimize
 from scorio.utils import rank_scores
 
 from ._base import build_pairwise_wins, validate_input
+from ._types import RankMethod
 from .priors import (
     GaussianPrior,
     Prior,
 )
 
 
-def _validate_positive_int(name: str, value: int, *, minimum: int = 1) -> int:
+def _validate_positive_int(name: str, value: int, minimum: int = 1) -> int:
     """Validate integer hyperparameters with a lower bound."""
     if isinstance(value, bool) or not isinstance(value, (int, np.integer)):
         raise TypeError(f"{name} must be an integer, got {type(value).__name__}")
@@ -74,7 +75,7 @@ def _validate_positive_int(name: str, value: int, *, minimum: int = 1) -> int:
     return ivalue
 
 
-def _validate_positive_float(name: str, value: float, *, minimum: float = 0.0) -> float:
+def _validate_positive_float(name: str, value: float, minimum: float = 0.0) -> float:
     """Validate finite scalar hyperparameters that must be > minimum."""
     fvalue = float(value)
     if not np.isfinite(fvalue) or fvalue <= minimum:
@@ -167,7 +168,7 @@ def _extract_winners_losers_events(
 
 def plackett_luce(
     R: np.ndarray,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
     tol: float = 1e-8,
@@ -238,7 +239,7 @@ def plackett_luce(
 def plackett_luce_map(
     R: np.ndarray,
     prior: Prior | float = 1.0,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
@@ -304,7 +305,7 @@ def plackett_luce_map(
 
 def davidson_luce(
     R: np.ndarray,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
     max_tie_order: int | None = None,
@@ -383,7 +384,7 @@ def davidson_luce(
 def davidson_luce_map(
     R: np.ndarray,
     prior: Prior | float = 1.0,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
     max_tie_order: int | None = None,
@@ -448,7 +449,7 @@ def davidson_luce_map(
 
 def bradley_terry_luce(
     R: np.ndarray,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
@@ -503,7 +504,7 @@ def bradley_terry_luce(
 def bradley_terry_luce_map(
     R: np.ndarray,
     prior: Prior | float = 1.0,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:

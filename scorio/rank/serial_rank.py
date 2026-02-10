@@ -28,10 +28,11 @@ import numpy as np
 from scorio.utils import rank_scores
 
 from ._base import build_pairwise_counts, validate_input
+from ._types import RankMethod
 
 
 def _comparison_matrix_from_counts(
-    wins: np.ndarray, ties: np.ndarray, *, comparison: str
+    wins: np.ndarray, ties: np.ndarray, comparison: str
 ) -> np.ndarray:
     """
     Build a skew-symmetric comparison matrix C from pairwise win/tie counts.
@@ -132,7 +133,7 @@ def _orientation_key(scores: np.ndarray, C: np.ndarray) -> tuple[int, float, flo
 def serial_rank(
     R: np.ndarray,
     comparison: str = "prob_diff",
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """

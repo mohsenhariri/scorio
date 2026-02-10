@@ -31,6 +31,7 @@ from scipy.optimize import minimize
 from scorio.utils import rank_scores
 
 from ._base import sigmoid, validate_input
+from ._types import RankMethod
 from .priors import GaussianPrior, Prior
 
 
@@ -171,7 +172,7 @@ def _score_dynamic_path(theta_path: np.ndarray, score_target: str) -> np.ndarray
 
 def rasch(
     R: np.ndarray,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
     return_item_params: bool = False,
@@ -245,7 +246,7 @@ def rasch(
 def rasch_map(
     R: np.ndarray,
     prior: Prior | float = 1.0,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
     return_item_params: bool = False,
@@ -318,7 +319,7 @@ def rasch_map(
 
 def rasch_2pl(
     R: np.ndarray,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
     return_item_params: bool = False,
@@ -396,7 +397,7 @@ def rasch_2pl(
 def rasch_2pl_map(
     R: np.ndarray,
     prior: Prior | float = 1.0,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
     return_item_params: bool = False,
@@ -467,7 +468,7 @@ def rasch_2pl_map(
 def dynamic_irt(
     R: np.ndarray,
     variant: str = "linear",
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
     return_item_params: bool = False,
@@ -500,7 +501,7 @@ def dynamic_irt(
 
         .. math::
             \\mathrm{penalty}=\\lambda\\sum_{l,n>0}
-            \\left(\\theta_{ln}-\\theta_{l,n-1}\\right)^2
+            \\frac{\\left(\\theta_{ln}-\\theta_{l,n-1}\\right)^2}{t_n-t_{n-1}}
 
     Args:
         R: Binary outcome tensor with shape ``(L, M, N)`` or matrix
@@ -979,6 +980,8 @@ def _estimate_state_space_abilities(
     We fit:
         P(R[l,m,n]=1) = σ(θ[l,n] - b[m])
     with a quadratic smoothness penalty on first differences of θ over time.
+    On an irregular time grid, we scale by the time step so the penalty is
+    comparable across different spacings.
 
     Args:
         R: Binary tensor of shape (L, M, N).
@@ -1021,8 +1024,9 @@ def _estimate_state_space_abilities(
 
         nll = -np.sum(R_float * np.log(prob) + (1 - R_float) * np.log(1 - prob))
 
-        # Random-walk smoothness over irregular or regular time grids.
-        step = (theta[:, 1:] - theta[:, :-1]) / dt[None, :]
+        # Random-walk / Brownian-motion smoothness over irregular or regular grids:
+        # penalize squared increments scaled by the time step.
+        step = (theta[:, 1:] - theta[:, :-1]) / np.sqrt(dt)[None, :]
         nll += state_reg * np.sum(step**2)
 
         # Weak anchoring for identifiability and numerical stability.
@@ -1044,7 +1048,7 @@ def _estimate_state_space_abilities(
 
 def rasch_3pl(
     R: np.ndarray,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
     fix_guessing: float | None = None,
@@ -1144,7 +1148,7 @@ def rasch_3pl(
 def rasch_3pl_map(
     R: np.ndarray,
     prior: Prior | float = 1.0,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
     fix_guessing: float | None = None,
@@ -1406,7 +1410,7 @@ def _estimate_3pl_abilities_map(
 
 def rasch_mml(
     R: np.ndarray,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 100,
     em_iter: int = 20,
@@ -1491,7 +1495,7 @@ def rasch_mml(
 def rasch_mml_credible(
     R: np.ndarray,
     quantile: float = 0.05,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 100,
     em_iter: int = 20,

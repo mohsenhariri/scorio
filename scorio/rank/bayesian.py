@@ -11,6 +11,7 @@ import numpy as np
 from scorio.utils import rank_scores
 
 from ._base import build_pairwise_wins, validate_input
+from ._types import RankMethod
 
 
 def thompson(
@@ -19,7 +20,7 @@ def thompson(
     prior_alpha: float = 1.0,
     prior_beta: float = 1.0,
     seed: int = 42,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
@@ -140,7 +141,7 @@ def bayesian_mcmc(
     burnin: int = 1000,
     prior_var: float = 1.0,
     seed: int = 42,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """

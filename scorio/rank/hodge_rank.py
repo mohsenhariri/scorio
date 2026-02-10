@@ -33,6 +33,7 @@ import numpy as np
 from scorio.utils import rank_scores
 
 from ._base import build_pairwise_counts, validate_input
+from ._types import RankMethod
 
 
 def _pairwise_flow_binary(wins: np.ndarray, ties: np.ndarray) -> np.ndarray:
@@ -54,7 +55,7 @@ def _pairwise_flow_binary(wins: np.ndarray, ties: np.ndarray) -> np.ndarray:
 
 
 def _pairwise_flow_log_odds(
-    wins: np.ndarray, ties: np.ndarray, *, epsilon: float = 0.5
+    wins: np.ndarray, ties: np.ndarray, epsilon: float = 0.5
 ) -> np.ndarray:
     """
     Paper (Section 2.2.1), logarithmic odds ratio statistic:
@@ -126,7 +127,7 @@ def hodge_rank(
     pairwise_stat: str = "binary",
     weight_method: str = "total",
     epsilon: float = 0.5,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     return_diagnostics: bool = False,
 ) -> (

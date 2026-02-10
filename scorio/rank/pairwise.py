@@ -6,22 +6,21 @@ to binary model-outcome tensors by inducing head-to-head results from each
 question-trial slice.
 """
 
-from typing import Literal
-
 import numpy as np
 from scipy.stats import norm
 
 from scorio.utils import rank_scores
 
 from ._base import validate_input
+from ._types import PairwiseTieHandling, RankMethod
 
 
 def elo(
     R: np.ndarray,
     K: float = 32.0,
     initial_rating: float = 1500.0,
-    tie_handling: Literal["skip", "draw", "correct_draw_only"] = "correct_draw_only",
-    method: str = "competition",
+    tie_handling: PairwiseTieHandling = "correct_draw_only",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
@@ -147,9 +146,9 @@ def trueskill(
     sigma_initial: float = 25.0 / 3,
     beta: float = 25.0 / 6,
     tau: float = 25.0 / 300,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
-    tie_handling: Literal["skip", "draw", "correct_draw_only"] = "skip",
+    tie_handling: PairwiseTieHandling = "skip",
     draw_margin: float = 0.0,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
@@ -368,9 +367,9 @@ def glicko(
     initial_rd: float = 350.0,
     c: float = 0.0,
     rd_max: float = 350.0,
-    tie_handling: Literal["skip", "draw", "correct_draw_only"] = "correct_draw_only",
+    tie_handling: PairwiseTieHandling = "correct_draw_only",
     return_deviation: bool = False,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
 ) -> (
     np.ndarray

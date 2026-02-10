@@ -19,6 +19,7 @@ import numpy as np
 from scorio.utils import rank_scores
 
 from ._base import build_pairwise_counts, build_pairwise_wins, validate_input
+from ._types import RankMethod
 
 
 def _is_connected_undirected(adj: np.ndarray) -> bool:
@@ -27,15 +28,9 @@ def _is_connected_undirected(adj: np.ndarray) -> bool:
     if n == 0:
         return True
 
-    # Find a start node with any edge (otherwise graph is edgeless).
-    degrees = adj.sum(axis=1)
-    start = int(np.flatnonzero(degrees > 0)[0]) if np.any(degrees > 0) else -1
-    if start == -1:
-        return False
-
     seen = np.zeros(n, dtype=bool)
-    stack = [start]
-    seen[start] = True
+    stack = [0]
+    seen[0] = True
 
     while stack:
         i = stack.pop()
@@ -44,8 +39,7 @@ def _is_connected_undirected(adj: np.ndarray) -> bool:
             seen[neighbors] = True
             stack.extend(int(j) for j in neighbors)
 
-    # Nodes with degree 0 are disconnected from the comparison graph.
-    return bool(np.all(seen | (degrees == 0)))
+    return bool(np.all(seen))
 
 
 def _stationary_distribution_power(
@@ -72,7 +66,7 @@ def _stationary_distribution_power(
 
 def rank_centrality(
     R: np.ndarray,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     tie_handling: str = "half",
     smoothing: float = 0.0,

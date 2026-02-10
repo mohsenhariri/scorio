@@ -25,11 +25,12 @@ import numpy as np
 from scorio.utils import rank_scores
 
 from ._base import validate_input
+from ._types import RankMethod
 
 
 def inverse_difficulty(
     R: np.ndarray,
-    method: str = "competition",
+    method: RankMethod = "competition",
     return_scores: bool = False,
     clip_range: tuple = (0.01, 0.99),
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
