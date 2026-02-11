@@ -1,0 +1,67 @@
+name: Register Julia Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: Commit SHA to register
+        required: true
+      version:
+        description: Expected Julia package version (X.Y.Z)
+        required: true
+      subdir:
+        description: Julia package subdirectory
+        required: true
+        default: julia/Scorio.jl
+
+permissions:
+  contents: write
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout target commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.sha }}
+
+      - name: Validate version consistency
+        run: |
+          VERSION_FILE="$(tr -d '[:space:]' < VERSION)"
+          JULIA_VERSION="$(sed -nE 's/^version = "([^"]+)"/\1/p' "${{ inputs.subdir }}/Project.toml" | head -n1)"
+
+          if [ -z "${JULIA_VERSION}" ]; then
+            echo "Could not read Julia version from ${{ inputs.subdir }}/Project.toml"
+            exit 1
+          fi
+
+          if [ "${{ inputs.version }}" != "${VERSION_FILE}" ]; then
+            echo "Input version (${{ inputs.version }}) does not match VERSION file (${VERSION_FILE})."
+            exit 1
+          fi
+
+          if [ "${{ inputs.version }}" != "${JULIA_VERSION}" ]; then
+            echo "Input version (${{ inputs.version }}) does not match Julia Project.toml (${JULIA_VERSION})."
+            exit 1
+          fi
+
+      - name: Trigger Registrator
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const commitSha = '${{ inputs.sha }}';
+            const subdir = '${{ inputs.subdir }}';
+            const body = `@JuliaRegistrator register subdir=${subdir}`;
+
+            await github.rest.repos.createCommitComment({
+              owner,
+              repo,
+              commit_sha: commitSha,
+              body
+            });
+
+            core.info(`Triggered Registrator on commit ${commitSha} (subdir=${subdir}).`);

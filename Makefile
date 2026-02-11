@@ -2,7 +2,7 @@
 SRC:=scorio/
 JULIA_PROJECT:=julia/Scorio.jl
 
-.PHONY: format format-check lint clean build install test pkg-check pkg-publish-test pkg-publish docs docs-clean help julia-test julia-docs julia-docs-clean julia-install test-comparison
+.PHONY: format format-check lint clean build install test pkg-check pkg-publish-test pkg-publish sync-version release-py release-jl jl-install jl-test py-docs-build py-docs-clean py-docs-serve jl-docs-build jl-docs-clean jl-docs-serve landing-serve
 
 format-check:
 	isort --check-only $(SRC)
@@ -33,7 +33,7 @@ install:
 	pip install -e ".[dev]"
 
 test:
-	pytest test/
+	pytest tests/
 
 pkg-check: build
 	python -m pip install --upgrade twine
@@ -46,6 +46,11 @@ pkg-publish-test: pkg-check
 pkg-publish: pkg-check
 	twine upload dist/* --verbose
 
+release-py:
+	./scripts/release_github.sh py
+
+release-jl:
+	./scripts/release_github.sh jl
 
 jl-install:
 	julia --project=$(JULIA_PROJECT) -e 'using Pkg; Pkg.instantiate()'
@@ -78,8 +83,3 @@ jl-docs-serve:
 
 landing-serve:
 	python -m http.server --directory docs-landing 4002
-
-
-
-
-
