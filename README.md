@@ -168,12 +168,13 @@ Bayesian performance evaluation with uncertainty quantification using the Bayes@
 
 ## Documentation
 
-| Language | Documentation | Status |
+[mohsenhariri.github.io/scorio](https://mohsenhariri.github.io/scorio/)
+
+| APIs | Documentation | Status |
 |----------|--------------|--------|
 | **Python** | [scorio.readthedocs.io](https://scorio.readthedocs.io/en/latest/) | [![ReadTheDocs](https://readthedocs.org/projects/scorio/badge/?version=latest)](https://scorio.readthedocs.io/en/latest/) |
 | **Julia** | [mohsenhariri.github.io/scorio/julia](https://mohsenhariri.github.io/scorio/julia/) | [![GitHub Pages](https://img.shields.io/badge/docs-stable-blue.svg)](https://mohsenhariri.github.io/scorio/julia/) |
 
-**Landing Page**: [mohsenhariri.github.io/scorio](https://mohsenhariri.github.io/scorio/)
 
 ---
 

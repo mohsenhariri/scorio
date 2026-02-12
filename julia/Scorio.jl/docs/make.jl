@@ -1,6 +1,8 @@
 using Documenter
 using Scorio
 
+const Remotes = Documenter.Remotes
+
 makedocs(
     sitename = "Scorio.jl",
     format = Documenter.HTML(
@@ -15,7 +17,7 @@ makedocs(
         "API Reference" => "api.md",
         "Examples" => "examples.md"
     ],
-    repo = "https://github.com/mohsenhariri/scorio/blob/{commit}{path}#{line}",
+    repo = Remotes.GitHub("mohsenhariri", "scorio"),
 )
 
 # Note: We don't use deploydocs() here because deployment is handled
