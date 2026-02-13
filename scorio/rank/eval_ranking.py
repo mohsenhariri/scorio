@@ -87,7 +87,7 @@ def mean(
 
 def bayes(
     R: np.ndarray,
-    w: np.ndarray,
+    w: np.ndarray | None = None,
     R0: np.ndarray | None = None,
     quantile: float | None = None,
     method: RankMethod = "competition",
@@ -113,6 +113,8 @@ def bayes(
             ``(L, M)`` (treated as ``N=1``). Entries must be integers in
             ``{0, ..., C}``.
         w: Weight vector of shape ``(C+1,)`` mapping categories to scores.
+            If not provided and R is binary (contains only 0 and 1), defaults
+            to ``[1, 0]``. For non-binary R, w is required.
         R0: Optional prior outcomes. Supported shapes:
             - ``(M, D)``: one shared prior matrix reused for all models.
             - ``(L, M, D)``: model-specific prior outcomes.

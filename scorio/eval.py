@@ -16,7 +16,7 @@ def _as_2d_int_matrix(R: np.ndarray) -> np.ndarray:
 
 
 def bayes(
-    R: np.ndarray, w: np.ndarray, R0: Optional[np.ndarray] = None
+    R: np.ndarray, w: Optional[np.ndarray] = None, R0: Optional[np.ndarray] = None
 ) -> tuple[float, float]:
     """
     Performance evaluation using the Bayes@N framework.
@@ -31,7 +31,8 @@ def bayes(
         R: :math:`M \\times N` int matrix with entries in :math:`\\{0,\\ldots,C\\}`.
            Row :math:`\\alpha` are the N outcomes for question :math:`\\alpha`.
         w: length :math:`(C+1)` weight vector :math:`(w_0,\\ldots,w_C)` that maps
-           category k to score :math:`w_k`.
+           category k to score :math:`w_k`. If not provided and R is binary (contains
+           only 0 and 1), defaults to [1, 0]. For non-binary R, w is required.
         R0: optional :math:`M \\times D` int matrix supplying D prior outcomes per row.
              If omitted, :math:`D=0`.
 
@@ -84,6 +85,21 @@ def bayes(
 
     """
     R = _as_2d_int_matrix(R)
+
+    # Auto-detect binary matrix and set default w if not provided
+    if w is None:
+        unique_vals = np.unique(R)
+        is_binary = len(unique_vals) <= 2 and np.all(np.isin(unique_vals, [0, 1]))
+
+        if is_binary:
+            w = np.array([1.0, 0.0])
+        else:
+            unique_str = ', '.join(map(str, sorted(unique_vals)))
+            raise ValueError(
+                f"R contains more than 2 unique values ({unique_str}), so weight vector 'w' must be provided. "
+                f"Please specify a weight vector of length {len(unique_vals)} to map each category to a score."
+            )
+
     w = np.asarray(w, dtype=float)
     M, N = R.shape
     C = w.size - 1
