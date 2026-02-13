@@ -54,7 +54,7 @@ from scipy.optimize import minimize
 from scorio.utils import rank_scores
 
 from ._base import build_pairwise_wins, validate_input
-from ._types import RankMethod
+from ._types import RankMethod, RankResult
 from .priors import (
     GaussianPrior,
     Prior,
@@ -168,7 +168,7 @@ def plackett_luce(
     return_scores: bool = False,
     max_iter: int = 500,
     tol: float = 1e-8,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with Plackett-Luce maximum likelihood.
 
@@ -238,7 +238,7 @@ def plackett_luce_map(
     method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with Plackett-Luce maximum a posteriori estimation.
 
@@ -305,7 +305,7 @@ def davidson_luce(
     return_scores: bool = False,
     max_iter: int = 500,
     max_tie_order: int | None = None,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with Davidson-Luce maximum likelihood (setwise ties).
 
@@ -384,7 +384,7 @@ def davidson_luce_map(
     return_scores: bool = False,
     max_iter: int = 500,
     max_tie_order: int | None = None,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with Davidson-Luce MAP estimation.
 
@@ -448,7 +448,7 @@ def bradley_terry_luce(
     method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with Bradley-Terry-Luce composite-likelihood ML.
 
@@ -503,7 +503,7 @@ def bradley_terry_luce_map(
     method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with Bradley-Terry-Luce composite-likelihood MAP estimation.
 

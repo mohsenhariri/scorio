@@ -94,7 +94,7 @@ def bayes(
         if is_binary:
             w = np.array([1.0, 0.0])
         else:
-            unique_str = ', '.join(map(str, sorted(unique_vals)))
+            unique_str = ", ".join(map(str, sorted(unique_vals)))
             raise ValueError(
                 f"R contains more than 2 unique values ({unique_str}), so weight vector 'w' must be provided. "
                 f"Please specify a weight vector of length {len(unique_vals)} to map each category to a score."

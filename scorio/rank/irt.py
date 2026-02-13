@@ -38,7 +38,7 @@ from scipy.optimize import minimize
 from scorio.utils import rank_scores
 
 from ._base import sigmoid, validate_input
-from ._types import RankMethod
+from ._types import RankMethod, RankResult
 from .priors import GaussianPrior, Prior
 
 
@@ -1507,7 +1507,7 @@ def rasch_mml_credible(
     max_iter: int = 100,
     em_iter: int = 20,
     n_quadrature: int = 21,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models by a posterior quantile under Rasch MML.
 

@@ -60,7 +60,7 @@ from scipy.optimize import minimize
 from scorio.utils import rank_scores
 
 from ._base import build_pairwise_counts, build_pairwise_wins, validate_input
-from ._types import RankMethod
+from ._types import RankMethod, RankResult
 from .priors import GaussianPrior, Prior
 
 
@@ -115,7 +115,7 @@ def bradley_terry(
     method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with Bradley-Terry maximum-likelihood strengths.
 
@@ -188,7 +188,7 @@ def bradley_terry_map(
     method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with Bradley-Terry MAP estimation.
 
@@ -267,7 +267,7 @@ def bradley_terry_davidson(
     method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with the Bradley-Terry-Davidson tie model (ML).
 
@@ -334,7 +334,7 @@ def bradley_terry_davidson_map(
     method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with the Bradley-Terry-Davidson tie model (MAP).
 
@@ -408,7 +408,7 @@ def rao_kupper(
     method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with the Rao-Kupper tie model (ML).
 
@@ -485,7 +485,7 @@ def rao_kupper_map(
     method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with the Rao-Kupper tie model (MAP).
 

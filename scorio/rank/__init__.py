@@ -34,7 +34,7 @@ With ``return_scores=True``, methods return ``(r, s)``.
 Available Methods
 -----------------
 
-Evaluation metric-based: `mean`, `bayes`, `pass_at_k`, `pass_hat_k`,
+Evaluation metric-based: `avg`, `bayes`, `pass_at_k`, `pass_hat_k`,
 `g_pass_at_k_tau`, `mg_pass_at_k`.
 
 Paired-comparison probabilistic models: `bradley_terry`, `bradley_terry_map`,
@@ -72,7 +72,7 @@ Examples
 >>> ranks_bayes = rank.bayes(R, w=np.array([0.0, 1.0]))
 >>> ranks_pass_at_k = rank.pass_at_k(R, k=2)
 >>> # Get raw scores when needed
->>> ranking, scores = rank.mean(R, return_scores=True)
+>>> ranking, scores = rank.avg(R, return_scores=True)
 """
 
 # Bayesian methods
@@ -90,9 +90,9 @@ from .bradley_terry import (
 
 # Evaluation metric-based ranking methods
 from .eval_ranking import (
+    avg,
     bayes,
     g_pass_at_k_tau,
-    mean,
     mg_pass_at_k,
     pass_at_k,
     pass_hat_k,
@@ -172,7 +172,7 @@ __all__ = [
     "CustomPrior",
     "EmpiricalPrior",
     # Eval-based
-    "mean",
+    "avg",
     "bayes",
     "pass_at_k",
     "pass_hat_k",

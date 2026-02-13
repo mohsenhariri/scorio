@@ -5,7 +5,7 @@
 
 | `scorio.rank.[method_name]` | Paper | Reference |
 | --- | --- | --- |
-| `mean` | - | [API](./eval_ranking.py#L17) |
+| `avg` | - | [API](./eval_ranking.py#L17) |
 | `bayes` | [Don't Pass@k: A Bayesian Framework for Large Language Model Evaluation](https://arxiv.org/abs/2510.04265) | [API](./eval_ranking.py#L73) · [BibTeX](#bibtex-hariri2025don) |
 | `pass_at_k` | [Evaluating Large Language Models Trained on Code](https://arxiv.org/abs/2107.03374) | [API](./eval_ranking.py#L192) · [BibTeX](#bibtex-chen2021evaluating) |
 | `pass_hat_k` | [tau-bench: A Benchmark for Tool-Agent-User Interaction in Real-World Domains](https://arxiv.org/abs/2406.12045) | [API](./eval_ranking.py#L252) · [BibTeX](#bibtex-yao2024taubench) |

@@ -25,7 +25,7 @@ import numpy as np
 from scorio.utils import rank_scores
 
 from ._base import validate_input
-from ._types import RankMethod
+from ._types import RankMethod, RankResult
 
 
 def inverse_difficulty(
@@ -33,7 +33,7 @@ def inverse_difficulty(
     method: RankMethod = "competition",
     return_scores: bool = False,
     clip_range: tuple = (0.01, 0.99),
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models by inverse-difficulty-weighted per-question accuracy.
 

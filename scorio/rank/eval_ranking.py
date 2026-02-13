@@ -26,14 +26,14 @@ from scorio import eval
 from scorio.utils import rank_scores
 
 from ._base import validate_input
-from ._types import RankMethod
+from ._types import RankMethod, RankResult
 
 
-def mean(
+def avg(
     R: np.ndarray,
     method: RankMethod = "competition",
     return_scores: bool = False,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models by mean accuracy over all questions and trials.
 
@@ -60,7 +60,7 @@ def mean(
 
     Formula:
         .. math::
-            s_l^{\\mathrm{mean}} = \\frac{1}{MN}
+            s_l^{\\mathrm{avg}} = \\frac{1}{MN}
             \\sum_{m=1}^{M}\\sum_{n=1}^{N} R_{lmn}
 
     Examples:
@@ -70,7 +70,7 @@ def mean(
         ...     [[1, 1], [0, 1]],
         ...     [[1, 0], [0, 0]],
         ... ])
-        >>> ranks, scores = rank.mean(R, return_scores=True)
+        >>> ranks, scores = rank.avg(R, return_scores=True)
         >>> scores.round(3).tolist()
         [0.75, 0.25]
         >>> ranks.tolist()
@@ -92,7 +92,7 @@ def bayes(
     quantile: float | None = None,
     method: RankMethod = "competition",
     return_scores: bool = False,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with Bayes@N posterior statistics.
 
@@ -211,7 +211,7 @@ def pass_at_k(
     k: int,
     method: RankMethod = "competition",
     return_scores: bool = False,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models by the Pass@k metric.
 
@@ -271,7 +271,7 @@ def pass_hat_k(
     k: int,
     method: RankMethod = "competition",
     return_scores: bool = False,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models by Pass-hat@k (G-Pass@k).
 
@@ -328,7 +328,7 @@ def g_pass_at_k_tau(
     tau: float,
     method: RankMethod = "competition",
     return_scores: bool = False,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models by generalized G-Pass@k_tau.
 
@@ -396,7 +396,7 @@ def mg_pass_at_k(
     k: int,
     method: RankMethod = "competition",
     return_scores: bool = False,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models by mG-Pass@k (mean generalized pass metric).
 
@@ -458,7 +458,7 @@ def mg_pass_at_k(
 
 
 __all__ = [
-    "mean",
+    "avg",
     "bayes",
     "pass_at_k",
     "pass_hat_k",

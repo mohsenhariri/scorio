@@ -25,7 +25,7 @@ import numpy as np
 from scorio.utils import rank_scores
 
 from ._base import build_pairwise_counts, build_pairwise_wins, validate_input
-from ._types import RankMethod
+from ._types import RankMethod, RankResult
 
 
 def _is_connected_undirected(adj: np.ndarray) -> bool:
@@ -79,7 +79,7 @@ def rank_centrality(
     teleport: float = 0.0,
     max_iter: int = 10_000,
     tol: float = 1e-12,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with Rank Centrality.
 

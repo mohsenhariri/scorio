@@ -29,7 +29,7 @@ from scipy.stats import norm
 from scorio.utils import rank_scores
 
 from ._base import validate_input
-from ._types import PairwiseTieHandling, RankMethod
+from ._types import PairwiseTieHandling, RankMethod, RankResult
 
 
 def elo(
@@ -39,7 +39,7 @@ def elo(
     tie_handling: PairwiseTieHandling = "correct_draw_only",
     method: RankMethod = "competition",
     return_scores: bool = False,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with sequential Elo updates on induced pairwise matches.
 
@@ -167,7 +167,7 @@ def trueskill(
     return_scores: bool = False,
     tie_handling: PairwiseTieHandling = "skip",
     draw_margin: float = 0.0,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with a two-player TrueSkill update stream.
 

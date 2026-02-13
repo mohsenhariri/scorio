@@ -27,7 +27,7 @@ import numpy as np
 from scorio.utils import rank_scores
 
 from ._base import build_pairwise_counts, validate_input
-from ._types import RankMethod
+from ._types import RankMethod, RankResult
 
 
 def _comparison_matrix_from_counts(
@@ -134,7 +134,7 @@ def serial_rank(
     comparison: str = "prob_diff",
     method: RankMethod = "competition",
     return_scores: bool = False,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with SerialRank spectral seriation.
 

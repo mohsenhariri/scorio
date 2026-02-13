@@ -26,7 +26,7 @@ from scipy.optimize import linprog
 from scorio.utils import rank_scores
 
 from ._base import build_pairwise_counts, validate_input
-from ._types import RankMethod
+from ._types import RankMethod, RankResult
 
 
 def _validate_positive_int(name: str, value: int, min_value: int = 1) -> int:
@@ -99,7 +99,7 @@ def pagerank(
     method: RankMethod = "competition",
     return_scores: bool = False,
     teleport: np.ndarray | None = None,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with PageRank on the pairwise win-probability graph.
 
@@ -216,7 +216,7 @@ def spectral(
     tol: float = 1e-12,
     method: RankMethod = "competition",
     return_scores: bool = False,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models by spectral centrality of pairwise win probabilities.
 
@@ -301,7 +301,7 @@ def alpharank(
     tol: float = 1e-12,
     method: RankMethod = "competition",
     return_scores: bool = False,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with single-population alpha-Rank.
 

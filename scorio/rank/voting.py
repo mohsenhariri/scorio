@@ -31,7 +31,7 @@ from scipy.stats import rankdata
 from scorio.utils import rank_scores
 
 from ._base import validate_input
-from ._types import RankMethod
+from ._types import RankMethod, RankResult
 
 
 def _per_question_correct_counts(R: np.ndarray) -> np.ndarray:
@@ -123,7 +123,7 @@ def borda(
     R: np.ndarray,
     method: RankMethod = "competition",
     return_scores: bool = False,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with Borda count on per-question rankings.
 
@@ -196,7 +196,7 @@ def copeland(
     R: np.ndarray,
     method: RankMethod = "competition",
     return_scores: bool = False,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with Copeland pairwise-majority scores.
 
@@ -281,7 +281,7 @@ def win_rate(
     R: np.ndarray,
     method: RankMethod = "competition",
     return_scores: bool = False,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models by pairwise question-level win rate.
 
@@ -355,7 +355,7 @@ def minimax(
     tie_policy: str = "half",
     method: RankMethod = "competition",
     return_scores: bool = False,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with the Minimax (Simpson-Kramer) Condorcet rule.
 
@@ -444,7 +444,7 @@ def schulze(
     tie_policy: str = "half",
     method: RankMethod = "competition",
     return_scores: bool = False,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with the Schulze beatpath Condorcet method.
 
@@ -528,7 +528,7 @@ def ranked_pairs(
     tie_policy: str = "half",
     method: RankMethod = "competition",
     return_scores: bool = False,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with the Ranked Pairs (Tideman) Condorcet method.
 
@@ -630,7 +630,7 @@ def kemeny_young(
     return_scores: bool = False,
     time_limit: float | None = None,
     tie_aware: bool = True,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with Kemeny-Young rank aggregation via exact MILP.
 
@@ -854,7 +854,7 @@ def nanson(
     rank_ties: str = "average",
     method: RankMethod = "competition",
     return_scores: bool = False,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with Nanson's Borda-elimination rule.
 
@@ -933,7 +933,7 @@ def baldwin(
     rank_ties: str = "average",
     method: RankMethod = "competition",
     return_scores: bool = False,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with Baldwin's iterative Borda-elimination rule.
 
@@ -1011,7 +1011,7 @@ def majority_judgment(
     R: np.ndarray,
     method: RankMethod = "competition",
     return_scores: bool = False,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models with Majority Judgment on per-question trial counts.
 

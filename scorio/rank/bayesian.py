@@ -27,7 +27,7 @@ import numpy as np
 from scorio.utils import rank_scores
 
 from ._base import build_pairwise_wins, validate_input
-from ._types import RankMethod
+from ._types import RankMethod, RankResult
 
 
 def thompson(
@@ -38,7 +38,7 @@ def thompson(
     seed: int = 42,
     method: RankMethod = "competition",
     return_scores: bool = False,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models by Thompson-sampling posterior expected rank.
 
@@ -159,7 +159,7 @@ def bayesian_mcmc(
     seed: int = 42,
     method: RankMethod = "competition",
     return_scores: bool = False,
-) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+) -> RankResult:
     """
     Rank models via Bayesian Bradley-Terry posterior means from MCMC.
 
