@@ -32,6 +32,8 @@ The module includes maximum-likelihood and joint maximum-likelihood estimators,
 MAP variants with configurable priors, and MML-EAP estimators.
 """
 
+from typing import Literal, TypeAlias
+
 import numpy as np
 from scipy.optimize import minimize
 
@@ -40,6 +42,20 @@ from scorio.utils import rank_scores
 from ._base import sigmoid, validate_input
 from ._types import RankMethod, RankResult
 from .priors import GaussianPrior, Prior
+
+DynamicIrtVariant: TypeAlias = Literal["linear", "growth", "state_space"]
+DynamicScoreTargetInput: TypeAlias = Literal[
+    "initial",
+    "final",
+    "mean",
+    "gain",
+    "baseline",
+    "start",
+    "end",
+    "average",
+    "delta",
+    "trend",
+]
 
 
 def _to_binomial_counts(R: np.ndarray) -> tuple[np.ndarray, int]:
@@ -474,13 +490,13 @@ def rasch_2pl_map(
 
 def dynamic_irt(
     R: np.ndarray,
-    variant: str = "linear",
+    variant: DynamicIrtVariant = "linear",
     method: RankMethod = "competition",
     return_scores: bool = False,
     max_iter: int = 500,
     return_item_params: bool = False,
     time_points: np.ndarray | None = None,
-    score_target: str = "final",
+    score_target: DynamicScoreTargetInput = "final",
     slope_reg: float = 0.01,
     state_reg: float = 1.0,
     assume_time_axis: bool = False,
@@ -567,16 +583,16 @@ def dynamic_irt(
         [1, 2]
     """
     max_iter = _validate_positive_int("max_iter", max_iter)
-    variant = str(variant).strip().lower()
+    variant_name = str(variant).strip().lower()
     R = validate_input(R)
     k_correct = R.sum(axis=2, dtype=float)
     n_trials = int(R.shape[2])
-    score_target = _validate_dynamic_score_target(score_target)
+    score_target_name = _validate_dynamic_score_target(score_target)
     slope_reg = _validate_nonnegative_float("slope_reg", slope_reg)
     state_reg = _validate_nonnegative_float("state_reg", state_reg)
 
-    if variant == "linear":
-        if score_target != "final":
+    if variant_name == "linear":
+        if score_target_name != "final":
             raise ValueError(
                 "score_target is only used for longitudinal variants "
                 "('growth' and 'state_space')."
@@ -584,7 +600,7 @@ def dynamic_irt(
         theta, beta = _estimate_rasch_abilities(k_correct, n_trials, max_iter=max_iter)
         scores = theta
 
-    elif variant == "growth":
+    elif variant_name == "growth":
         if not assume_time_axis:
             raise ValueError(
                 "variant='growth' interprets axis-2 as ordered longitudinal time. "
@@ -598,8 +614,8 @@ def dynamic_irt(
             slope_reg=slope_reg,
         )
         theta_path = theta0[:, None] + theta1[:, None] * time_unit[None, :]
-        scores = _score_dynamic_path(theta_path, score_target)
-    elif variant == "state_space":
+        scores = _score_dynamic_path(theta_path, score_target_name)
+    elif variant_name == "state_space":
         if not assume_time_axis:
             raise ValueError(
                 "variant='state_space' interprets axis-2 as ordered longitudinal "
@@ -612,17 +628,18 @@ def dynamic_irt(
             max_iter=max_iter,
             state_reg=state_reg,
         )
-        scores = _score_dynamic_path(theta_path, score_target)
+        scores = _score_dynamic_path(theta_path, score_target_name)
     else:
         raise ValueError(
-            f"Unknown variant: {variant}. " "Use 'linear', 'growth', or 'state_space'."
+            f"Unknown variant: {variant_name}. "
+            "Use 'linear', 'growth', or 'state_space'."
         )
 
     ranking = rank_scores(scores)[method]
     if return_item_params:
-        if variant == "linear":
+        if variant_name == "linear":
             return ranking, scores, {"difficulty": beta}
-        if variant == "growth":
+        if variant_name == "growth":
             return (
                 ranking,
                 scores,
