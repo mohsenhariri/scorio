@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import numpy as np
 import pytest
 from scipy.stats import norm
@@ -7,16 +5,6 @@ from scipy.stats import norm
 from scorio import eval
 from scorio.rank import eval_ranking
 from scorio.utils import rank_scores
-
-ROOT = Path(__file__).resolve().parents[2]
-DATA_DIR = ROOT / "tests" / "data"
-TOP_P_PATH = DATA_DIR / "R_top_p.npz"
-GREEDY_PATH = DATA_DIR / "R_greedy.npz"
-
-
-def _load_task(path: Path, task: str) -> np.ndarray:
-    with np.load(path, allow_pickle=True) as data:
-        return data[task].astype(int, copy=False)
 
 
 def _expected_scores(
@@ -32,16 +20,13 @@ def _expected_scores(
 
 
 @pytest.fixture(scope="module")
-def top_p_subset() -> np.ndarray:
-    # Random-binary simulation dataset with notebook-compatible shape/layout.
-    R = _load_task(TOP_P_PATH, "aime25")
-    return R[:6, :10, :12]
+def top_p_subset(top_p_task_aime25: np.ndarray) -> np.ndarray:
+    return top_p_task_aime25[:6, :10, :12]
 
 
 @pytest.fixture(scope="module")
-def greedy_subset() -> np.ndarray:
-    R = _load_task(GREEDY_PATH, "aime25")
-    return R[:6, :10, :]
+def greedy_subset(greedy_task_aime25: np.ndarray) -> np.ndarray:
+    return greedy_task_aime25[:6, :10, :]
 
 
 def test_avg_wrapper_matches_eval_scores_and_ranks(top_p_subset: np.ndarray) -> None:
@@ -121,6 +106,30 @@ def test_bayes_R0_shared_and_per_model(top_p_subset: np.ndarray) -> None:
     expected_rank_per_model = rank_scores(expected_per_model)["competition"]
     np.testing.assert_allclose(scores_per_model, expected_per_model)
     np.testing.assert_allclose(ranking_per_model, expected_rank_per_model)
+
+
+def test_eval_ranking_wrappers_are_model_permutation_equivariant(
+    top_p_subset: np.ndarray,
+) -> None:
+    perm = np.array([3, 0, 5, 1, 4, 2], dtype=int)
+    inv_perm = np.empty_like(perm)
+    inv_perm[perm] = np.arange(perm.size)
+
+    calls = [
+        lambda X: eval_ranking.avg(X, return_scores=True),
+        lambda X: eval_ranking.bayes(X, return_scores=True),
+        lambda X: eval_ranking.pass_at_k(X, k=3, return_scores=True),
+        lambda X: eval_ranking.pass_hat_k(X, k=3, return_scores=True),
+        lambda X: eval_ranking.g_pass_at_k_tau(X, k=3, tau=0.7, return_scores=True),
+        lambda X: eval_ranking.mg_pass_at_k(X, k=3, return_scores=True),
+    ]
+
+    for call in calls:
+        ranking, scores = call(top_p_subset)
+        ranking_perm, scores_perm = call(top_p_subset[perm])
+
+        np.testing.assert_allclose(scores, scores_perm[inv_perm])
+        np.testing.assert_allclose(ranking, ranking_perm[inv_perm])
 
 
 def test_bayes_validation_errors(top_p_subset: np.ndarray) -> None:
@@ -209,8 +218,45 @@ def test_g_pass_tau_invalid_tau_raises(top_p_subset: np.ndarray) -> None:
 def test_2d_input_promotion_matches_3d(greedy_subset: np.ndarray) -> None:
     matrix = greedy_subset[:, :, 0]
 
-    ranking_3d, scores_3d = eval_ranking.pass_at_k(greedy_subset, k=1, return_scores=True)
+    ranking_3d, scores_3d = eval_ranking.pass_at_k(
+        greedy_subset, k=1, return_scores=True
+    )
     ranking_2d, scores_2d = eval_ranking.pass_at_k(matrix, k=1, return_scores=True)
 
     np.testing.assert_allclose(scores_2d, scores_3d)
     np.testing.assert_allclose(ranking_2d, ranking_3d)
+
+
+def test_public_eval_ranking_api_exports_have_valid_smoke_calls(
+    top_p_subset: np.ndarray,
+) -> None:
+    api_calls = {
+        "avg": lambda: eval_ranking.avg(top_p_subset, return_scores=True),
+        "bayes": lambda: eval_ranking.bayes(top_p_subset, return_scores=True),
+        "pass_at_k": lambda: eval_ranking.pass_at_k(
+            top_p_subset, k=3, return_scores=True
+        ),
+        "pass_hat_k": lambda: eval_ranking.pass_hat_k(
+            top_p_subset, k=3, return_scores=True
+        ),
+        "g_pass_at_k_tau": lambda: eval_ranking.g_pass_at_k_tau(
+            top_p_subset, k=3, tau=0.7, return_scores=True
+        ),
+        "mg_pass_at_k": lambda: eval_ranking.mg_pass_at_k(
+            top_p_subset, k=3, return_scores=True
+        ),
+    }
+
+    assert set(api_calls) == set(eval_ranking.__all__)
+
+    L = top_p_subset.shape[0]
+    for name, fn in api_calls.items():
+        ranking, scores = fn()
+        assert ranking.shape == (L,)
+        assert scores.shape == (L,)
+        assert np.all(np.isfinite(ranking))
+        assert np.all(np.isfinite(scores))
+        assert np.all(ranking >= 1)
+
+        if name != "bayes":
+            assert np.all((0.0 <= scores) & (scores <= 1.0))
