@@ -1,14 +1,14 @@
 """Eval-metric-based ranking methods."""
 
 """
-    mean(R; method="competition", return_scores=false)
+    avg(R; method="competition", return_scores=false)
 
 Rank models by per-model mean accuracy across all questions and trials.
 
 For each model `l`, compute the scalar score:
 
 ```math
-s_l^{\\mathrm{mean}} = \\frac{1}{MN}\\sum_{m=1}^{M}\\sum_{n=1}^{N} R_{lmn}
+s_l^{\\mathrm{avg}} = \\frac{1}{MN}\\sum_{m=1}^{M}\\sum_{n=1}^{N} R_{lmn}
 ```
 
 Higher scores are better; ranking is produced by `rank_scores`.
@@ -18,7 +18,7 @@ Higher scores are better; ranking is produced by `rank_scores`.
 - `method`: tie-handling rule for `rank_scores`.
 - `return_scores`: if `true`, return `(ranking, scores)`.
 """
-function mean(R; method="competition", return_scores=false)
+function avg(R; method="competition", return_scores=false)
     Rv = validate_input(R)
     L = size(Rv, 1)
 
@@ -121,7 +121,7 @@ s_l =
 # Arguments
 - `R`: integer tensor `(L, M, N)` with values in `{0, ..., C}`.
 - `w`: class weights of length `C+1`. If not provided and R is binary (contains only 0 and 1),
-  defaults to `[1.0, 0.0]`. For non-binary R, w is required.
+  defaults to `[0.0, 1.0]`. For non-binary R, w is required.
 - `R0`: optional shared prior `(M, D)` or model-specific prior `(L, M, D)`.
 - `quantile`: optional value in `[0, 1]` for quantile-adjusted ranking.
 - `method`, `return_scores`: ranking output controls.
@@ -302,7 +302,7 @@ function g_pass_at_k_tau(
 
     scores = zeros(Float64, L)
     for model in 1:L
-        scores[model] = g_pass_at_k_tao(@view(Rv[model, :, :]), k, tau)
+        scores[model] = g_pass_at_k_tau(@view(Rv[model, :, :]), k, tau)
     end
 
     ranking = rank_scores(scores)[string(method)]

@@ -51,7 +51,7 @@ Pkg.develop(path="/path/to/Scorio.jl")
 #### `g_pass_at_k(R, k) -> Float64`
 - Alias for `pass_hat_k`.
 
-#### `g_pass_at_k_tao(R, k, tao) -> Float64`
+#### `g_pass_at_k_tau(R, k, tau) -> Float64`
 - G-Pass@k_τ: Generalized Pass@k with threshold τ. Computes the probability that at least ⌈τ·k⌉ of k randomly selected samples are correct.
 
 #### `mg_pass_at_k(R, k) -> Float64`

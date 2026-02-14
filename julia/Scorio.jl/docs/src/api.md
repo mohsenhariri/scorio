@@ -4,11 +4,11 @@
 
 ```@docs
 bayes
-avg
+avg(::AbstractArray{<:Real})
 pass_at_k
 pass_hat_k
 g_pass_at_k
-g_pass_at_k_tao
+g_pass_at_k_tau(::AbstractMatrix{<:Integer}, ::Integer, ::Real)
 mg_pass_at_k
 ```
 
@@ -29,8 +29,8 @@ EmpiricalPrior
 ```@docs
 competition_ranks_from_scores
 rank_scores
-mean
-g_pass_at_k_tau
+avg(::Any; method, return_scores)
+g_pass_at_k_tau(::AbstractArray{<:Integer, 3}, ::Any, ::Any; method, return_scores)
 inverse_difficulty
 elo
 trueskill

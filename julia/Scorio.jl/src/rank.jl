@@ -1,10 +1,78 @@
 """
-    elo(args...; kwargs...)
+Scorio ranking API scaffold.
 
-Not yet implemented.
 """
-function elo(args...; kwargs...)
-    error("Not yet implemented.")
-end
 
-export elo
+include("rank/types.jl")
+include("rank/base.jl")
+include("rank/priors.jl")
+include("rank/eval_ranking.jl")
+include("rank/pointwise.jl")
+include("rank/pairwise.jl")
+include("rank/bradley_terry.jl")
+include("rank/bayesian.jl")
+include("rank/voting.jl")
+include("rank/irt.jl")
+include("rank/graph.jl")
+include("rank/rank_centrality.jl")
+include("rank/serial_rank.jl")
+include("rank/hodge_rank.jl")
+include("rank/listwise.jl")
+
+export Prior,
+    GaussianPrior,
+    LaplacePrior,
+    CauchyPrior,
+    UniformPrior,
+    CustomPrior,
+    EmpiricalPrior,
+    avg,
+    bayes,
+    pass_at_k,
+    pass_hat_k,
+    g_pass_at_k_tau,
+    mg_pass_at_k,
+    inverse_difficulty,
+    elo,
+    glicko,
+    trueskill,
+    bradley_terry,
+    bradley_terry_map,
+    bradley_terry_davidson,
+    bradley_terry_davidson_map,
+    rao_kupper,
+    rao_kupper_map,
+    thompson,
+    bayesian_mcmc,
+    borda,
+    copeland,
+    win_rate,
+    minimax,
+    schulze,
+    ranked_pairs,
+    kemeny_young,
+    nanson,
+    baldwin,
+    majority_judgment,
+    rasch,
+    rasch_map,
+    rasch_2pl,
+    rasch_2pl_map,
+    rasch_3pl,
+    rasch_3pl_map,
+    rasch_mml,
+    rasch_mml_credible,
+    dynamic_irt,
+    pagerank,
+    spectral,
+    alpharank,
+    nash,
+    rank_centrality,
+    serial_rank,
+    hodge_rank,
+    plackett_luce,
+    plackett_luce_map,
+    davidson_luce,
+    davidson_luce_map,
+    bradley_terry_luce,
+    bradley_terry_luce_map

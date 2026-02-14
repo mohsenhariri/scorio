@@ -1,5 +1,5 @@
 """
-    bayes(R::AbstractMatrix{<:Integer}, w::AbstractVector{<:Real}, R0::Union{AbstractMatrix{<:Integer}, Nothing}=nothing) -> Tuple{Float64, Float64}
+    bayes(R::AbstractMatrix{<:Integer}, w::Union{AbstractVector{<:Real}, Nothing}=nothing, R0::Union{AbstractMatrix{<:Integer}, Nothing}=nothing) -> Tuple{Float64, Float64}
 
 Performance evaluation using the Bayes@N framework.
 
@@ -12,9 +12,10 @@ https://arxiv.org/abs/2510.04265
 # Arguments
 - `R::AbstractMatrix{<:Integer}`: ``M \\times N`` int matrix with entries in ``\\{0,\\ldots,C\\}``.
   Row ``\\alpha`` are the N outcomes for question ``\\alpha``.
-- `w::AbstractVector{<:Real}`: length ``(C+1)`` weight vector ``(w_0,\\ldots,w_C)`` that maps
-  category k to score ``w_k``.
-- `R0::Union{AbstractMatrix{<:Integer}, Nothing}`: optional ``M \\times D`` int matrix supplying 
+- `w::Union{AbstractVector{<:Real}, Nothing}`: length ``(C+1)`` weight vector ``(w_0,\\ldots,w_C)``
+  that maps category k to score ``w_k``. If not provided and R is binary (contains only 0 and 1),
+  defaults to `[0.0, 1.0]`. For non-binary R, w is required.
+- `R0::Union{AbstractMatrix{<:Integer}, Nothing}`: optional ``M \\times D`` int matrix supplying
   D prior outcomes per row. If omitted, ``D=0``.
 
 # Returns
@@ -68,11 +69,26 @@ mu2, sigma2 = bayes(R, w)
 """
 function bayes(
     R::AbstractMatrix{<:Integer},
-    w::AbstractVector{<:Real},
+    w::Union{AbstractVector{<:Real}, Nothing}=nothing,
     R0::Union{AbstractMatrix{<:Integer}, Nothing}=nothing
 )::Tuple{Float64, Float64}
-    
+
     M, N = size(R)
+
+    # Auto-detect binary matrix and set default w if not provided
+    if isnothing(w)
+        unique_vals = unique(R)
+        is_binary = length(unique_vals) <= 2 && all(v -> v in [0, 1], unique_vals)
+
+        if is_binary
+            w = [0.0, 1.0]
+        else
+            unique_str = join(sort(unique_vals), ", ")
+            error("R contains more than 2 unique values ($unique_str), so weight vector 'w' must be provided. " *
+                  "Please specify a weight vector of length $(length(unique_vals)) to map each category to a score.")
+        end
+    end
+
     C = length(w) - 1
     
     # Handle R0 (prior outcomes)
@@ -317,7 +333,7 @@ end
 
 
 """
-    g_pass_at_k_tao(R::AbstractMatrix{<:Integer}, k::Integer, tao::Real) -> Float64
+    g_pass_at_k_tau(R::AbstractMatrix{<:Integer}, k::Integer, tau::Real) -> Float64
 
 G-Pass@k_τ: Generalized Pass@k with threshold τ.
 
@@ -334,7 +350,7 @@ https://arxiv.org/abs/2412.13147
 - `R::AbstractMatrix{<:Integer}`: ``M \\times N`` binary matrix with entries in ``\\{0, 1\\}``.
   ``R_{\\alpha i} = 1`` if trial ``i`` for question ``\\alpha`` passed, 0 otherwise.
 - `k::Integer`: Number of samples to select (``1 \\le k \\le N``).
-- `tao::Real`: Threshold parameter ``\\tau \\in [0, 1]``. Requires at least
+- `tau::Real`: Threshold parameter ``\\tau \\in [0, 1]``. Requires at least
   ``\\lceil \\tau \\cdot k \\rceil`` successes.
   When ``\\tau = 0``, equivalent to Pass@k.
   When ``\\tau = 1``, equivalent to Pass^k.
@@ -367,29 +383,29 @@ For each row ``\\alpha``:
 ```julia
 R = [0 1 1 0 1;
      1 1 0 1 1]
-g_pass_at_k_tao(R, 2, 0.5)  # Returns ≈ 0.95
-g_pass_at_k_tao(R, 2, 1.0)  # Returns ≈ 0.45
+g_pass_at_k_tau(R, 2, 0.5)  # Returns ≈ 0.95
+g_pass_at_k_tau(R, 2, 1.0)  # Returns ≈ 0.45
 ```
 """
-function g_pass_at_k_tao(R::AbstractMatrix{<:Integer}, k::Integer, tao::Real)::Float64
+function g_pass_at_k_tau(R::AbstractMatrix{<:Integer}, k::Integer, tau::Real)::Float64
     M, N = size(R)
     
-    if !(0.0 <= tao <= 1.0)
-        error("tao must be in [0, 1]; got $tao")
+    if !(0.0 <= tau <= 1.0)
+        error("tau must be in [0, 1]; got $tau")
     end
     if !(1 <= k <= N)
         error("k must satisfy 1 <= k <= N (N=$N); got k=$k")
     end
     
-    # Edge case: if tao -> 0, return pass_at_k(R, k)
-    if tao <= 0.0
+    # Edge case: if tau -> 0, return pass_at_k(R, k)
+    if tau <= 0.0
         return pass_at_k(R, k)
     end
     
     nu = vec(sum(R, dims=2))
     denom = binomial(BigInt(N), k)
     
-    j0 = Int(ceil(tao * k))
+    j0 = Int(ceil(tau * k))
     if j0 > k
         return 0.0
     end
@@ -499,4 +515,4 @@ function mg_pass_at_k(R::AbstractMatrix{<:Integer}, k::Integer)::Float64
 end
 
 
-export bayes, avg, pass_at_k, pass_hat_k, g_pass_at_k, g_pass_at_k_tao, mg_pass_at_k
+export bayes, avg, pass_at_k, pass_hat_k, g_pass_at_k, g_pass_at_k_tau, mg_pass_at_k
