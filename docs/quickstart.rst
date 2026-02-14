@@ -103,7 +103,7 @@ Generalized Pass@k with threshold:
 .. code-block:: python
 
    # Probability at least 50% of k samples are correct
-   g_pass = eval.g_pass_at_k_tao(R, k=3, tao=0.5)
+   g_pass = eval.g_pass_at_k_tau(R, k=3, tau=0.5)
    print(f"G-Pass@3(τ=0.5): {g_pass:.4f}")
 
 Simple Average

@@ -15,7 +15,7 @@ Added
   
   - Standard ``pass_at_k()`` (at least one correct)
   - ``pass_hat_k()`` / ``g_pass_at_k()`` (all correct)
-  - ``g_pass_at_k_tao()`` with threshold parameter
+  - ``g_pass_at_k_tau()`` with threshold parameter
   - ``mg_pass_at_k()``
 
 

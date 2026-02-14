@@ -1,6 +1,6 @@
 """Ranking methods for comparing multiple models.
 
-This package implements ranking estimators for binary response tensors
+This module implements ranking estimators for binary response tensors
 used in ``scorio`` evaluation workflows.
 
 Notation
