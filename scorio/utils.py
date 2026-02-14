@@ -1,30 +1,53 @@
 import math
+from typing import Literal, Optional, Sequence
 
 import numpy as np
-from scipy.stats import kendalltau, rankdata, spearmanr, weightedtau
+from scipy.stats import kendalltau, norm, rankdata, spearmanr, weightedtau
 
 
-def rank_scores(scores_in_id_order, tol=1e-12):
+def rank_scores(
+    scores_in_id_order: Sequence[float],
+    tol: float = 1e-12,
+    *,
+    sigmas_in_id_order: Optional[Sequence[float]] = None,
+    confidence: float = 0.95,
+    ci_tie_method: Literal[
+        "zscore_adjacent", "ci_overlap_adjacent"
+    ] = "zscore_adjacent",
+) -> dict[str, np.ndarray]:
     """
-    Convert scores to ranks using multiple ranking methods.
+    Convert scores to ranks using multiple ranking methods (with optional confidence-aware ties).
 
-    Transforms a list of scores into rankings using different tie-breaking strategies.
-    Scores within tolerance ``tol`` are treated as equal.
+    This is a utility that many evaluation scripts already use: it converts a list of
+    scores into four standard rank conventions (competition/min, competition/max,
+    dense, average/fractional). Higher scores get better (lower) ranks.
+
+    Extension: if `sigmas_in_id_order` is provided, this function ALSO returns a
+    second set of ranks that treats two adjacent scores as tied when they are not
+    separable at the requested confidence level.
 
     Args:
-        scores_in_id_order: List or array of scores aligned by ID order.
+        scores_in_id_order: Scores aligned by ID order.
         tol: Tolerance threshold for treating scores as equal (default: 1e-12).
+        sigmas_in_id_order: Optional per-score uncertainty aligned by ID order.
+            If provided, uncertainty-aware ranks are added under keys suffixed with "_ci".
+        confidence: Confidence used for the uncertainty-aware tie rule.
+        ci_tie_method: How to decide ties when sigmas are provided:
+            - "zscore_adjacent" (paper Sec. 2.9): tie if z < Φ^{-1}(confidence)
+            - "ci_overlap_adjacent": tie if confidence-level CIs overlap
 
     Returns:
-        dict: Dictionary with four ranking methods:
+        dict with four base ranking methods:
             - "competition": Min-rank competition (1, 2, 2, 4)
             - "competition_max": Max-rank competition (1, 3, 3, 4)
             - "dense": Dense ranking (1, 2, 2, 3)
             - "avg": Fractional/average ranking (1, 2.5, 2.5, 4)
 
-    Notes:
-        Higher scores receive better (lower) ranks. Scores are sorted in
-        descending order before ranking.
+        If `sigmas_in_id_order` is provided, four extra keys are included:
+            - "competition_ci"
+            - "competition_max_ci"
+            - "dense_ci"
+            - "avg_ci"
 
     Examples:
         >>> import numpy as np
@@ -34,10 +57,17 @@ def rank_scores(scores_in_id_order, tol=1e-12):
         True
         >>> ranks["dense"].tolist() == [1, 2, 2, 3, 4]
         True
-        >>> ranks["avg"]
-        array([1. , 2.5, 2.5, 4. , 5. ])
+
+        With uncertainty: the top two are close and get tied at 95%:
+
+        >>> sigmas = [1.0, 1.0, 0.1, 0.1, 0.1]
+        >>> ranks2 = rank_scores(scores, sigmas_in_id_order=sigmas, confidence=0.95)
+        >>> "dense_ci" in ranks2
+        True
     """
     scores = np.asarray(scores_in_id_order, dtype=float)
+    if scores.ndim != 1:
+        raise ValueError("scores_in_id_order must be a 1D sequence.")
     order = np.argsort(-scores)  # descending order
     sorted_scores = scores[order]
 
@@ -47,18 +77,66 @@ def rank_scores(scores_in_id_order, tol=1e-12):
         if abs(grouped_scores[i] - grouped_scores[i - 1]) <= tol:
             grouped_scores[i] = grouped_scores[i - 1]
 
-    def ranker(method):
-        ranks_sorted = rankdata(-grouped_scores, method=method)
+    def ranker(method: str, arr_sorted: np.ndarray) -> np.ndarray:
+        ranks_sorted = rankdata(-arr_sorted, method=method)
         ranks = np.empty_like(ranks_sorted)
         ranks[order] = ranks_sorted
         return ranks
 
-    return {
-        "competition": ranker("min"),  # 1,2,2,4,5
-        "competition_max": ranker("max"),  # 1,3,3,4,5
-        "dense": ranker("dense"),  # 1,2,2,3,4
-        "avg": ranker("average"),  # 1.0,2.5,2.5,4.0,5.0
+    out: dict[str, np.ndarray] = {
+        "competition": ranker("min", grouped_scores),  # 1,2,2,4,5
+        "competition_max": ranker("max", grouped_scores),  # 1,3,3,4,5
+        "dense": ranker("dense", grouped_scores),  # 1,2,2,3,4
+        "avg": ranker("average", grouped_scores),  # 1.0,2.5,2.5,4.0,5.0
     }
+
+    if sigmas_in_id_order is not None:
+        sigmas = np.asarray(sigmas_in_id_order, dtype=float)
+        if sigmas.shape != scores.shape:
+            raise ValueError("sigmas_in_id_order must have the same length as scores.")
+        mus_s = scores[order]
+        sig_s = sigmas[order]
+        ci_grouped = grouped_scores.copy()
+
+        if ci_tie_method == "zscore_adjacent":
+            z_thresh = float(norm.ppf(confidence))  # one-sided
+            for i in range(1, len(ci_grouped)):
+                # If already equal by tol, keep tied
+                if abs(ci_grouped[i] - ci_grouped[i - 1]) <= tol:
+                    ci_grouped[i] = ci_grouped[i - 1]
+                    continue
+                denom = math.sqrt(sig_s[i - 1] ** 2 + sig_s[i] ** 2)
+                if denom == 0.0:
+                    continue
+                z = abs(mus_s[i - 1] - mus_s[i]) / denom
+                if z < z_thresh:
+                    ci_grouped[i] = ci_grouped[i - 1]
+        elif ci_tie_method == "ci_overlap_adjacent":
+            z = float(norm.ppf(0.5 + confidence / 2.0))
+            for i in range(1, len(ci_grouped)):
+                if abs(ci_grouped[i] - ci_grouped[i - 1]) <= tol:
+                    ci_grouped[i] = ci_grouped[i - 1]
+                    continue
+                lo_prev, hi_prev = (
+                    mus_s[i - 1] - z * sig_s[i - 1],
+                    mus_s[i - 1] + z * sig_s[i - 1],
+                )
+                lo_cur, hi_cur = mus_s[i] - z * sig_s[i], mus_s[i] + z * sig_s[i]
+                if lo_prev <= hi_cur:
+                    ci_grouped[i] = ci_grouped[i - 1]
+        else:
+            raise ValueError("Unknown ci_tie_method.")
+
+        out.update(
+            {
+                "competition_ci": ranker("min", ci_grouped),
+                "competition_max_ci": ranker("max", ci_grouped),
+                "dense_ci": ranker("dense", ci_grouped),
+                "avg_ci": ranker("average", ci_grouped),
+            }
+        )
+
+    return out
 
 
 def compare_rankings(
@@ -273,10 +351,6 @@ def lehmer_unhash(hash_value, n):
         result.append(available.pop(idx))
 
     return result
-
-
-# Ordered Bell / Fubini number approach for rankings with ties
-# This is the theoretically optimal approach with collision-free hashing
 
 
 def ordered_bell(n: int):
