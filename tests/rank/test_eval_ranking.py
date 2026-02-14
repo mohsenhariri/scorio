@@ -8,10 +8,10 @@ from scorio import eval
 from scorio.rank import eval_ranking
 from scorio.utils import rank_scores
 
-
 ROOT = Path(__file__).resolve().parents[2]
-TOP_P_PATH = ROOT / "notebooks" / "R_top_p.npz"
-GREEDY_PATH = ROOT / "notebooks" / "R_greedy.npz"
+DATA_DIR = ROOT / "tests" / "data"
+TOP_P_PATH = DATA_DIR / "R_top_p.npz"
+GREEDY_PATH = DATA_DIR / "R_greedy.npz"
 
 
 def _load_task(path: Path, task: str) -> np.ndarray:
@@ -33,7 +33,7 @@ def _expected_scores(
 
 @pytest.fixture(scope="module")
 def top_p_subset() -> np.ndarray:
-    # Keep tests fast while preserving the same (L, M, N) contract as README.
+    # Random-binary simulation dataset with notebook-compatible shape/layout.
     R = _load_task(TOP_P_PATH, "aime25")
     return R[:6, :10, :12]
 

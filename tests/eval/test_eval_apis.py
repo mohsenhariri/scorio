@@ -6,9 +6,9 @@ from scipy.stats import norm
 
 from scorio import eval as scorio_eval
 
-
 ROOT = Path(__file__).resolve().parents[2]
-TOP_P_PATH = ROOT / "notebooks" / "R_top_p.npz"
+DATA_DIR = ROOT / "tests" / "data"
+TOP_P_PATH = DATA_DIR / "R_top_p.npz"
 
 
 @pytest.fixture(scope="module")
@@ -265,7 +265,7 @@ def test_pass_family_rejects_non_binary_values() -> None:
         scorio_eval.pass_at_k(R, 1)
 
 
-def test_eval_apis_on_project_data_slice(top_p_model_slice: np.ndarray) -> None:
+def test_eval_apis_on_simulation_dataset_slice(top_p_model_slice: np.ndarray) -> None:
     R = top_p_model_slice
 
     a, a_sigma = scorio_eval.avg(R)
