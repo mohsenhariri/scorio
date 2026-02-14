@@ -447,7 +447,7 @@ end
 
 Rank models with Bradley-Terry maximum likelihood on decisive pairwise wins.
 
-Let `W_{ij}` be decisive wins of model `i` over `j` and strengths `pi_i > 0`.
+Let ``W_{ij}`` be decisive wins of model `i` over `j` and strengths `pi_i > 0`.
 
 ```math
 \\Pr(i \\succ j) = \\frac{\\pi_i}{\\pi_i + \\pi_j}
@@ -593,7 +593,7 @@ end
 
 Rank models with the Rao-Kupper tie model (ML).
 
-With fixed `kappa \\ge 1`:
+With fixed ``kappa \\ge 1``:
 
 ```math
 \\Pr(i\\succ j)=\\frac{\\pi_i}{\\pi_i+\\kappa\\pi_j}, \\quad

@@ -152,7 +152,7 @@ end
 
 Rank models with Borda count from per-question model orderings.
 
-Let `k_{lm} = \\sum_{n=1}^{N} R_{lmn}` and `r_{lm}` be the descending
+Let ``k_{lm} = \\sum_{n=1}^{N} R_{lmn}`` and ``r_{lm}`` be the descending
 tie-averaged rank of model `l` on question `m` (rank 1 is best):
 
 ```math
@@ -182,7 +182,7 @@ end
 
 Rank models by Copeland score over pairwise question-level majorities.
 
-Let `W^{(q)}_{ij}` be the number of questions where `k_{im} > k_{jm}`:
+Let ``W^{(q)}_{ij}`` be the number of questions where ``k_{im} > k_{jm}``:
 
 ```math
 s_i^{\\mathrm{Copeland}}
@@ -226,7 +226,7 @@ end
 
 Rank models by aggregate pairwise win rate.
 
-With the same `W^{(q)}_{ij}` counts:
+With the same ``W^{(q)}_{ij}`` counts:
 
 ```math
 s_i^{\\mathrm{winrate}}
@@ -283,7 +283,7 @@ end
 
 Rank models with Minimax (Simpson-Kramer), using worst defeat strength.
 
-Let `P_{ij}` be pairwise preference counts and `\\Delta_{ij}=P_{ij}-P_{ji}`.
+Let ``P_{ij}`` be pairwise preference counts and ``\\Delta_{ij}=P_{ij}-P_{ji}``.
 
 Margin variant:
 
@@ -357,7 +357,7 @@ Then apply strongest-path closure:
 p_{jk} \\leftarrow \\max\\!\\left(p_{jk}, \\min(p_{ji}, p_{ik})\\right)
 ```
 
-Model `i` beats `j` if `p_{ij} > p_{ji}`.
+Model `i` beats `j` if ``p_{ij} > p_{ji}``.
 """
 function schulze(R; tie_policy="half", method="competition", return_scores=false)
     Rv = validate_input(R)
@@ -562,7 +562,7 @@ end
 Rank models with Kemeny-Young via MILP optimization. With `tie_aware=true`,
 the routine analyzes forced pairwise orders among optimal solutions.
 
-Binary variables `y_{ij}` indicate whether model `i` is above `j`:
+Binary variables ``y_{ij}`` indicate whether model `i` is above `j`:
 
 ```math
 \\max_y \\sum_{i\\ne j} P_{ij} y_{ij}
@@ -690,7 +690,7 @@ end
 Rank models with Nanson's elimination rule (iterative Borda with below-mean
 elimination).
 
-At round `t`, with active set `A_t` and Borda scores `s_i^{(t)}`:
+At round `t`, with active set `A_t` and Borda scores ``s_i^{(t)}``:
 
 ```math
 E_t = \\{ i\\in A_t : s_i^{(t)} < \\overline{s}^{(t)} \\},
@@ -803,7 +803,7 @@ end
 
 Rank models using Majority Judgment with recursive median-grade tie-breaking.
 
-Each question assigns grade `k_{lm}\\in\\{0,\\dots,N\\}`.
+Each question assigns grade ``k_{lm}\\in\\{0,\\dots,N\\}``.
 Models are compared by lower median grade; ties are broken by recursively
 removing one occurrence of the current median grade from tied models and
 repeating the comparison.

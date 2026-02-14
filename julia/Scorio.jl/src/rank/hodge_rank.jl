@@ -96,7 +96,7 @@ end
 
 Rank models with l2 HodgeRank on a weighted pairwise-comparison graph.
 
-Let `Y_{ij}` be a skew-symmetric observed pairwise flow and `w_{ij}\\ge 0`
+Let ``Y_{ij}`` be a skew-symmetric observed pairwise flow and ``w_{ij}\\ge 0``
 edge weights. HodgeRank solves:
 
 ```math
@@ -112,7 +112,7 @@ Equivalent normal equations:
 s^\\star = -\\Delta_0^\\dagger \\operatorname{div}(Y)
 ```
 
-where `\\Delta_0^\\dagger` is the Laplacian pseudoinverse.
+where ``\\Delta_0^\\dagger`` is the Laplacian pseudoinverse.
 
 # Reference
 Jiang, X., Lim, L.-H., Yao, Y., & Ye, Y. (2009).

@@ -24,7 +24,8 @@ function avg(R; method="competition", return_scores=false)
 
     scores = zeros(Float64, L)
     for model in 1:L
-        scores[model] = avg(@view Rv[model, :, :])
+        mu, _ = avg(@view Rv[model, :, :])
+        scores[model] = mu
     end
 
     ranking = rank_scores(scores)[string(method)]
@@ -192,7 +193,7 @@ end
 Rank models by per-model Pass@k scores.
 
 For each model `l`, define per-question success counts
-`nu_{lm} = \\sum_{n=1}^{N} R_{lmn}`. Then:
+``nu_{lm} = \\sum_{n=1}^{N} R_{lmn}``. Then:
 
 ```math
 s_l^{\\mathrm{Pass@}k}
@@ -228,7 +229,7 @@ end
 
 Rank models by per-model Pass-hat@k (G-Pass@k) scores.
 
-With `nu_{lm} = \\sum_{n=1}^{N} R_{lmn}`:
+With ``nu_{lm} = \\sum_{n=1}^{N} R_{lmn}``:
 
 ```math
 s_l^{\\widehat{\\mathrm{Pass@}k}}
@@ -270,8 +271,8 @@ end
 
 Rank models by generalized G-Pass@k_τ per model.
 
-Let `X_{lm} ~ Hypergeometric(N, nu_{lm}, k)` where
-`nu_{lm} = \\sum_{n=1}^{N} R_{lmn}`. The score is:
+Let ``X_{lm} ~ Hypergeometric(N, nu_{lm}, k)`` where
+``nu_{lm} = \\sum_{n=1}^{N} R_{lmn}``. The score is:
 
 ```math
 s_l^{\\mathrm{G\\text{-}Pass@}k_{\\tau}}
@@ -314,7 +315,7 @@ end
 
 Rank models by per-model mG-Pass@k scores.
 
-With `X_{lm} ~ Hypergeometric(N, nu_{lm}, k)` and `m_0 = \\lceil k/2 \\rceil`:
+With ``X_{lm} ~ Hypergeometric(N, nu_{lm}, k)`` and ``m_0 = \\lceil k/2 \\rceil``:
 
 ```math
 s_l^{\\mathrm{mG\\text{-}Pass@}k}

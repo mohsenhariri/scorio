@@ -14,9 +14,9 @@ difficulty.
 Each question weight is proportional to `1 / p_correct(question)`, after
 clipping `p_correct` to `clip_range` and normalizing weights to sum to 1.
 
-Let `k_{lm} = \\sum_{n=1}^{N} R_{lmn}` and
-`\\hat p_{lm} = k_{lm}/N`. Define the global per-question solve rate
-`\\bar p_m = \\frac{1}{L}\\sum_l \\hat p_{lm}` and weights:
+Let ``k_{lm} = \\sum_{n=1}^{N} R_{lmn}`` and
+``\\hat p_{lm} = k_{lm}/N``. Define the global per-question solve rate
+``\\bar p_m = \\frac{1}{L}\\sum_l \\hat p_{lm}`` and weights:
 
 ```math
 w_m \\propto \\frac{1}{\\operatorname{clip}(\\bar p_m, a, b)},

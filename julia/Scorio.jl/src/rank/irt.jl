@@ -737,7 +737,7 @@ Rank models with Rasch (1PL) maximum-likelihood estimation.
 Returns rankings from estimated abilities `theta`. When
 `return_item_params=true`, also returns item difficulties.
 
-For counts `k_{lm}=\\sum_n R_{lmn}`:
+For counts ``k_{lm}=\\sum_n R_{lmn}``:
 
 ```math
 k_{lm} \\sim \\mathrm{Binomial}\\!\\left(N,\\sigma(\\theta_l-b_m)\\right)
@@ -1081,7 +1081,7 @@ Rank models with 3PL IRT maximum likelihood (ability, discrimination, guessing).
 p_{lm} = c_m + (1-c_m)\\sigma\\!\\left(a_m(\\theta_l-b_m)\\right)
 ```
 
-with `c_m \\in [0, \\text{guessing_upper}]`.
+with ``c_m \\in [0, \\text{guessing_upper}]``.
 """
 function rasch_3pl(
     R;
@@ -1194,7 +1194,7 @@ end
 
 Rank models with Rasch marginal maximum likelihood using EM + quadrature.
 
-Using quadrature nodes `\\theta_q` and weights `w_q`, posterior mass for model
+Using quadrature nodes ``\\theta_q`` and weights `w_q`, posterior mass for model
 `l` is:
 
 ```math

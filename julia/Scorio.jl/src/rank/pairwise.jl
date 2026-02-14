@@ -35,7 +35,7 @@ applied in fixed iteration order. Pair outcomes are:
 - `(ranking, ratings)` when `return_scores=true`.
 
 # Formula
-For each induced pairwise match `(i,j)` with observed score `S_{ij} \\in \\{0, 0.5, 1\\}`:
+For each induced pairwise match `(i,j)` with observed score ``S_{ij} \\in \\{0, 0.5, 1\\}``:
 
 ```math
 E_{ij} = \\frac{1}{1 + 10^{(r_j-r_i)/400}}
@@ -148,14 +148,14 @@ t = (\\mu_i-\\mu_j)/c, \\quad
 ```
 
 For decisive outcomes, the update uses
-`v_{win}(t,\\epsilon)` and `w_{win}(t,\\epsilon)`:
+``v_{win}(t,\\epsilon)`` and ``w_{win}(t,\\epsilon)``:
 
 ```math
 \\mu_i' = \\mu_i + \\frac{\\sigma_i^2}{c} v_{win}(t,\\epsilon), \\quad
 \\sigma_i'^2 = \\sigma_i^2\\!\\left(1 - \\frac{\\sigma_i^2}{c^2}w_{win}(t,\\epsilon)\\right)
 ```
 
-Draw updates use the analogous `v_{draw}` and `w_{draw}` corrections.
+Draw updates use the analogous ``v_{draw}`` and ``w_{draw}`` corrections.
 
 # Reference
 Herbrich, R., Minka, T., & Graepel, T. (2006).
@@ -371,8 +371,8 @@ If `return_deviation=true`, returns `(ranking, rating, rd)`; otherwise returns
 `ranking` or `(ranking, rating)` when `return_scores=true`.
 
 # Formula
-Let `q = \\ln(10)/400` and
-`g(RD) = 1/\\sqrt{1 + 3q^2 RD^2/\\pi^2}`.
+Let ``q = \\ln(10)/400`` and
+``g(RD) = 1/\\sqrt{1 + 3q^2 RD^2/\\pi^2}``.
 For model `i` in one period:
 
 ```math

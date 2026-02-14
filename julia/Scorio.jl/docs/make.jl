@@ -14,7 +14,12 @@ makedocs(
     modules = [Scorio],
     pages = [
         "Home" => "index.md",
-        "API Reference" => "api.md",
+        "API Reference" => [
+            "Overview" => "api.md",
+            "Evaluation (Scorio.Eval)" => "api/eval.md",
+            "Ranking (Scorio.Rank)" => "api/rank.md",
+            "Utilities (Scorio.Utils)" => "api/utils.md"
+        ],
         "Examples" => "examples.md"
     ],
     repo = Remotes.GitHub("mohsenhariri", "scorio"),

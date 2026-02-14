@@ -108,13 +108,13 @@ Rank models by Thompson sampling over Beta posteriors of model success rates.
 The returned score for each model is negative average sampled rank (higher is
 better).
 
-Let `S_l = \\sum_{m,n} R_{lmn}` and `T = M N`. Posterior per model:
+Let ``S_l = \\sum_{m,n} R_{lmn}`` and `T = M N`. Posterior per model:
 
 ```math
 p_l \\mid R \\sim \\mathrm{Beta}(\\alpha + S_l,\\ \\beta + T - S_l)
 ```
 
-With posterior draws `t=1,\\dots,T_s` and sampled rank `r_l^{(t)}`:
+With posterior draws ``t=1,\\dots,T_s`` and sampled rank ``r_l^{(t)}``:
 
 ```math
 s_l^{\\mathrm{TS}} = -\\frac{1}{T_s}\\sum_{t=1}^{T_s} r_l^{(t)}
@@ -208,7 +208,7 @@ pairwise likelihood with Gaussian prior on latent abilities.
 
 Scores are posterior means of sampled latent abilities.
 
-Let `W_{ij}` be decisive wins of model `i` over `j`, and latent log-strengths
+Let ``W_{ij}`` be decisive wins of model `i` over `j`, and latent log-strengths
 `theta_i` with Gaussian prior variance `sigma^2 = prior_var`.
 
 ```math

@@ -3,15 +3,58 @@
 """
     Prior
 
-Abstract supertype for prior penalty specifications used in MAP rankers.
+Abstract supertype for prior penalty specifications used by MAP rankers.
+
+Concrete subtypes define hyperparameters for an internal penalty term over the
+latent score vector `theta`.
 """
 abstract type Prior end
 
 """
     EmpiricalPrior(R0; var=1.0, eps=1e-6)
 
-Empirical Gaussian-style prior whose mean is inferred from baseline outcomes
-`R0` (via clipped logit accuracy), centered for identifiability.
+Empirical Gaussian-style prior centered at logits inferred from baseline
+outcomes.
+
+`R0` is accepted as shape `(L, M)` or `(L, M, D)`. A 2D input is promoted to
+`(L, M, 1)`.
+
+# Arguments
+- `R0`: baseline outcomes per model. Typically binary outcomes in `{0,1}`.
+- `var::Real=1.0`: variance used in the quadratic penalty; must be positive.
+- `eps::Real=1e-6`: clipping level used before logit transform.
+  No explicit range check is applied; choose `0 < eps < 0.5` in practice.
+
+# Returns
+- `EmpiricalPrior`: stores `R0`, `var`, `eps`, and centered `prior_mean`.
+
+# Formula
+For model ``l``:
+
+```math
+a_l = \\frac{1}{M D}\\sum_{m=1}^{M}\\sum_{d=1}^{D} R^0_{lmd}
+```
+
+```math
+\\tilde a_l = \\operatorname{clip}(a_l, \\varepsilon, 1-\\varepsilon), \\qquad
+\\mu_l = \\log\\!\\left(\\frac{\\tilde a_l}{1-\\tilde a_l}\\right)
+```
+
+Then mean-center ``\\mu`` for identifiability and use:
+
+```math
+\\operatorname{penalty}(\\theta)
+= \\frac{1}{2\\,\\mathrm{var}}\\sum_{l=1}^{L}(\\theta_l-\\mu_l)^2
+```
+
+# Examples
+```julia
+R0 = Int[
+    1 1 1 0 1
+    0 1 0 0 1
+]
+prior = EmpiricalPrior(R0; var=2.0, eps=1e-6)
+```
 """
 struct EmpiricalPrior <: Prior
     R0::Array
@@ -47,6 +90,20 @@ end
     GaussianPrior(mean=0.0, var=1.0)
 
 Gaussian prior on latent parameters with quadratic penalty.
+
+# Arguments
+- `mean::Real=0.0`: prior mean.
+- `var::Real=1.0`: prior variance; must be positive.
+
+# Returns
+- `GaussianPrior`
+
+# Formula
+
+```math
+\\operatorname{penalty}(\\theta)
+= \\frac{1}{2\\,\\mathrm{var}}\\sum_i (\\theta_i-\\mathrm{mean})^2
+```
 """
 struct GaussianPrior <: Prior
     mean::Float64
@@ -63,6 +120,20 @@ end
     LaplacePrior(loc=0.0, scale=1.0)
 
 Laplace prior on latent parameters with L1 penalty.
+
+# Arguments
+- `loc::Real=0.0`: location parameter.
+- `scale::Real=1.0`: scale parameter; must be positive.
+
+# Returns
+- `LaplacePrior`
+
+# Formula
+
+```math
+\\operatorname{penalty}(\\theta)
+= \\frac{1}{\\mathrm{scale}}\\sum_i \\left|\\theta_i-\\mathrm{loc}\\right|
+```
 """
 struct LaplacePrior <: Prior
     loc::Float64
@@ -79,6 +150,20 @@ end
     CauchyPrior(loc=0.0, scale=1.0)
 
 Cauchy prior on latent parameters with log-quadratic penalty.
+
+# Arguments
+- `loc::Real=0.0`: location parameter.
+- `scale::Real=1.0`: scale parameter; must be positive.
+
+# Returns
+- `CauchyPrior`
+
+# Formula
+Let ``z_i = (\\theta_i-\\mathrm{loc})/\\mathrm{scale}``.
+
+```math
+\\operatorname{penalty}(\\theta) = \\sum_i \\log(1 + z_i^2)
+```
 """
 struct CauchyPrior <: Prior
     loc::Float64
@@ -95,13 +180,32 @@ end
     UniformPrior()
 
 Improper flat prior with zero penalty.
+
+# Returns
+- `UniformPrior`
+
+# Formula
+
+```math
+\\operatorname{penalty}(\\theta) = 0
+```
 """
 struct UniformPrior <: Prior end
 
 """
     CustomPrior(penalty_fn)
 
-User-defined prior from a callable penalty function `penalty_fn(theta)`.
+User-defined prior from a callable penalty function.
+
+# Arguments
+- `penalty_fn`: callable with signature `penalty_fn(theta)` returning a scalar
+  penalty value.
+
+# Returns
+- `CustomPrior`
+
+# Notes
+`penalty_fn` is used directly with no transformation of `theta`.
 """
 struct CustomPrior{F} <: Prior
     penalty_fn::F

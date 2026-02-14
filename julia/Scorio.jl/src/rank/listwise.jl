@@ -411,7 +411,7 @@ This implementation uses pairwise decisive counts and Hunter's MM update:
 {\\sum_{j\\ne i}(W_{ij}+W_{ji})/(\\pi_i^{(k)}+\\pi_j^{(k)})}
 ```
 
-followed by normalization of `\\pi`.
+followed by normalization of ``\\pi``.
 
 # References
 Plackett, R. L. (1975). *The Analysis of Permutations*.
@@ -445,7 +445,7 @@ end
 
 Rank models with Plackett-Luce MAP using a prior on centered log-strengths.
 
-With `theta_i = \\log \\pi_i`:
+With ``theta_i = \\log \\pi_i``:
 
 ```math
 \\hat\\theta \\in \\arg\\min_\\theta
@@ -483,8 +483,8 @@ end
 
 Rank models with Davidson-Luce setwise tie likelihood (ML).
 
-For event comparison set `S=W\\cup L`, winner set size `t=|W|`,
-`g_t(W)=\\left(\\prod_{i\\in W}\\alpha_i\\right)^{1/t}`, and tie-order parameters
+For event comparison set ``S=W\\cup L``, winner set size `t=|W|`,
+``g_t(W)=\\left(\\prod_{i\\in W}\\alpha_i\\right)^{1/t}``, and tie-order parameters
 `delta_t`:
 
 ```math
@@ -591,8 +591,8 @@ end
 Rank models with Bradley-Terry-Luce composite-likelihood ML from setwise
 winner/loser events.
 
-For each event `(W,L)`, each winner `i\\in W` is treated as a Luce choice from
-`{i}\\cup L`, yielding composite log-likelihood:
+For each event `(W,L)`, each winner ``i\\in W`` is treated as a Luce choice from
+``{i}\\cup L``, yielding composite log-likelihood:
 
 ```math
 \\ell_{\\mathrm{comp}}(\\pi)

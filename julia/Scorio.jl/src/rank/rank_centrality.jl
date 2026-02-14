@@ -67,8 +67,8 @@ Rank models with Rank Centrality using stationary distribution of a
 pairwise-comparison Markov chain.
 
 Let `d_max` be the maximum degree of the undirected comparison graph and
-`\\hat P_{j\\succ i}` the empirical probability that `j` beats `i`.
-For `i \\ne j`:
+``\\hat P_{j\\succ i}`` the empirical probability that `j` beats `i`.
+For ``i \\ne j``:
 
 ```math
 P_{ij} = \\frac{1}{d_{\\max}}\\,\\hat P_{j\\succ i},
@@ -76,7 +76,7 @@ P_{ij} = \\frac{1}{d_{\\max}}\\,\\hat P_{j\\succ i},
 P_{ii} = 1 - \\sum_{j\\ne i} P_{ij}
 ```
 
-Scores are stationary probabilities `\\pi` with:
+Scores are stationary probabilities ``\\pi`` with:
 
 ```math
 \\pi^\\top P = \\pi^\\top,\\qquad \\sum_i \\pi_i = 1

@@ -1,60 +1,221 @@
-"""
-    Scorio
-
-A Julia package for Bayesian evaluation and ranking of LLMs.
-
-Scorio provides:
-- Evaluation metrics on `(M, N)` outcome matrices (for example `bayes`, `pass_at_k`)
-- Ranking methods on `(L, M, N)` response tensors (for example paired-comparison, IRT, graph, and voting families)
-- Utility helpers for converting scores to ranks (`competition_ranks_from_scores`, `rank_scores`)
-
-For full API coverage, see the generated docs pages:
-- `API Reference`
-- `Examples`
-
-# Quickstart
-
-```julia
-using Scorio
-
-# Evaluation example (M x N)
-R_eval = [0 1 2 2 1;
-          1 1 0 2 2]
-w = [0.0, 0.5, 1.0]
-mu, sigma = bayes(R_eval, w)
-
-# Ranking example (L x M x N)
-R_rank = reshape([
-    1 1 0 1 0;
-    1 0 0 1 0;
-    0 1 0 1 1;
-    0 0 0 1 0
-], 4, 5, 1)
-
-# Ranking functions are available under the Scorio module namespace.
-ranks, scores = Scorio.bradley_terry(R_rank; return_scores=true)
-```
-
-# Installation
-
-```julia
-using Pkg
-Pkg.add("Scorio")
-```
-"""
+"""Scorio Julia package."""
 module Scorio
 
-# Version
 const VERSION = v"0.2.0"
 
-# Include submodules
 include("eval.jl")
 include("rank.jl")
+include("sinf.jl")
 include("utils.jl")
 
-# Re-export main APIs
-export bayes, avg, pass_at_k, pass_hat_k, g_pass_at_k, g_pass_at_k_tau, mg_pass_at_k  # from eval.jl
-export elo  # from rank.jl
-export competition_ranks_from_scores, rank_scores  # from utils.jl
+module Eval
+using ..Scorio: bayes,
+    bayes_ci,
+    avg,
+    avg_ci,
+    pass_at_k,
+    pass_at_k_ci,
+    pass_hat_k,
+    pass_hat_k_ci,
+    g_pass_at_k,
+    g_pass_at_k_ci,
+    g_pass_at_k_tau,
+    g_pass_at_k_tau_ci,
+    mg_pass_at_k,
+    mg_pass_at_k_ci
+
+export bayes,
+    bayes_ci,
+    avg,
+    avg_ci,
+    pass_at_k,
+    pass_at_k_ci,
+    pass_hat_k,
+    pass_hat_k_ci,
+    g_pass_at_k,
+    g_pass_at_k_ci,
+    g_pass_at_k_tau,
+    g_pass_at_k_tau_ci,
+    mg_pass_at_k,
+    mg_pass_at_k_ci
+end
+
+module Rank
+using ..Scorio: Prior,
+    GaussianPrior,
+    LaplacePrior,
+    CauchyPrior,
+    UniformPrior,
+    CustomPrior,
+    EmpiricalPrior,
+    avg,
+    bayes,
+    pass_at_k,
+    pass_hat_k,
+    g_pass_at_k_tau,
+    mg_pass_at_k,
+    inverse_difficulty,
+    elo,
+    glicko,
+    trueskill,
+    bradley_terry,
+    bradley_terry_map,
+    bradley_terry_davidson,
+    bradley_terry_davidson_map,
+    rao_kupper,
+    rao_kupper_map,
+    thompson,
+    bayesian_mcmc,
+    borda,
+    copeland,
+    win_rate,
+    minimax,
+    schulze,
+    ranked_pairs,
+    kemeny_young,
+    nanson,
+    baldwin,
+    majority_judgment,
+    rasch,
+    rasch_map,
+    rasch_2pl,
+    rasch_2pl_map,
+    rasch_3pl,
+    rasch_3pl_map,
+    rasch_mml,
+    rasch_mml_credible,
+    dynamic_irt,
+    pagerank,
+    spectral,
+    alpharank,
+    nash,
+    rank_centrality,
+    serial_rank,
+    hodge_rank,
+    plackett_luce,
+    plackett_luce_map,
+    davidson_luce,
+    davidson_luce_map,
+    bradley_terry_luce,
+    bradley_terry_luce_map
+
+export Prior,
+    GaussianPrior,
+    LaplacePrior,
+    CauchyPrior,
+    UniformPrior,
+    CustomPrior,
+    EmpiricalPrior,
+    avg,
+    bayes,
+    pass_at_k,
+    pass_hat_k,
+    g_pass_at_k_tau,
+    mg_pass_at_k,
+    inverse_difficulty,
+    elo,
+    glicko,
+    trueskill,
+    bradley_terry,
+    bradley_terry_map,
+    bradley_terry_davidson,
+    bradley_terry_davidson_map,
+    rao_kupper,
+    rao_kupper_map,
+    thompson,
+    bayesian_mcmc,
+    borda,
+    copeland,
+    win_rate,
+    minimax,
+    schulze,
+    ranked_pairs,
+    kemeny_young,
+    nanson,
+    baldwin,
+    majority_judgment,
+    rasch,
+    rasch_map,
+    rasch_2pl,
+    rasch_2pl_map,
+    rasch_3pl,
+    rasch_3pl_map,
+    rasch_mml,
+    rasch_mml_credible,
+    dynamic_irt,
+    pagerank,
+    spectral,
+    alpharank,
+    nash,
+    rank_centrality,
+    serial_rank,
+    hodge_rank,
+    plackett_luce,
+    plackett_luce_map,
+    davidson_luce,
+    davidson_luce_map,
+    bradley_terry_luce,
+    bradley_terry_luce_map
+end
+
+module SInf
+using ..Scorio: ci_from_mu_sigma,
+    should_stop,
+    should_stop_top1,
+    suggest_next_allocation
+
+export ci_from_mu_sigma,
+    should_stop,
+    should_stop_top1,
+    suggest_next_allocation
+end
+
+module Utils
+using ..Scorio: competition_ranks_from_scores,
+    rank_scores,
+    compare_rankings,
+    lehmer_hash,
+    lehmer_unhash,
+    ranking_hash,
+    unhash_ranking
+
+export competition_ranks_from_scores,
+    rank_scores,
+    compare_rankings,
+    lehmer_hash,
+    lehmer_unhash,
+    ranking_hash,
+    unhash_ranking
+end
+
+export bayes,
+    bayes_ci,
+    avg,
+    avg_ci,
+    pass_at_k,
+    pass_at_k_ci,
+    pass_hat_k,
+    pass_hat_k_ci,
+    g_pass_at_k,
+    g_pass_at_k_ci,
+    g_pass_at_k_tau,
+    g_pass_at_k_tau_ci,
+    mg_pass_at_k,
+    mg_pass_at_k_ci
+
+export ci_from_mu_sigma,
+    should_stop,
+    should_stop_top1,
+    suggest_next_allocation
+
+export competition_ranks_from_scores,
+    rank_scores,
+    compare_rankings,
+    lehmer_hash,
+    lehmer_unhash,
+    ranking_hash,
+    unhash_ranking
+
+export Eval, Rank, SInf, Utils
 
 end # module Scorio

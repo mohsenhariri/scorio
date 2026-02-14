@@ -66,7 +66,7 @@ end
 
 Rank models with PageRank on the pairwise win-probability graph.
 
-Let `\\hat P_{i\\succ j}` be empirical tied-split win probabilities.
+Let ``\\hat P_{i\\succ j}`` be empirical tied-split win probabilities.
 Column-normalized transition matrix:
 
 ```math
