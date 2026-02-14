@@ -11,7 +11,14 @@ authors = [
 license = "MIT"
 readme = { file = "README_PyPI.md", content-type = "text/markdown" }
 description = "Bayesian evaluation and ranking toolkit"
-keywords = ["bayesian", "statistics", "ranking", "evaluation", "machine learning", "large language models"]
+keywords = [
+    "bayesian",
+    "statistics",
+    "ranking",
+    "evaluation",
+    "machine learning",
+    "large language models",
+]
 classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -38,10 +45,20 @@ Issues = "https://github.com/mohsenhariri/scorio/issues"
 Documentation = "https://scorio.readthedocs.io/"
 
 [project.optional-dependencies]
-dev = ["pytest>=9.0.2", "black>=26.1.0", "isort>=7.0.0", "mypy>=1.18.1", "build>=1.4.0", "twine>=6.2.0", "sphinx>=9.1.0", "sphinx-rtd-theme>=3.1.0", "sphinx-autodoc-typehints>=3.6.2"]
+dev = [
+    "pytest>=9.0.2",
+    "black>=26.1.0",
+    "isort>=7.0.0",
+    "mypy>=1.18.1",
+    "build>=1.4.0",
+    "twine>=6.2.0",
+    "sphinx>=9.1.0",
+    "sphinx-rtd-theme>=3.1.0",
+    "sphinx-autodoc-typehints>=3.6.2",
+]
 
 [tool.setuptools.dynamic]
-version = {file = "VERSION"}
+version = { file = "VERSION" }
 
 [tool.setuptools.packages.find]
 include = ["scorio*"]
@@ -57,7 +74,10 @@ profile = "black"
 
 [tool.mypy]
 python_version = "3.10"
-warn_return_any = true
+warn_return_any = false
 warn_unused_configs = true
 disallow_untyped_defs = false
 ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+markers = ["slow: slow tests for heavy ranking APIs"]

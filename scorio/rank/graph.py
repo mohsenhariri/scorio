@@ -395,18 +395,18 @@ def alpharank(
         return float(np.clip(out, 0.0, 1.0))
 
     C = np.zeros((L, L), dtype=float)
-    for s in range(L):  # resident state
+    for resident in range(L):  # resident state
         for r in range(L):  # mutant candidate
-            if r == s:
+            if r == resident:
                 continue
-            C[s, r] = eta * rho(P_hat[r, s])
-        C[s, s] = 1.0 - float(np.sum(C[s, :]))
+            C[resident, r] = eta * rho(P_hat[r, resident])
+        C[resident, resident] = 1.0 - float(np.sum(C[resident, :]))
 
     pi = _power_stationary_distribution_row_stochastic(C, max_iter=max_iter, tol=tol)
     pi = np.clip(pi, 0.0, None)
-    s = float(pi.sum())
+    total = float(pi.sum())
 
-    scores = (pi / s) if s > 0 else (np.ones(L, dtype=float) / L)
+    scores = (pi / total) if total > 0 else (np.ones(L, dtype=float) / L)
 
     ranking = rank_scores(scores)[method]
     return (ranking, scores) if return_scores else ranking

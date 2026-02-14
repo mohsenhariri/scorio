@@ -6,10 +6,9 @@ from scipy.stats import kendalltau, norm, rankdata, spearmanr, weightedtau
 
 
 def rank_scores(
-    scores_in_id_order: Sequence[float],
+    scores_in_id_order: Sequence[float] | np.ndarray,
     tol: float = 1e-12,
-    *,
-    sigmas_in_id_order: Optional[Sequence[float]] = None,
+    sigmas_in_id_order: Optional[Sequence[float] | np.ndarray] = None,
     confidence: float = 0.95,
     ci_tie_method: Literal[
         "zscore_adjacent", "ci_overlap_adjacent"

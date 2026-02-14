@@ -23,6 +23,8 @@ Each method updates latent rating states :math:`\\Theta_i` sequentially:
 where :math:`s_i` is the final score used for ranking.
 """
 
+from typing import cast
+
 import numpy as np
 from scipy.stats import norm
 
@@ -30,6 +32,15 @@ from scorio.utils import rank_scores
 
 from ._base import validate_input
 from ._types import PairwiseTieHandling, RankMethod, RankResult
+
+
+def _validate_tie_handling(tie_handling: object) -> PairwiseTieHandling:
+    tie_policy = str(tie_handling)
+    if tie_policy not in {"skip", "draw", "correct_draw_only"}:
+        raise ValueError(
+            'tie_handling must be one of: "skip", "draw", "correct_draw_only"'
+        )
+    return cast(PairwiseTieHandling, tie_policy)
 
 
 def elo(
@@ -113,11 +124,7 @@ def elo(
     if not np.isfinite(initial_rating):
         raise ValueError("initial_rating must be finite.")
 
-    tie_handling = str(tie_handling)
-    if tie_handling not in {"skip", "draw", "correct_draw_only"}:
-        raise ValueError(
-            'tie_handling must be one of: "skip", "draw", "correct_draw_only"'
-        )
+    tie_policy = _validate_tie_handling(tie_handling)
 
     ratings = np.full(L, initial_rating, dtype=float)
 
@@ -131,11 +138,11 @@ def elo(
 
                     # Determine actual scores S_i, S_j (or skip)
                     if r_i == r_j:
-                        if tie_handling == "skip":
+                        if tie_policy == "skip":
                             continue
-                        if tie_handling == "draw":
+                        if tie_policy == "draw":
                             S_i, S_j = 0.5, 0.5
-                        elif tie_handling == "correct_draw_only":
+                        elif tie_policy == "correct_draw_only":
                             if r_i == 1:  # (1,1)
                                 S_i, S_j = 0.5, 0.5
                             else:  # (0,0)
@@ -261,11 +268,7 @@ def trueskill(
     if not np.isfinite(draw_margin) or draw_margin < 0.0:
         raise ValueError("draw_margin must be a nonnegative finite scalar.")
 
-    tie_handling = str(tie_handling)
-    if tie_handling not in {"skip", "draw", "correct_draw_only"}:
-        raise ValueError(
-            'tie_handling must be one of: "skip", "draw", "correct_draw_only"'
-        )
+    tie_policy = _validate_tie_handling(tie_handling)
 
     mu = np.full(L, mu_initial, dtype=float)
     sigma = np.full(L, sigma_initial, dtype=float)
@@ -357,9 +360,9 @@ def trueskill(
                     r_i, r_j = outcomes[i], outcomes[j]
 
                     if r_i == r_j:
-                        if tie_handling == "skip":
+                        if tie_policy == "skip":
                             continue
-                        if tie_handling == "correct_draw_only" and int(r_i) == 0:
+                        if tie_policy == "correct_draw_only" and int(r_i) == 0:
                             continue
                         mu[i], sigma[i], mu[j], sigma[j] = update_draw(
                             mu[i], sigma[i], mu[j], sigma[j]
@@ -486,11 +489,7 @@ def glicko(
     if c < 0:
         raise ValueError("c must be >= 0")
 
-    tie_handling = str(tie_handling)
-    if tie_handling not in {"skip", "draw", "correct_draw_only"}:
-        raise ValueError(
-            'tie_handling must be one of: "skip", "draw", "correct_draw_only"'
-        )
+    tie_policy = _validate_tie_handling(tie_handling)
 
     rating = np.full(L, initial_rating, dtype=float)
     rd = np.full(L, min(initial_rd, rd_max), dtype=float)
@@ -525,9 +524,9 @@ def glicko(
                     r_j = int(outcomes[j])
 
                     if r_i == r_j:
-                        if tie_handling == "skip":
+                        if tie_policy == "skip":
                             continue
-                        if tie_handling == "draw":
+                        if tie_policy == "draw":
                             s_i = s_j = 0.5
                         else:  # correct_draw_only
                             if r_i == 1:

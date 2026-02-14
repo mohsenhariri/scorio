@@ -5,12 +5,50 @@ means and posterior standard deviations.
 
 """
 
+import math
 from typing import Any, Literal, Optional, Sequence
 
 import numpy as np
 from scipy.stats import kendalltau, norm, rankdata, spearmanr, weightedtau
 
 from scorio.eval import avg
+
+
+def ranking_confidence(
+    mu_a: float, sigma_a: float, mu_b: float, sigma_b: float
+) -> tuple[float, float]:
+    """
+    Compute pairwise ranking confidence under a normal approximation.
+
+    For large ``M``, the score difference is approximated as
+    ``Δ = π̄_a - π̄_b ~ Normal(mu_a - mu_b, sigma_a^2 + sigma_b^2)``.
+    Define
+    ``z = |mu_a - mu_b| / sqrt(sigma_a^2 + sigma_b^2)``,
+    then ranking confidence is ``rho = Φ(z)``.
+
+    Args:
+        mu_a: Posterior mean score for candidate ``a``.
+        sigma_a: Posterior standard deviation for candidate ``a``.
+        mu_b: Posterior mean score for candidate ``b``.
+        sigma_b: Posterior standard deviation for candidate ``b``.
+
+    Returns:
+        Tuple ``(rho, z)`` where ``rho`` is pairwise ordering confidence and
+        ``z`` is the absolute standardized separation.
+
+    Notes:
+        If ``sigma_a == sigma_b == 0``, returns ``(0.5, inf)`` for a tie
+        (``mu_a == mu_b``) and ``(1.0, inf)`` otherwise.
+    """
+    denom = math.sqrt(float(sigma_a) ** 2 + float(sigma_b) ** 2)
+    if denom == 0.0:
+        # Identical (or both exact) uncertainties: either perfect certainty or tie.
+        if float(mu_a) == float(mu_b):
+            return 0.5, float("inf")
+        return 1.0, float("inf")
+    z = abs(float(mu_a) - float(mu_b)) / denom
+    rho = float(norm.cdf(z))
+    return rho, float(z)
 
 
 def ci_from_mu_sigma(
@@ -87,6 +125,7 @@ def should_stop(
     half = z * float(sigma)
     if max_half_width is not None:
         return half <= float(max_half_width)
+    assert max_ci_width is not None
     return 2.0 * half <= float(max_ci_width)
 
 
@@ -215,6 +254,7 @@ def suggest_next_allocation(
 
 
 __all__ = [
+    "ranking_confidence",
     "ci_from_mu_sigma",
     "should_stop",
     "should_stop_top1",
