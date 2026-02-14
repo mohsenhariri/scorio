@@ -1,8 +1,7 @@
 """Sequential inference helpers."""
 
-# NOTE: Python currently calls ranking_confidence() in this module,
-# but that helper is not defined there. We use the intended normal
-# separation criterion: P(mu_a > mu_b) with independent Gaussian uncertainty.
+
+# z = |mu_a - mu_b| / sqrt(sigma_a^2 + sigma_b^2), rho = Phi(z).
 function _ranking_confidence(
     mu_a::Real,
     sigma_a::Real,
@@ -15,15 +14,13 @@ function _ranking_confidence(
     denom = sqrt(s_a * s_a + s_b * s_b)
 
     if denom == 0.0
-        if dmu > 0.0
-            return 1.0, Inf
-        elseif dmu < 0.0
-            return 0.0, -Inf
+        if dmu == 0.0
+            return 0.5, Inf
         end
-        return 0.5, 0.0
+        return 1.0, Inf
     end
 
-    z = dmu / denom
+    z = abs(dmu) / denom
     rho = _normal_cdf(z)
     return Float64(rho), Float64(z)
 end

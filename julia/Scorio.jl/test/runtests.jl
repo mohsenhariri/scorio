@@ -1,6 +1,9 @@
 using Test
 using Scorio
 
+# Load shared simulation data (NPZ files from tests/data/)
+include("testdata.jl")
+
 @testset "Scorio.jl" begin
     @test Scorio.VERSION == v"0.2.0"
 
@@ -18,4 +21,6 @@ using Scorio
 end
 
 include("eval/test_eval_apis.jl")
-include("rank/test_eval_ranking.jl")
+include("rank/runtests_rank.jl")
+include("sinf/test_sinf.jl")
+include("test_utils.jl")

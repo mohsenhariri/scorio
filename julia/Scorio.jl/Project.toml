@@ -11,10 +11,12 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 [compat]
 HiGHS = "1"
 JuMP = "1"
+NPZ = "0.4"
 julia = "1.6"
 
 [extras]
+NPZ = "15e1cf62-19b3-5cfa-8e77-841668bca605"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test"]
+test = ["Test", "NPZ"]
