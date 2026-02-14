@@ -3,6 +3,7 @@ SRC:=scorio/
 JULIA_PROJECT:=julia/Scorio.jl
 
 .PHONY: format format-check lint clean build install test pkg-check pkg-publish-test pkg-publish sync-version release-py release-jl jl-install jl-test py-docs-build py-docs-clean py-docs-serve jl-docs-build jl-docs-clean jl-docs-serve landing-serve
+.PHONY: test-eval-py test-rank-py test-eval-jl test-rank-jl
 
 format-check:
 	isort --check-only $(SRC)
@@ -35,6 +36,12 @@ install:
 test:
 	pytest tests/
 
+test-eval-py:
+	pytest tests/eval
+
+test-rank-py:
+	pytest tests/rank
+
 pkg-check: build
 	python -m pip install --upgrade twine
 	twine check dist/*
@@ -58,6 +65,12 @@ jl-install:
 
 jl-test:
 	julia --project=$(JULIA_PROJECT) -e 'using Pkg; Pkg.test()'
+
+test-eval-jl:
+	julia --project=$(JULIA_PROJECT) -e 'using Scorio; include("$(JULIA_PROJECT)/test/eval/test_eval_apis.jl")'
+
+test-rank-jl:
+	julia --project=$(JULIA_PROJECT) -e 'using Scorio; include("$(JULIA_PROJECT)/test/rank/test_eval_ranking.jl")'
 
 # Documentation
 

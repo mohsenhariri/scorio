@@ -80,7 +80,7 @@ def avg(
     """
     R = validate_input(R)
     L, _, _ = R.shape
-    scores = np.array([eval.avg(R[model, :, :]) for model in range(L)])
+    scores = np.array([eval.avg(R[model, :, :])[0] for model in range(L)])
     ranking = rank_scores(scores)[method]
     return (ranking, scores) if return_scores else ranking
 
