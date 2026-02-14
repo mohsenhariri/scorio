@@ -13,7 +13,7 @@ bayes_ci
 ## Avg Family
 
 ```@docs
-avg(::Union{AbstractVector, AbstractMatrix})
+avg
 avg_ci
 ```
 

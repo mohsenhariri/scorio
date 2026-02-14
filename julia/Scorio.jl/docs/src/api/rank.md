@@ -22,7 +22,7 @@ bayes(::AbstractArray{<:Integer, 3}, ::Any; R0, quantile, method, return_scores)
 
 ### Avg
 
-```@docs
+```@docs; canonical=false
 avg(::Any; method, return_scores)
 ```
 
