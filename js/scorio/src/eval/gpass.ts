@@ -36,6 +36,16 @@ function checkTau(tau: number): void {
   }
 }
 
+/**
+ * Success threshold `max(1, ceil(τk))`. `τk` is nudged down by a small
+ * tolerance so float error on a whole product (`0.28 * 25` is
+ * `7.000000000000001`) does not add one. Mirrors `resolveKeepCount` in
+ * `aggregate/internal/base.ts`.
+ */
+function tauThreshold(tau: number, k: number): number {
+  return Math.max(1, Math.ceil(tau * k - 1e-9));
+}
+
 /** Per-row Beta posterior parameters `[alpha, beta]` for binary outcomes. */
 function binaryBetaPosterior(
   Rm: readonly (readonly number[])[],
@@ -79,7 +89,7 @@ export function gPassAtKTau(R: Matrix, k: number, tau: number): number {
   }
 
   const nu = rowSums(Rm);
-  const j0 = Math.max(1, Math.ceil(tau * k));
+  const j0 = tauThreshold(tau, k);
   const M = Rm.length;
   const vals = nu.map((v) => hypergeomSf(N, v, k, j0));
   return vals.reduce((s, v) => s + v, 0) / M;
@@ -205,7 +215,7 @@ function gPassAtKTauBayes(
   }
 
   const M = Rm.length;
-  const j0 = Math.ceil(tau * k);
+  const j0 = tauThreshold(tau, k);
   const js: number[] = [];
   for (let j = j0; j <= k; j++) js.push(j);
   const coeff = js.map((j) => comb(k, j));

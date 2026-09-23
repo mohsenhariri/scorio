@@ -89,3 +89,35 @@ describe("mgPassAtKCi", () => {
     expect(round(hi, 6)).toBe(0.41193);
   });
 });
+
+describe("tau threshold when tau * k is a whole number", () => {
+  // (j, k) pairs where (j / k) * k rounds above j in IEEE doubles.
+  const cases: [number, number][] = [
+    [7, 25],
+    [14, 25],
+    [15, 29],
+    [29, 35],
+    [21, 38],
+  ];
+  const bank = (ones: number, n: number) => [
+    [...Array(ones).fill(1), ...Array(n - ones).fill(0)],
+  ];
+
+  it.each(cases)("needs exactly %i of %i successes", (j, k) => {
+    expect(gPassAtKTau(bank(j, k), k, j / k)).toBeCloseTo(1.0, 12);
+    expect(gPassAtKTau(bank(j - 1, k), k, j / k)).toBeCloseTo(0.0, 12);
+    const exact = gPassAtKTauCi(bank(j, k), k, j / k);
+    const below = gPassAtKTauCi(bank(j, k), k, (j - 0.5) / k);
+    exact.forEach((v, i) => expect(v).toBeCloseTo(below[i]!, 12));
+  });
+
+  it("matches Python reference at tau = 0.28, k = 25", () => {
+    // python: eval.g_pass_at_k_tau(R, 25, 0.28) -> 1.0 (7 of 25 correct)
+    expect(gPassAtKTau(bank(7, 25), 25, 0.28)).toBeCloseTo(1.0, 12);
+    // python: eval.g_pass_at_k_tau_ci(R, 25, 0.28)
+    //   -> (0.5893754878280344, 0.2781303668356882, 0.0442499858..., 1.0)
+    const [mu, sigma] = gPassAtKTauCi(bank(7, 25), 25, 0.28);
+    expect(round(mu, 6)).toBe(0.589375);
+    expect(round(sigma, 6)).toBe(0.27813);
+  });
+});

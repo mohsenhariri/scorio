@@ -403,3 +403,69 @@ def test_threshold_spectrum_matches_literal_subset_enumeration() -> None:
     expected = float(np.mean(row_scores))
 
     assert scorio_eval.threshold_spectrum_at_k(R, k, weights) == pytest.approx(expected)
+
+
+def _count_ladder(k: int) -> np.ndarray:
+    """Rows with exactly 0, 1, ..., k successes out of ``N = k`` trials."""
+    return (np.arange(k)[None, :] < np.arange(k + 1)[:, None]).astype(int)
+
+
+# (j, k) pairs where ``(j / k) * k`` rounds above ``j`` in IEEE doubles, so a
+# bare ``ceil(tau * k)`` asks for one success too many.
+_WHOLE_TAU_K_ROUNDING_UP = ((7, 25), (14, 25), (15, 29), (29, 35), (21, 38))
+
+
+@pytest.mark.parametrize(("j", "k"), _WHOLE_TAU_K_ROUNDING_UP)
+def test_g_pass_tau_threshold_is_exact_when_tau_k_is_whole(j: int, k: int) -> None:
+    exactly_j = np.array([[1] * j + [0] * (k - j)], dtype=int)
+    one_short = np.array([[1] * (j - 1) + [0] * (k - j + 1)], dtype=int)
+
+    assert scorio_eval.g_pass_at_k_tau(exactly_j, k, j / k) == pytest.approx(1.0)
+    assert scorio_eval.g_pass_at_k_tau(one_short, k, j / k) == pytest.approx(0.0)
+
+    # The posterior target must use the same threshold as tau just below j/k.
+    R = _count_ladder(k)
+    assert scorio_eval.g_pass_at_k_tau_ci(R, k, j / k) == pytest.approx(
+        scorio_eval.g_pass_at_k_tau_ci(R, k, (j - 0.5) / k)
+    )
+
+
+def test_g_pass_tau_threshold_on_every_j_over_k_grid_point() -> None:
+    for k in range(1, 65):
+        R = _count_ladder(k)
+        for j in range(1, k + 1):
+            # Rows with at least j successes pass with certainty; others fail.
+            expected = (k - j + 1) / (k + 1)
+            assert scorio_eval.g_pass_at_k_tau(R, k, j / k) == pytest.approx(
+                expected, abs=1e-12
+            ), (j, k)
+
+
+def test_g_pass_tau_at_strict_majority_matches_maj_at_k() -> None:
+    # Maj@k is G-Pass@k_tau at tau = (floor(k/2) + 1) / k; the JavaScript and
+    # Julia ports compute it that way. (k // 2 + 1) / k * k rounds up for
+    # k = 29, 52, 56, 58, 60, ...
+    for k in range(1, 65):
+        R = _count_ladder(k)
+        tau = (k // 2 + 1) / k
+        assert scorio_eval.g_pass_at_k_tau(R, k, tau) == pytest.approx(
+            scorio_eval.maj_at_k(R, k), abs=1e-12
+        ), k
+    for k in (29, 52):
+        R = _count_ladder(k)
+        tau = (k // 2 + 1) / k
+        assert scorio_eval.g_pass_at_k_tau_ci(R, k, tau) == pytest.approx(
+            scorio_eval.maj_at_k_ci(R, k)
+        ), k
+
+
+@pytest.mark.parametrize("k", [25, 38, 41])
+def test_mg_pass_equals_mean_of_g_pass_on_upper_tau_grid(k: int) -> None:
+    rng = np.random.default_rng(k)
+    R = rng.integers(0, 2, size=(20, 41))
+    majority = -(-k // 2)
+    grid_mean = (2.0 / k) * sum(
+        scorio_eval.g_pass_at_k_tau(R, k, i / k) for i in range(majority + 1, k + 1)
+    )
+
+    assert scorio_eval.mg_pass_at_k(R, k) == pytest.approx(grid_mean, abs=1e-12)

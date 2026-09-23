@@ -29,6 +29,18 @@ from .pass_at_k import pass_hat_k, pass_hat_k_ci
 from .utils import normal_credible_interval
 
 
+def _tau_threshold(tau: float, k: int) -> int:
+    r"""Return the success threshold :math:`\max(1, \lceil \tau k \rceil)`.
+
+    ``tau * k`` is nudged down by a small tolerance before the ceiling so that
+    floating-point error on a whole product (e.g. ``0.28 * 25 ==
+    7.000000000000001``) does not raise the threshold by one. This matters for
+    the usual ``tau = j / k`` grids. It mirrors ``_keep_count`` in
+    ``scorio.aggregate._base``.
+    """
+    return max(1, math.ceil(tau * k - 1e-9))
+
+
 def g_pass_at_k(R: np.ndarray, k: int) -> float:
     r"""
     Performance evaluation using G-Pass@k.
@@ -148,7 +160,7 @@ def g_pass_at_k_tau(R: np.ndarray, k: int, tau: float) -> float:
     if tau <= 0.0:
         return CountScore.pass_at_k(k).mean(bank)
 
-    threshold = max(1, int(math.ceil(tau * k)))
+    threshold = _tau_threshold(tau, k)
     return CountScore.threshold_at_k(k, threshold).mean(bank)
 
 
@@ -230,7 +242,7 @@ def _g_pass_at_k_tau_bayes(
     if not (0.0 <= tau <= 1.0):
         raise ValueError(f"tau must be in [0, 1]; got {tau}")
     k = validate_finite_k(bank.trial_count, k)
-    threshold = max(1, int(math.ceil(tau * k)))
+    threshold = _tau_threshold(tau, k)
     moments = posterior_moments(
         bank,
         CountScore.threshold_at_k(k, threshold),

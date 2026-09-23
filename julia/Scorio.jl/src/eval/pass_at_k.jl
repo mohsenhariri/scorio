@@ -224,6 +224,11 @@ function g_pass_at_k(R, k::Integer)::Float64
     return pass_hat_k(R, k)
 end
 
+# `max(1, ceil(tau * k))`, nudged down by a small tolerance so float error on a
+# whole product (`0.28 * 25 == 7.000000000000001`) does not add one. Mirrors
+# `_keep_count` in `aggregate/base.jl`.
+_tau_threshold(tau::Float64, k::Integer)::Int = max(1, ceil(Int, tau * k - 1e-9))
+
 """
     g_pass_at_k_tau(R, k, tau) -> Float64
 
@@ -305,7 +310,7 @@ function g_pass_at_k_tau(
     end
 
     nu = vec(sum(Rm, dims=2))
-    j0 = Int(ceil(tau_f * k))
+    j0 = _tau_threshold(tau_f, k)
     if j0 > k
         return 0.0
     end
@@ -534,7 +539,7 @@ function _g_pass_at_k_tau_bayes(
         return _pass_hat_k_bayes(Rm, k; alpha0=alpha0, beta0=beta0)
     end
 
-    j0 = Int(ceil(tau_f * k))
+    j0 = _tau_threshold(tau_f, k)
     alpha, beta = _binary_beta_posterior_params(Rm; alpha0=alpha0, beta0=beta0)
 
     means = zeros(Float64, M)
