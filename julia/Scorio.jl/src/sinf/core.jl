@@ -178,3 +178,5 @@ function suggest_next_allocation(
 
     error("method must be 'ci_overlap' or 'zscore'.")
 end
+
+const ranking_confidence = _ranking_confidence

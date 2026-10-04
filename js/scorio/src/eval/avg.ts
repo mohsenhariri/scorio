@@ -3,6 +3,7 @@
  * avg scale. Port of `scorio/eval/avg.py`.
  */
 
+import { scaledRewards, realVector } from "./internal/tailpass.js";
 import { bayes } from "./bayes.js";
 import { normalCredibleInterval, type Bounds } from "./internal/ci.js";
 import {
@@ -12,7 +13,10 @@ import {
   type Matrix,
 } from "./internal/validate.js";
 
-function weightedMean(R: readonly (readonly number[])[], wv?: number[]): number {
+function weightedMean(
+  R: readonly (readonly number[])[],
+  wv?: number[],
+): number {
   let total = 0;
   let count = 0;
   for (const row of R) {
@@ -39,7 +43,8 @@ export function avg(R: Matrix, w?: readonly number[] | null): [number, number] {
     validateBinary(Rm);
     wv = [0.0, 1.0];
   } else {
-    wv = w.map(Number);
+    wv = realVector(w, "w");
+    if (!wv.length) throw new Error("w must be nonempty");
   }
   const N = Rm[0]!.length;
   const C = wv.length - 1;
@@ -51,7 +56,8 @@ export function avg(R: Matrix, w?: readonly number[] | null): [number, number] {
   const [, sigmaBayes] = bayes(Rm, wv);
   const T = 1 + C + N; // D = 0
   const sigmaAvg = (T / N) * sigmaBayes;
-  return [weightedMean(Rm, wv), sigmaAvg];
+  const [offset, scale, normalized] = scaledRewards(wv);
+  return [offset + scale * weightedMean(Rm, normalized), sigmaAvg];
 }
 
 /**

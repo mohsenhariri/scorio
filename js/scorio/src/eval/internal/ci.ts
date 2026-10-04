@@ -51,8 +51,8 @@ export function normalCredibleInterval(
     if (bLo > bHi) {
       throw new Error("bounds must satisfy bounds[0] <= bounds[1]");
     }
-    lo = Math.max(lo, bLo);
-    hi = Math.min(hi, bHi);
+    lo = Math.min(Math.max(lo, bLo), bHi);
+    hi = Math.min(Math.max(hi, bLo), bHi);
   }
   return [lo, hi];
 }

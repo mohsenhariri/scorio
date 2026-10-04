@@ -6,6 +6,7 @@
  * Large Language Model Evaluation," ICLR 2026.
  */
 
+import { scaledRewards, realVector, dot, sum } from "./internal/tailpass.js";
 import { normalCredibleInterval, type Bounds } from "./internal/ci.js";
 import {
   asMatrix,
@@ -44,7 +45,8 @@ export function bayes(
   R0?: Matrix | null,
 ): [number, number] {
   const Rm = asMatrix(R);
-  const wv = w == null ? detectBinaryWeights(Rm) : w.map(Number);
+  const wv = w == null ? detectBinaryWeights(Rm) : realVector(w, "w");
+  if (!wv.length) throw new Error("w must be nonempty");
   const M = Rm.length;
   const N = Rm[0]!.length;
   const C = wv.length - 1;
@@ -70,25 +72,22 @@ export function bayes(
   const nCounts = rowBincount(Rm, C + 1);
   const n0Counts = rowBincount(R0m, C + 1).map((row) => row.map((c) => c + 1));
 
-  const deltaW = wv.map((wj) => wj - wv[0]!);
-
-  let muAccum = 0;
-  let sigmaAccum = 0;
-  for (let a = 0; a < M; a++) {
-    let dot = 0; // sum_j (nu/T) * deltaW
-    let sq = 0; // sum_j (nu/T) * deltaW^2
-    for (let j = 0; j <= C; j++) {
-      const nu = nCounts[a]![j]! + n0Counts[a]![j]!;
-      muAccum += nu * deltaW[j]!;
-      const nuOverT = nu / T;
-      dot += nuOverT * deltaW[j]!;
-      sq += nuOverT * deltaW[j]! * deltaW[j]!;
-    }
-    sigmaAccum += sq - dot * dot;
-  }
-
-  const mu = wv[0]! + muAccum / (M * T);
-  const sigma = Math.sqrt(sigmaAccum / (M * M * (T + 1)));
+  const [offset, scale, values] = scaledRewards(wv);
+  if (scale === 0) return [offset, 0];
+  const moments = nCounts.map((row, i) => {
+    const probabilities = row.map((n, j) => (n + n0Counts[i]![j]!) / T);
+    const mean = dot(probabilities, values);
+    return [
+      mean,
+      dot(
+        probabilities,
+        values.map((v) => (v - mean) ** 2),
+      ) /
+        (T + 1),
+    ];
+  });
+  const mu = offset + (scale * sum(moments.map((v) => v[0]!))) / M;
+  const sigma = (scale * Math.sqrt(sum(moments.map((v) => v[1]!)))) / M;
   return [mu, sigma];
 }
 

@@ -5,13 +5,9 @@ using SpecialFunctions: erfcinv
 _is_eval_sequence(value) = value isa AbstractVector || value isa Tuple
 
 function _eval_int_cast(value)::Int
-    if value isa Complex
-        return trunc(Int, real(value))
-    elseif value isa Real
-        return trunc(Int, value)
-    elseif value isa AbstractString
-        return parse(Int, value)
-    end
+    value isa Real && isfinite(value) && isinteger(value) ||
+        error("Outcome matrix entries must be finite integer-valued numbers or booleans")
+    typemin(Int) <= big(value) <= typemax(Int) || error("Outcome matrix entries must fit in Int")
     return Int(value)
 end
 
@@ -40,6 +36,9 @@ function _as_eval_int_array(R, name::AbstractString="R")
     end
 
     ndims(raw) in (1, 2) || error("$name must be a 1D or 2D array.")
+    if name == "R"
+        !isempty(raw) || error("R must contain at least one question and trial")
+    end
     return _eval_int_cast.(raw)
 end
 
@@ -134,8 +133,8 @@ function normal_credible_interval(
         if b_lo > b_hi
             error("bounds must satisfy bounds[1] <= bounds[2]")
         end
-        lo = max(lo, b_lo)
-        hi = min(hi, b_hi)
+        lo = clamp(lo, b_lo, b_hi)
+        hi = clamp(hi, b_lo, b_hi)
     end
 
     return lo, hi

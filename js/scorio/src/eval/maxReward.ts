@@ -11,7 +11,17 @@
  * extension using the same grouped-Dirichlet posterior as `bayes`.
  */
 
-import { gammaln, comb, betaRatio } from "./internal/math.js";
+import {
+  logBetaPower,
+  positiveLogDifference,
+  scaledRewards,
+  variance,
+  integer,
+  realVector,
+  dot,
+  sum,
+} from "./internal/tailpass.js";
+import { hypergeomAtLeastOne } from "./internal/math.js";
 import { normalCredibleInterval, type Bounds } from "./internal/ci.js";
 import {
   asMatrix,
@@ -52,7 +62,8 @@ function prepareCategoricalInput(
   if (w == null) {
     const seen = new Set<number>();
     for (const row of Rm) for (const v of row) seen.add(v);
-    const isBinary = seen.size <= 2 && [...seen].every((v) => v === 0 || v === 1);
+    const isBinary =
+      seen.size <= 2 && [...seen].every((v) => v === 0 || v === 1);
     if (!isBinary) {
       const vals = [...seen].sort((a, b) => a - b).join(", ");
       throw new Error(
@@ -62,7 +73,8 @@ function prepareCategoricalInput(
     }
     wv = [0.0, 1.0];
   } else {
-    wv = w.map(Number);
+    wv = realVector(w, "w");
+    if (!wv.length) throw new Error("w must be nonempty");
   }
 
   const M = Rm.length;
@@ -90,7 +102,10 @@ function validateK(N: number, k: number): void {
 }
 
 /** Sorted unique values of `w`, with each entry's index into that sorted list. */
-function uniqueLevels(wv: readonly number[]): { levels: number[]; inverse: number[] } {
+function uniqueLevels(wv: readonly number[]): {
+  levels: number[];
+  inverse: number[];
+} {
   const sorted = [...new Set(wv)].sort((a, b) => a - b);
   const index = new Map<number, number>();
   sorted.forEach((v, i) => index.set(v, i));
@@ -110,7 +125,9 @@ function groupedPosteriorParams(
   const L = levels.length;
 
   const nCounts = rowBincountWide(Rm, C + 1);
-  const n0Counts = rowBincountWide(R0m, C + 1).map((row) => row.map((c) => c + 1));
+  const n0Counts = rowBincountWide(R0m, C + 1).map((row) =>
+    row.map((c) => c + 1),
+  );
 
   const gamma = Rm.map((_, row) => {
     const g = new Array<number>(L).fill(0);
@@ -121,43 +138,6 @@ function groupedPosteriorParams(
   });
 
   return { gamma, levels };
-}
-
-/**
- * `E[X^k (X+Y)^k]` for `X, Y` from a 3-part Dirichlet partition.
- *
- * `X` has parameter `a`, `Y` has parameter `b`, and the omitted remainder has
- * parameter `total - a - b`. Follows from the multinomial expansion of
- * `(X+Y)^k` and Dirichlet raw moments.
- */
-function dirichletNestedCumulativeMoment(
-  total: number,
-  a: number,
-  b: number,
-  k: number,
-): number {
-  if (b <= 0.0) {
-    throw new Error("b must be > 0 for nested cumulative moments");
-  }
-  // The sum Σ_{r=0}^k C(k,r) · [Γ(a+k+r)/Γ(a)] · [Γ(b+k-r)/Γ(b)] / [Γ(total+2k)/Γ(total)]
-  // has consecutive terms related by
-  //   T(r) = T(r-1) · (k-r+1)/r · (a+k+r-1)/(b+k-r),
-  // so a single gammaln-evaluated seed plus an O(k) arithmetic recurrence
-  // replaces the per-term gammaln calls. The terms are nonnegative moments
-  // summing to a probability in [0, 1], so no log-sum-exp is needed.
-  let t = Math.exp(
-    gammaln(a + k) -
-      gammaln(a) +
-      gammaln(b + k) -
-      gammaln(b) -
-      (gammaln(total + 2.0 * k) - gammaln(total)),
-  );
-  let sum = t;
-  for (let r = 1; r < k + 1; r++) {
-    t *= ((k - r + 1) / r) * ((a + k + r - 1) / (b + k - r));
-    sum += t;
-  }
-  return sum;
 }
 
 /**
@@ -182,25 +162,29 @@ export function maxAtK(
   k: number,
   w?: readonly number[] | null,
 ): number {
-  const { Rm, wv } = prepareCategoricalInput(R, w);
-  const N = Rm[0]!.length;
+  const { Rm, wv } = prepareCategoricalInput(R, w),
+    N = Rm[0]!.length;
   validateK(N, k);
-
-  const denom = comb(N, k);
-  // coeff[i - (k-1)] = C(i, k-1) / C(N, k) for i in {k-1, ..., N-1}.
-  const coeff: number[] = [];
-  for (let i = k - 1; i < N; i++) coeff.push(comb(i, k - 1) / denom);
-
-  let acc = 0;
-  for (const row of Rm) {
-    const sorted = row.map((c) => wv[c]!).sort((a, b) => a - b);
-    let val = 0;
-    for (let j = 0; j < coeff.length; j++) {
-      val += coeff[j]! * sorted[k - 1 + j]!;
-    }
-    acc += val;
-  }
-  return acc / Rm.length;
+  const { levels } = uniqueLevels(wv),
+    [offset, scale, normalized] = scaledRewards(levels);
+  if (scale === 0) return offset;
+  const gaps = normalized.slice(1).map((v, j) => v - normalized[j]!);
+  const means = Rm.map(
+    (row) =>
+      normalized[0]! +
+      sum(
+        gaps.map(
+          (gap, j) =>
+            gap *
+            hypergeomAtLeastOne(
+              N,
+              row.filter((c) => wv[c]! > levels[j]!).length,
+              k,
+            ),
+        ),
+      ),
+  );
+  return offset + scale * (sum(means) / Rm.length);
 }
 
 /** Posterior mean/std for Max@k under a grouped Dirichlet posterior. */
@@ -210,83 +194,48 @@ function maxAtKBayes(
   w?: readonly number[] | null,
   R0?: Matrix | null,
 ): { mu: number; sigma: number; levels: number[] } {
+  integer(k);
   const { gamma, levels } = groupedPosteriorParams(R, w, R0);
-  const M = gamma.length;
-  const L = gamma[0]!.length;
-  const total = gamma[0]!.reduce((s, v) => s + v, 0);
-
-  if (k < 1) {
-    throw new Error(`k must be >= 1; got ${k}`);
-  }
-  // The posterior moments describe the latent distribution, so k is not
-  // restricted by the observed sample size once the posterior is defined.
-
-  if (L === 1) {
-    return { mu: levels[0]!, sigma: 0.0, levels };
-  }
-
-  const gaps: number[] = [];
-  for (let i = 1; i < L; i++) gaps.push(levels[i]! - levels[i - 1]!);
-  const top = levels[L - 1]!;
-
-  const means = new Array<number>(M);
-  const vars_ = new Array<number>(M);
-
-  for (let row = 0; row < M; row++) {
-    const gammaRow = gamma[row]!;
-    // cum[idx] = A_l parameters for l = 1..L-1 (cumulative sums, excluding last).
-    const cum: number[] = [];
+  const [offset, scale, normalized] = scaledRewards(levels);
+  if (scale === 0) return { mu: offset, sigma: 0, levels };
+  const gaps = normalized.slice(1).map((v, j) => v - normalized[j]!);
+  const moments = gamma.map((row) => {
+    const total = sum(row),
+      cum: number[] = [];
     let running = 0;
-    for (let i = 0; i < L - 1; i++) {
-      running += gammaRow[i]!;
+    for (const a of row.slice(0, -1)) {
+      running += a;
       cum.push(running);
     }
-
-    const eAk = new Array<number>(L - 1);
-    const eA2k = new Array<number>(L - 1);
-    for (let idx = 0; idx < L - 1; idx++) {
-      const a = cum[idx]!;
-      const b = total - a;
-      eAk[idx] = betaRatio(a, b, k, 0);
-      eA2k[idx] = betaRatio(a, b, 2 * k, 0);
-    }
-
-    let dotGapsEAk = 0;
-    for (let i = 0; i < L - 1; i++) dotGapsEAk += gaps[i]! * eAk[i]!;
-    const m = top - dotGapsEAk;
-
-    // cross is the (L-1)x(L-1) matrix of cumulative cross moments.
-    const cross: number[][] = Array.from({ length: L - 1 }, () =>
-      new Array<number>(L - 1).fill(0),
-    );
-    for (let i = 0; i < L - 1; i++) {
-      cross[i]![i] = eA2k[i]!;
-      for (let j = i + 1; j < L - 1; j++) {
-        const a = cum[i]!;
-        const b = cum[j]! - cum[i]!;
-        const moment = dirichletNestedCumulativeMoment(total, a, b, k);
-        cross[i]![j] = moment;
-        cross[j]![i] = moment;
+    const logs = cum.map((a) => logBetaPower(a, total - a, k));
+    const mean =
+      normalized[0]! +
+      dot(
+        gaps,
+        logs.map((v) => -Math.expm1(v)),
+      );
+    let v = 0;
+    for (let i = 0; i < gaps.length; i++)
+      for (let j = 0; j < gaps.length; j++) {
+        const lower = Math.min(i, j),
+          upper = Math.max(i, j);
+        const cross =
+          logBetaPower(cum[upper]!, total - cum[upper]!, 2 * k) +
+          (i === j
+            ? 0
+            : logBetaPower(cum[lower]!, cum[upper]! - cum[lower]!, k));
+        v +=
+          gaps[i]! *
+          gaps[j]! *
+          positiveLogDifference(cross, logs[i]! + logs[j]!);
       }
-    }
-
-    let e2 = top * top - 2.0 * top * dotGapsEAk;
-    // gaps @ cross @ gaps
-    let quad = 0;
-    for (let i = 0; i < L - 1; i++) {
-      let rowDot = 0;
-      for (let j = 0; j < L - 1; j++) rowDot += cross[i]![j]! * gaps[j]!;
-      quad += gaps[i]! * rowDot;
-    }
-    e2 += quad;
-
-    means[row] = m;
-    vars_[row] = Math.max(0.0, e2 - m * m);
-  }
-
-  const mu = means.reduce((s, v) => s + v, 0) / M;
-  const sigma = Math.sqrt(vars_.reduce((s, v) => s + v, 0)) / M;
-  return { mu, sigma, levels };
+    return [mean, Math.sqrt(variance(v))];
+  });
+  return {
+    mu: offset + (scale * sum(moments.map((v) => v[0]!))) / gamma.length,
+    sigma: (scale * Math.hypot(...moments.map((v) => v[1]!))) / gamma.length,
+    levels,
+  };
 }
 
 /**
@@ -317,15 +266,20 @@ export function maxAtKCi(
   confidence = 0.95,
   bounds?: Bounds | null,
 ): [number, number, number, number] {
+  integer(k);
   if (k === 1) {
     return bayesCi(R, w, R0, confidence, bounds);
   }
 
   const { mu, sigma, levels } = maxAtKBayes(R, k, w, R0);
   const effectiveBounds: Bounds =
-    bounds == null
-      ? [Math.min(...levels), Math.max(...levels)]
-      : bounds;
-  const [lo, hi] = normalCredibleInterval(mu, sigma, confidence, true, effectiveBounds);
+    bounds == null ? [Math.min(...levels), Math.max(...levels)] : bounds;
+  const [lo, hi] = normalCredibleInterval(
+    mu,
+    sigma,
+    confidence,
+    true,
+    effectiveBounds,
+  );
   return [mu, sigma, lo, hi];
 }

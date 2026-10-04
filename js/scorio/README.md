@@ -1,6 +1,6 @@
 # scorio
 
-Bayesian evaluation toolkit for stochastic models — a TypeScript/JavaScript port of the [Scorio](https://github.com/mohsenhariri/scorio) `eval` APIs.
+Bayesian evaluation toolkit for stochastic models — a TypeScript/JavaScript port of [Scorio](https://github.com/mohsenhariri/scorio).
 
 It provides these main API families:
 
@@ -183,3 +183,55 @@ npm run typecheck
 ## License
 
 MIT © Mohsen Hariri. See the repository root `LICENSE` and `CITATION.cff`.
+
+## TailPass profiles and utilities
+
+TailPass returns a posterior threshold profile. Choose a scalar utility explicitly:
+
+```ts
+import { tailpass, tailpassWeights } from "scorio/eval";
+
+const profile = tailpass([[0, 1, 1], [1, 1, 1]], 8);
+const [mu, sigma] = profile.linear(tailpassWeights.momentWeights(8, 2));
+const draws = profile.sample(4000, { rng: 42 });
+const [qrsMean, qrsStd, lo, hi] = draws.summary(draws.qrs());
+```
+
+`tailpass(R, k, w?, R0?, { eta, prior, thresholds })` uses the posterior
+`prior + counts(R) + eta * counts(R0)`. Rubric scores must lie in [0, 1].
+`prior` is a positive scalar, category vector, or question-by-category matrix;
+binary order is failure, success. `k` may exceed the observed trial count.
+
+Profiles expose `mean`, `questionMean`, `covariance`, and `std`, and provide
+`linear(weights)`, `moment(lam)`, `discovery()`, `stability()`, and `atK(k)`.
+For categorical rubrics, `moment(lam)` integrates the full attainable score
+distribution, including scores between reporting thresholds. The empirical
+counterpart `tailpassEmpirical(R, k, w?, { thresholds })` samples observed trials
+without replacement and requires `k <= N`.
+
+Draws provide `linear`, `moment`, `powerMean`, `qrs`, `rollout`, `harmonic`,
+`shortfall`, and `atK`. Nonlinear utilities transform each question before
+averaging by default. `powerMean` and `qrs` also accept `{ aggregation: "profile" }`.
+`summary(values?, confidence?)` returns mean, sample standard deviation, and
+pointwise equal-tailed intervals. `ci`, `linearCi`, and `momentCi` on a profile
+accept `{ method: "normal" }` for exact moments and clipped Gaussian intervals,
+or `{ method: "mc", nDraws, rng }` (the default) for shared posterior draws.
+These intervals describe latent expected performance, not future sampled banks.
+Seeds are reproducible within JavaScript; random streams differ across languages.
+
+Weight constructors in `tailpassWeights` include `uniformWeights`,
+`thresholdWeights`, `discoveryWeights`, `stabilityWeights`, `momentWeights`,
+`betaWeights`, `maxentWeights`, and `payoffWeights`. Snake_case aliases and the
+`tailpass_weights` namespace are also available.
+
+Exact count enumeration is limited to 20,000 states, and profile covariance to
+4,000,000 count/threshold pairs. For large categorical budgets, moments 1, 2,
+and 4 and the discovery/stability utilities avoid count enumeration. Supply an
+explicit threshold grid when `k > 20,000`. Posterior draws provide a covariance
+alternative when the mean profile is feasible but exact covariance is too large.
+
+## Sequential inference
+
+The `scorio/sinf` entry point exposes `rankingConfidence`, `ciFromMuSigma`,
+`shouldStop`, `shouldStopTop1`, and `suggestNextAllocation`, with snake_case
+aliases. These operate on posterior means and standard deviations, as in Python.

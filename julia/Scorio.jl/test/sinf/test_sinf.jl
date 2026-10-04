@@ -5,32 +5,32 @@ using Scorio
 
     @testset "RankingConfidence" begin
         @testset "identical scores zero sigma returns tie" begin
-            rho, z = Scorio._ranking_confidence(0.5, 0.0, 0.5, 0.0)
+            rho, z = Scorio.SInf.ranking_confidence(0.5, 0.0, 0.5, 0.0)
             @test rho == 0.5
             @test z == Inf
         end
 
         @testset "different scores zero sigma returns certain" begin
-            rho, z = Scorio._ranking_confidence(0.7, 0.0, 0.3, 0.0)
+            rho, z = Scorio.SInf.ranking_confidence(0.7, 0.0, 0.3, 0.0)
             @test rho == 1.0
             @test z == Inf
         end
 
         @testset "well separated scores high confidence" begin
-            rho, z = Scorio._ranking_confidence(0.9, 0.01, 0.1, 0.01)
+            rho, z = Scorio.SInf.ranking_confidence(0.9, 0.01, 0.1, 0.01)
             @test rho > 0.999
             @test z > 3.0
         end
 
         @testset "overlapping scores low confidence" begin
-            rho, z = Scorio._ranking_confidence(0.51, 0.1, 0.49, 0.1)
+            rho, z = Scorio.SInf.ranking_confidence(0.51, 0.1, 0.49, 0.1)
             @test rho < 0.6
             @test z < 0.5
         end
 
         @testset "symmetry" begin
-            rho_ab, z_ab = Scorio._ranking_confidence(0.6, 0.05, 0.4, 0.03)
-            rho_ba, z_ba = Scorio._ranking_confidence(0.4, 0.03, 0.6, 0.05)
+            rho_ab, z_ab = Scorio.SInf.ranking_confidence(0.6, 0.05, 0.4, 0.03)
+            rho_ba, z_ba = Scorio.SInf.ranking_confidence(0.4, 0.03, 0.6, 0.05)
             @test rho_ab ≈ rho_ba atol = 1e-12
             @test z_ab ≈ z_ba atol = 1e-12
         end
@@ -39,7 +39,7 @@ using Scorio
             mu_a, sigma_a = 0.7, 0.05
             mu_b, sigma_b = 0.4, 0.03
             expected_z = abs(mu_a - mu_b) / sqrt(sigma_a^2 + sigma_b^2)
-            rho, z = Scorio._ranking_confidence(mu_a, sigma_a, mu_b, sigma_b)
+            rho, z = Scorio.SInf.ranking_confidence(mu_a, sigma_a, mu_b, sigma_b)
             @test z ≈ expected_z atol = 1e-12
             expected_rho = Scorio._normal_cdf(expected_z)
             @test rho ≈ expected_rho atol = 1e-12
@@ -49,7 +49,7 @@ using Scorio
             data = top_p_task_aime25()
             mu_0, sigma_0 = Scorio.Eval.bayes(data[1, :, :])
             mu_1, sigma_1 = Scorio.Eval.bayes(data[2, :, :])
-            rho, z = Scorio._ranking_confidence(mu_0, sigma_0, mu_1, sigma_1)
+            rho, z = Scorio.SInf.ranking_confidence(mu_0, sigma_0, mu_1, sigma_1)
             @test 0.5 <= rho <= 1.0
             @test z >= 0.0
             @test isfinite(rho)
@@ -378,7 +378,7 @@ using Scorio
             for n_trials in [5, 10, 20, 40, 80]
                 mu_a, sigma_a = Scorio.Eval.bayes(model_a_data[:, 1:n_trials])
                 mu_b, sigma_b = Scorio.Eval.bayes(model_b_data[:, 1:n_trials])
-                rho, z = Scorio._ranking_confidence(mu_a, sigma_a, mu_b, sigma_b)
+                rho, z = Scorio.SInf.ranking_confidence(mu_a, sigma_a, mu_b, sigma_b)
                 push!(z_values, z)
                 @test isfinite(z)
             end
@@ -388,7 +388,8 @@ using Scorio
     end
 
     @testset "SInf public API exports" begin
-        expected = Set([:ci_from_mu_sigma, :should_stop, :should_stop_top1, :suggest_next_allocation])
+        expected = Set([:ranking_confidence, :ci_from_mu_sigma, :should_stop,
+            :should_stop_top1, :suggest_next_allocation])
         actual = Set(filter(name -> name != :SInf, names(Scorio.SInf; all=false, imported=true)))
         @test actual == expected
     end

@@ -9,12 +9,12 @@
  */
 
 import {
-  betaRatio,
-  comb,
-  hypergeomPmf,
-  hypergeomSf,
-  logBetaRatio,
-} from "./internal/math.js";
+  positive,
+  endpointMoments,
+  binaryPayoffMoments,
+  sum,
+} from "./internal/tailpass.js";
+import { hypergeomPmf, hypergeomSf } from "./internal/math.js";
 import { normalCredibleInterval, type Bounds } from "./internal/ci.js";
 import {
   asMatrix,
@@ -25,7 +25,7 @@ import {
 import { passAtK, passHatK, passHatKCi } from "./passAtK.js";
 
 function checkK(k: number, N: number): void {
-  if (!(k >= 1 && k <= N)) {
+  if (!Number.isSafeInteger(k) || !(k >= 1 && k <= N)) {
     throw new Error(`k must satisfy 1 <= k <= N (N=${N}); got k=${k}`);
   }
 }
@@ -54,6 +54,8 @@ function binaryBetaPosterior(
   alpha0: number,
   beta0: number,
 ): { alpha: number[]; beta: number[]; N: number } {
+  positive(alpha0, "alpha0");
+  positive(beta0, "beta0");
   validateBinary(Rm);
   const N = Rm[0]!.length;
   const c = rowSums(Rm);
@@ -132,67 +134,6 @@ export function mgPassAtK(R: Matrix, k: number): number {
   return vals.reduce((s, v) => s + (v * 2.0) / k, 0) / M;
 }
 
-/**
- * Posterior mean/std of `Σ_j coeff_j · 1{X >= ...}` for a hypergeometric-style
- * weighted sum whose i.i.d. Beta-Binomial moments are
- * `E[(success-budget) terms] = Beta(a+j, b+k-j)/Beta(a, b)`.
- *
- * The first and second moments need `Beta(a+x, b+k-x)/Beta(a,b)` (`tK`) and
- * `Beta(a+x, b+2k-x)/Beta(a,b)` (`t2K`). Evaluate each required ratio directly
- * in log space. A forward recurrence from x=0 is tempting, but its seed can
- * underflow for large k and then incorrectly leaves every later moment at zero.
- */
-function iidWeightedMoments(
-  alpha: readonly number[],
-  beta: readonly number[],
-  M: number,
-  js: readonly number[],
-  coeff: readonly number[],
-  k: number,
-): [number, number] {
-  let meanSum = 0;
-  let varSum = 0;
-  for (let i = 0; i < M; i++) {
-    const a = alpha[i]!;
-    const b = beta[i]!;
-
-    const logTK = new Array<number>(k + 1);
-    for (let x = 0; x <= k; x++) logTK[x] = logBetaRatio(a, b, x, k - x);
-
-    const logT2K = new Array<number>(2 * k + 1);
-    for (let x = 0; x <= 2 * k; x++) {
-      logT2K[x] = logBetaRatio(a, b, x, 2 * k - x);
-    }
-
-    let m = 0;
-    for (let idx = 0; idx < js.length; idx++) {
-      const c = coeff[idx]!;
-      if (c !== 0.0) m += Math.exp(Math.log(c) + logTK[js[idx]!]!);
-    }
-
-    let e2 = 0;
-    for (let idxJ = 0; idxJ < js.length; idxJ++) {
-      const cJ = coeff[idxJ]!;
-      if (cJ === 0.0) continue;
-      const j = js[idxJ]!;
-      for (let idxL = 0; idxL < js.length; idxL++) {
-        const cL = coeff[idxL]!;
-        if (cL === 0.0) continue;
-        // Preserve Python's floating-point evaluation order. For sufficiently
-        // large k the coefficient product overflows while the beta moment
-        // underflows, producing NaN; Python's max(0.0, NaN) then clips that
-        // row variance to zero.
-        e2 += cJ * cL * Math.exp(logT2K[j + js[idxL]!]!);
-      }
-    }
-
-    meanSum += m;
-    const rawVariance = e2 - m * m;
-    varSum += Number.isNaN(rawVariance) ? 0.0 : Math.max(0.0, rawVariance);
-  }
-  return [meanSum / M, Math.sqrt(varSum) / M];
-}
-
 /** Posterior mean/std for the i.i.d. G-Pass@k_τ quantity. */
 function gPassAtKTauBayes(
   R: Matrix,
@@ -201,28 +142,21 @@ function gPassAtKTauBayes(
   alpha0: number,
   beta0: number,
 ): [number, number] {
-  const Rm = asMatrix(R);
-  const { alpha, beta, N } = binaryBetaPosterior(Rm, alpha0, beta0);
-  checkTau(tau);
+  const Rm = asMatrix(R),
+    { alpha, beta, N } = binaryBetaPosterior(Rm, alpha0, beta0);
   checkK(k, N);
-
-  if (tau <= 0.0) {
-    return passAtKBayes(Rm, k, alpha0, beta0);
-  }
-  if (tau >= 1.0) {
-    return passHatKBayes(Rm, k, alpha0, beta0);
-  }
-  if (!Number.isInteger(k)) {
-    throw new TypeError("'number' object cannot be interpreted as an integer");
-  }
-
-  const M = Rm.length;
-  const j0 = tauThreshold(tau, k);
-  const js: number[] = [];
-  for (let j = j0; j <= k; j++) js.push(j);
-  const coeff = js.map((j) => comb(k, j));
-
-  return iidWeightedMoments(alpha, beta, M, js, coeff, k);
+  checkTau(tau);
+  if (tau <= 0) return passAtKBayes(Rm, k, alpha0, beta0);
+  if (tau >= 1) return passHatKBayes(Rm, k, alpha0, beta0);
+  const cutoff = tauThreshold(tau, k),
+    values = Array.from({ length: k + 1 }, (_, j) => [+(j >= cutoff)]);
+  const moments = alpha.map((a, i) =>
+    binaryPayoffMoments(k, a, beta[i]!, values),
+  );
+  return [
+    sum(moments.map((v) => v.mean[0]!)) / Rm.length,
+    Math.sqrt(sum(moments.map((v) => v.covariance[0]![0]!))) / Rm.length,
+  ];
 }
 
 /** Posterior mean/std for the i.i.d. mG-Pass@k quantity. */
@@ -232,24 +166,20 @@ function mgPassAtKBayes(
   alpha0: number,
   beta0: number,
 ): [number, number] {
-  const Rm = asMatrix(R);
-  const { alpha, beta, N } = binaryBetaPosterior(Rm, alpha0, beta0);
+  const Rm = asMatrix(R),
+    { alpha, beta, N } = binaryBetaPosterior(Rm, alpha0, beta0);
   checkK(k, N);
-  if (!Number.isInteger(k)) {
-    throw new TypeError("'number' object cannot be interpreted as an integer");
-  }
-
-  const majority = Math.ceil(0.5 * k);
-  if (majority >= k) {
-    return [0.0, 0.0];
-  }
-
-  const M = Rm.length;
-  const js: number[] = [];
-  for (let j = majority + 1; j <= k; j++) js.push(j);
-  const coeff = js.map((j) => (2.0 / k) * (j - majority) * comb(k, j));
-
-  return iidWeightedMoments(alpha, beta, M, js, coeff, k);
+  const majority = Math.ceil(k / 2),
+    values = Array.from({ length: k + 1 }, (_, j) => [
+      (2 / k) * Math.max(j - majority, 0),
+    ]);
+  const moments = alpha.map((a, i) =>
+    binaryPayoffMoments(k, a, beta[i]!, values),
+  );
+  return [
+    sum(moments.map((v) => v.mean[0]!)) / Rm.length,
+    Math.sqrt(sum(moments.map((v) => v.covariance[0]![0]!))) / Rm.length,
+  ];
 }
 
 /** Posterior mean/std for the i.i.d. Pass@k quantity `1 - (1-p)^k`. */
@@ -259,23 +189,14 @@ function passAtKBayes(
   alpha0: number,
   beta0: number,
 ): [number, number] {
-  const Rm = asMatrix(R);
-  const { alpha, beta, N } = binaryBetaPosterior(Rm, alpha0, beta0);
+  const Rm = asMatrix(R),
+    { alpha, beta, N } = binaryBetaPosterior(Rm, alpha0, beta0);
   checkK(k, N);
-  const M = Rm.length;
-  let meanSum = 0;
-  let varSum = 0;
-  for (let i = 0; i < M; i++) {
-    const a = alpha[i]!;
-    const b = beta[i]!;
-    const eQk = betaRatio(a, b, 0, k);
-    const eQ2k = betaRatio(a, b, 0, 2 * k);
-    const m = 1 - eQk;
-    const e2 = 1 - 2 * eQk + eQ2k;
-    meanSum += m;
-    varSum += Math.max(0, e2 - m * m);
-  }
-  return [meanSum / M, Math.sqrt(varSum) / M];
+  const moments = alpha.map((a, i) => endpointMoments(k, a, beta[i]!, true));
+  return [
+    sum(moments.map((v) => v[0])) / Rm.length,
+    Math.sqrt(sum(moments.map((v) => v[1]))) / Rm.length,
+  ];
 }
 
 /** Posterior mean/std for the i.i.d. Pass^k quantity `p^k`. */
@@ -285,21 +206,14 @@ function passHatKBayes(
   alpha0: number,
   beta0: number,
 ): [number, number] {
-  const Rm = asMatrix(R);
-  const { alpha, beta, N } = binaryBetaPosterior(Rm, alpha0, beta0);
+  const Rm = asMatrix(R),
+    { alpha, beta, N } = binaryBetaPosterior(Rm, alpha0, beta0);
   checkK(k, N);
-  const M = Rm.length;
-  let meanSum = 0;
-  let varSum = 0;
-  for (let i = 0; i < M; i++) {
-    const a = alpha[i]!;
-    const b = beta[i]!;
-    const ePk = betaRatio(a, b, k, 0);
-    const eP2k = betaRatio(a, b, 2 * k, 0);
-    meanSum += ePk;
-    varSum += Math.max(0, eP2k - ePk * ePk);
-  }
-  return [meanSum / M, Math.sqrt(varSum) / M];
+  const moments = alpha.map((a, i) => endpointMoments(k, a, beta[i]!, false));
+  return [
+    sum(moments.map((v) => v[0])) / Rm.length,
+    Math.sqrt(sum(moments.map((v) => v[1]))) / Rm.length,
+  ];
 }
 
 /**

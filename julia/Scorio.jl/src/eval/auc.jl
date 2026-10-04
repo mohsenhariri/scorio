@@ -1,14 +1,14 @@
 """AUC@K evaluation metrics for binary outcomes."""
 
 function _validate_auc_k(N::Integer, k::Integer)::Nothing
-    if !(1 <= k <= N)
+    if k isa Bool || !(1 <= k <= N)
         error("k must satisfy 1 <= k <= N (N=$N); got k=$k")
     end
     return nothing
 end
 
 function _auc_at_k_coefficients(k::Integer)::Vector{Float64}
-    if k < 1
+    if k isa Bool || k < 1
         error("k must be >= 1; got $k")
     end
     if k == 1
@@ -48,39 +48,19 @@ function auc_at_k(R, k::Integer)::Float64
     return Float64(sum(vals) / M)
 end
 
-function _auc_at_k_bayes(
-    R,
-    k::Integer;
-    alpha0::Real=1.0,
-    beta0::Real=1.0,
-)::Tuple{Float64, Float64}
-    Rm = _as_2d_int_matrix(R)
-    _validate_binary(Rm)
-    M, N = size(Rm)
+function _auc_at_k_bayes(R, k::Integer; alpha0::Real=1.0, beta0::Real=1.0)::Tuple{Float64, Float64}
+    Rm = _as_2d_int_matrix(R); _validate_binary(Rm); M, N = size(Rm)
     _validate_auc_k(N, k)
-
     alpha, beta = _binary_beta_posterior_params(Rm; alpha0=alpha0, beta0=beta0)
     coeff = _auc_at_k_coefficients(k)
-    means = zeros(Float64, M)
-    vars_ = zeros(Float64, M)
-
-    @inbounds for i in 1:M
-        a_i = alpha[i]
-        b_i = beta[i]
-        eq = [_beta_ratio(a_i, b_i, 0, j) for j in 1:k]
-        weighted_eq = sum(coeff .* eq)
-        m = 1.0 - weighted_eq
-        e2 = 1.0 - 2.0 * weighted_eq
-        for j in 1:k
-            for l in 1:k
-                e2 += coeff[j] * coeff[l] * _beta_ratio(a_i, b_i, 0, j + l)
-            end
-        end
-        means[i] = m
-        vars_[i] = max(0.0, e2 - m * m)
-    end
-
-    return Float64(sum(means) / M), Float64(sqrt(sum(vars_)) / M)
+    moments = [begin
+        nodes, weights = _tp_beta_quadrature(k, a, b)
+        values = [sum(coeff[j]*(-expm1(j*log1p(-p))) for j in 1:k) for p in nodes]
+        mean = sum(coeff[j]*_tp_endpoint(j, a, b, true)[1] for j in 1:k)
+        center = dot(weights, values)
+        (mean, dot(weights, (values .- center).^2))
+    end for (a, b) in zip(alpha, beta)]
+    return sum(first, moments)/M, sqrt(sum(last, moments))/M
 end
 
 """

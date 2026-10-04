@@ -9,9 +9,11 @@
  */
 
 import {
-  comb,
-  logBetaRatio,
-} from "./internal/math.js";
+  positive,
+  endpointMoments,
+  binaryPayoffMoments,
+} from "./internal/tailpass.js";
+import { hypergeomPmf, hypergeomAtLeastOne } from "./internal/math.js";
 import { normalCredibleInterval, type Bounds } from "./internal/ci.js";
 import {
   asMatrix,
@@ -55,7 +57,12 @@ function weightedGeometricMean(
 }
 
 function validateBetaPrior(alpha0: number, beta0: number): void {
-  if (alpha0 <= 0.0 || beta0 <= 0.0) {
+  if (
+    !Number.isFinite(alpha0) ||
+    !Number.isFinite(beta0) ||
+    alpha0 <= 0.0 ||
+    beta0 <= 0.0
+  ) {
     throw new Error(
       `alpha0 and beta0 must both be > 0 for a Beta prior; got ${alpha0}, ${beta0}`,
     );
@@ -63,7 +70,7 @@ function validateBetaPrior(alpha0: number, beta0: number): void {
 }
 
 function validateFiniteBankK(N: number, k: number): void {
-  if (!(k >= 1 && k <= N)) {
+  if (!Number.isSafeInteger(k) || !(k >= 1 && k <= N)) {
     throw new Error(`k must satisfy 1 <= k <= N (N=${N}); got k=${k}`);
   }
 }
@@ -121,7 +128,9 @@ function validateSpectrumWeights(weights: Weights, k: number): number[] {
   }
   const weightSum = w.reduce((s, v) => s + v, 0);
   if (weightSum > 1.0 + 1e-12) {
-    throw new Error(`weights must satisfy sum(weights) <= 1; got sum=${weightSum}`);
+    throw new Error(
+      `weights must satisfy sum(weights) <= 1; got sum=${weightSum}`,
+    );
   }
   return w;
 }
@@ -154,14 +163,13 @@ export function thresholdSpectrumAtK(
 
   const nu = rowSums(Rm);
   const levels = eventScoreLevels(w);
-  const denom = comb(N, k);
   const vals = nu.map(() => 0.0);
   for (let j = 1; j <= k; j++) {
     const credit = levels[j]!;
     if (credit === 0.0) continue;
     for (let i = 0; i < nu.length; i++) {
       const v = nu[i]!;
-      vals[i]! += (credit * comb(v, j) * comb(N - v, k - j)) / denom;
+      vals[i]! += credit * hypergeomPmf(N, v, k, j);
     }
   }
   return vals.reduce((s, v) => s + v, 0) / vals.length;
@@ -179,7 +187,12 @@ export function geomDsAtK(
 ): number {
   const passScore = passAtK(R, k);
   const unanimousScore = passHatK(R, k);
-  return weightedGeometricMean(passScore, unanimousScore, passPower, unanimousPower);
+  return weightedGeometricMean(
+    passScore,
+    unanimousScore,
+    passPower,
+    unanimousPower,
+  );
 }
 
 /**
@@ -198,15 +211,17 @@ export function geomAtK(
   validateFiniteBankK(N, k);
 
   const nu = rowSums(Rm);
-  const denom = comb(N, k);
   let sum = 0.0;
   for (let i = 0; i < Rm.length; i++) {
     const v = nu[i]!;
-    // scipy.special.comb extends this formula to fractional k, unlike the
-    // hypergeometric-distribution APIs used by the other point metrics.
-    const passVal = 1.0 - comb(N - v, k) / denom;
-    const unanimousVal = comb(v, k) / denom;
-    sum += weightedGeometricMean(passVal, unanimousVal, passPower, unanimousPower);
+    const passVal = hypergeomAtLeastOne(N, v, k);
+    const unanimousVal = hypergeomPmf(N, v, k, k);
+    sum += weightedGeometricMean(
+      passVal,
+      unanimousVal,
+      passPower,
+      unanimousPower,
+    );
   }
   return sum / Rm.length;
 }
@@ -250,6 +265,8 @@ function binaryBetaPosteriorParams(
   alpha0: number,
   beta0: number,
 ): { alpha: number[]; beta: number[] } {
+  positive(alpha0, "alpha0");
+  positive(beta0, "beta0");
   validateBinary(Rm);
   const N = Rm[0]!.length;
   const c = rowSums(Rm);
@@ -269,81 +286,29 @@ function passAndSpectrumRowPosteriorMoments(
 ): RowMoments {
   validateLatentK(k);
   validateBetaPrior(alpha0, beta0);
-
+  positive(alpha0, "alpha0");
+  positive(beta0, "beta0");
   const Rm = asMatrix(R);
   validateBinary(Rm);
-  const M = Rm.length;
-  const w = validateSpectrumWeights(weights, k);
-
+  const w = validateSpectrumWeights(weights, k),
+    levels = eventScoreLevels(w);
   const { alpha, beta } = binaryBetaPosteriorParams(Rm, alpha0, beta0);
-  const levels = eventScoreLevels(w);
-  const coeff = new Array<number>(k + 1).fill(0.0);
-  for (let j = 1; j <= k; j++) {
-    coeff[j] = levels[j]! * comb(k, j);
-  }
-  const activeJs: number[] = [];
-  for (let j = 1; j <= k; j++) {
-    if (coeff[j] !== 0.0) activeJs.push(j);
-  }
-
-  const meanPass = new Array<number>(M);
-  const varPass = new Array<number>(M);
-  const meanSpec = new Array<number>(M);
-  const varSpec = new Array<number>(M);
-  const covPs = new Array<number>(M);
-
-  for (let i = 0; i < M; i++) {
-    const aI = alpha[i]!;
-    const bI = beta[i]!;
-
-    // tK[x] = Beta(aI+x, bI+k-x)/Beta(aI,bI); t2K[x] =
-    // Beta(aI+x, bI+2k-x)/Beta(aI,bI). Compute each ratio directly in log
-    // space: an endpoint-seeded recurrence can underflow at x=0 and can never
-    // recover the nonzero moments near the beta-binomial mode.
-    const logTK = new Array<number>(k + 1);
-    for (let x = 0; x <= k; x++) logTK[x] = logBetaRatio(aI, bI, x, k - x);
-
-    const logT2K = new Array<number>(2 * k + 1);
-    for (let x = 0; x <= 2 * k; x++) {
-      logT2K[x] = logBetaRatio(aI, bI, x, 2 * k - x);
-    }
-
-    const eqk = Math.exp(logTK[0]!);
-    const mPass = 1.0 - eqk;
-    const vPass = Math.max(0.0, Math.exp(logT2K[0]!) - eqk * eqk);
-
-    let mSpec = 0.0;
-    let e2Spec = 0.0;
-    let ePs = 0.0;
-
-    for (const j of activeJs) {
-      const cJ = coeff[j]!;
-      const logCJ = Math.log(cJ);
-      const momentJ = Math.exp(logTK[j]!);
-      const weightedMomentJ = Math.exp(logCJ + logTK[j]!);
-      mSpec += weightedMomentJ;
-      ePs += cJ * (momentJ - Math.exp(logT2K[j]!));
-      for (const l of activeJs) {
-        // Match Python's coefficient-product-first floating-point behavior;
-        // its max(0.0, NaN) convention clips overflow*underflow variance terms.
-        e2Spec += cJ * coeff[l]! * Math.exp(logT2K[j + l]!);
-      }
-    }
-
-    const rawSpecVariance = e2Spec - mSpec * mSpec;
-    const vSpec = Number.isNaN(rawSpecVariance)
-      ? 0.0
-      : Math.max(0.0, rawSpecVariance);
-    const cov = ePs - mPass * mSpec;
-
-    meanPass[i] = mPass;
-    varPass[i] = vPass;
-    meanSpec[i] = mSpec;
-    varSpec[i] = vSpec;
-    covPs[i] = cov;
-  }
-
-  return { meanPass, varPass, meanSpec, varSpec, covPs };
+  const moments = alpha.map((a, i) =>
+    binaryPayoffMoments(
+      k,
+      a,
+      beta[i]!,
+      levels.map((v, j) => [+(j > 0), v]),
+    ),
+  );
+  const endpoints = alpha.map((a, i) => endpointMoments(k, a, beta[i]!, true));
+  return {
+    meanPass: endpoints.map((v) => v[0]),
+    varPass: endpoints.map((v) => v[1]),
+    meanSpec: moments.map((v) => v.mean[1]!),
+    varSpec: moments.map((v) => v.covariance[1]![1]!),
+    covPs: moments.map((v) => v.covariance[0]![1]!),
+  };
 }
 
 interface DatasetMoments {
@@ -401,7 +366,8 @@ function geoSpectrumAtKBayes(
     return [0.0, 0.0];
   }
 
-  const gradPass = lam * Math.pow(muPass, lam - 1.0) * Math.pow(muSpec, 1.0 - lam);
+  const gradPass =
+    lam * Math.pow(muPass, lam - 1.0) * Math.pow(muSpec, 1.0 - lam);
   const gradSpec = (1.0 - lam) * Math.pow(muPass, lam) * Math.pow(muSpec, -lam);
   const sigma2 =
     gradPass * gradPass * varPass +
@@ -434,7 +400,12 @@ function geomAtKBayes(
   for (let i = 0; i < M; i++) {
     const muPass = meanPass[i]!;
     const muUnanimous = meanSpec[i]!;
-    const mu = weightedGeometricMean(muPass, muUnanimous, passPower, unanimousPower);
+    const mu = weightedGeometricMean(
+      muPass,
+      muUnanimous,
+      passPower,
+      unanimousPower,
+    );
     means[i] = mu;
     if (mu === 0.0) {
       variances[i] = 0.0;
@@ -491,7 +462,12 @@ function geomDsAtKBayes(
   const varUnanimous = varSpec;
   const covPu = cov;
 
-  const mu = weightedGeometricMean(muPass, muUnanimous, passPower, unanimousPower);
+  const mu = weightedGeometricMean(
+    muPass,
+    muUnanimous,
+    passPower,
+    unanimousPower,
+  );
   if (mu === 0.0) {
     return [0.0, 0.0];
   }
@@ -541,7 +517,13 @@ export function thresholdSpectrumAtKCi(
     beta0,
   );
   const sigma = Math.sqrt(Math.max(0.0, varSpec));
-  const [lo, hi] = normalCredibleInterval(muSpec, sigma, confidence, true, bounds);
+  const [lo, hi] = normalCredibleInterval(
+    muSpec,
+    sigma,
+    confidence,
+    true,
+    bounds,
+  );
   return [muSpec, sigma, lo, hi];
 }
 
@@ -556,7 +538,14 @@ export function geomAtKCi(
   alpha0 = 1.0,
   beta0 = 1.0,
 ): [number, number, number, number] {
-  const [mu, sigma] = geomAtKBayes(R, k, passPower, unanimousPower, alpha0, beta0);
+  const [mu, sigma] = geomAtKBayes(
+    R,
+    k,
+    passPower,
+    unanimousPower,
+    alpha0,
+    beta0,
+  );
   const [lo, hi] = normalCredibleInterval(mu, sigma, confidence, true, bounds);
   return [mu, sigma, lo, hi];
 }
@@ -572,7 +561,14 @@ export function geomDsAtKCi(
   alpha0 = 1.0,
   beta0 = 1.0,
 ): [number, number, number, number] {
-  const [mu, sigma] = geomDsAtKBayes(R, k, passPower, unanimousPower, alpha0, beta0);
+  const [mu, sigma] = geomDsAtKBayes(
+    R,
+    k,
+    passPower,
+    unanimousPower,
+    alpha0,
+    beta0,
+  );
   const [lo, hi] = normalCredibleInterval(mu, sigma, confidence, true, bounds);
   return [mu, sigma, lo, hi];
 }

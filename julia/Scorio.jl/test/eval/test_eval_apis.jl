@@ -1,6 +1,13 @@
 using Test
 using Scorio
 
+const TAILPASS_PUBLIC_NAMES = Set([
+    :tailpass, :tailpass_empirical, :TailPassProfile, :TailPassDraws,
+    :TailPassWeights, :tailpass_weights, :linear, :moment, :discovery,
+    :stability, :at_k, :sample, :summary, :ci, :linear_ci, :moment_ci,
+    :power_mean, :qrs, :rollout, :harmonic, :shortfall,
+])
+
 @testset "eval/apis.jl" begin
     R = Int[
         0 1 1 0 1
@@ -222,12 +229,11 @@ using Scorio
         @test Scorio.Eval.pass_hat_k(v, 1) ≈ 0.6 atol = 1e-12
         @test Scorio.Eval.bayes(v)[1] ≈ Scorio.Eval.bayes(reshape(v, 1, :))[1] atol = 1e-12
 
-        # Python uses `np.asarray(..., dtype=int)`: rectangular nested
-        # sequences are accepted and finite real values truncate toward zero.
+        # Outcomes must be finite, integer-valued numeric or boolean entries.
         nested = ((0.9, 1.9), (1.2, 0.2))
-        @test Scorio.Eval.pass_at_k(nested, 1) == 0.5
-        @test Scorio.Eval.auc_at_k(nested, 2) ==
-              Scorio.Eval.auc_at_k(Int[0 1; 1 0], 2)
+        @test_throws ErrorException Scorio.Eval.pass_at_k(nested, 1)
+        @test_throws ErrorException Scorio.Eval.auc_at_k(nested, 2)
+        @test Scorio.Eval.pass_at_k(((false, true), (true, false)), 1) == 0.5
         @test Scorio.Eval.bayes(((0, 1), (1, 0)), (0.0, 1.0), ((1,), (0,))) ==
               Scorio.Eval.bayes(
             Int[0 1; 1 0],
@@ -400,6 +406,7 @@ end
             :geo_spectrum_at_k, :geo_spectrum_at_k_ci,
             :geo_spectrum_star_at_k, :geo_spectrum_star_at_k_ci,
         ])
+        union!(expected, TAILPASS_PUBLIC_NAMES)
         actual = Set(filter(name -> name != :Eval, names(Scorio.Eval)))
         @test actual == expected
         @test all(name -> isdefined(Scorio, name), expected)
@@ -492,7 +499,7 @@ end
     )
 
     public_eval_names = filter(name -> name != :Eval, names(Scorio.Eval))
-    @test Set(first.(specifications)) == Set(public_eval_names)
+    @test Set(first.(specifications)) == setdiff(Set(public_eval_names), TAILPASS_PUBLIC_NAMES)
     for (name, fn, required, optional_names, optional_values) in specifications
         expected = fn(required..., optional_values...)
         for prefix_length in 0:length(optional_names)

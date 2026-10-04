@@ -9,7 +9,14 @@
  * References: Hu et al. (2026), arXiv:2601.08763.
  */
 
-import { comb } from "./internal/math.js";
+import {
+  positive,
+  endpointMoments,
+  betaQuadrature,
+  dot,
+  sum,
+} from "./internal/tailpass.js";
+import { hypergeomAtLeastOne } from "./internal/math.js";
 import { normalCredibleInterval, type Bounds } from "./internal/ci.js";
 import {
   asMatrix,
@@ -27,8 +34,7 @@ function checkK(N: number, k: number): void {
 
 /** Vectorized Pass@k value from a per-row success count `nu`. */
 function passAtKFromCount(nu: number, N: number, k: number): number {
-  const denom = comb(N, k);
-  return 1.0 - comb(N - nu, k) / denom;
+  return hypergeomAtLeastOne(N, nu, k);
 }
 
 /** Eq. (7) trapezoidal-rule coefficients for AUC@K over Pass@1..Pass@K. */
@@ -84,6 +90,8 @@ function binaryBetaPosterior(
   alpha0: number,
   beta0: number,
 ): { alpha: number[]; beta: number[]; N: number } {
+  positive(alpha0, "alpha0");
+  positive(beta0, "beta0");
   validateBinary(Rm);
   const N = Rm[0]!.length;
   const c = rowSums(Rm);
@@ -101,50 +109,32 @@ function aucAtKBayes(
   alpha0: number,
   beta0: number,
 ): [number, number] {
-  const Rm = asMatrix(R);
-  const { alpha, beta, N } = binaryBetaPosterior(Rm, alpha0, beta0);
+  const Rm = asMatrix(R),
+    { alpha, beta, N } = binaryBetaPosterior(Rm, alpha0, beta0);
   checkK(N, k);
-  const M = Rm.length;
   const coeff = aucAtKCoefficients(k);
-
-  let meanSum = 0;
-  let varSum = 0;
-  // Eq. (7) is a weighted sum of Pass@j terms, and for Bernoulli success rate
-  // p we use Pass@j(p) = 1 - (1 - p)^j.
-  for (let i = 0; i < M; i++) {
-    const a = alpha[i]!;
-    const b = beta[i]!;
-
-    // r[s] = E[(1-p)^s] = Beta(a, b+s)/Beta(a, b). Using the recurrence
-    //   r[s] = r[s-1] * (b + s - 1) / (a + b + s - 1),   r[0] = 1,
-    // precomputes every moment in O(k) arithmetic with no gammaln calls.
-    const r = new Array<number>(2 * k + 1);
-    r[0] = 1.0;
-    for (let s = 1; s <= 2 * k; s++) {
-      r[s] = (r[s - 1]! * (b + s - 1)) / (a + b + s - 1);
-    }
-
-    let dotCoeffEq = 0;
-    for (let j = 1; j <= k; j++) {
-      dotCoeffEq += coeff[j - 1]! * r[j]!;
-    }
-    const m = 1.0 - dotCoeffEq;
-
-    let e2 = 1.0 - 2.0 * dotCoeffEq;
-    for (let j = 1; j <= k; j++) {
-      const cJ = coeff[j - 1]!;
-      for (let l = 1; l <= k; l++) {
-        e2 += cJ * coeff[l - 1]! * r[j + l]!;
-      }
-    }
-
-    meanSum += m;
-    varSum += Math.max(0.0, e2 - m * m);
-  }
-
-  const mu = meanSum / M;
-  const sigma = Math.sqrt(varSum) / M;
-  return [mu, sigma];
+  const moments = alpha.map((a, i) => {
+    const b = beta[i]!,
+      [nodes, weights] = betaQuadrature(k, a, b);
+    const values = nodes.map((p) =>
+      sum(coeff.map((c, j) => c * -Math.expm1((j + 1) * Math.log1p(-p)))),
+    );
+    const mean = sum(
+      coeff.map((c, j) => c * endpointMoments(j + 1, a, b, true)[0]),
+    );
+    const center = dot(weights, values);
+    return [
+      mean,
+      dot(
+        weights,
+        values.map((v) => (v - center) ** 2),
+      ),
+    ];
+  });
+  return [
+    sum(moments.map((v) => v[0]!)) / Rm.length,
+    Math.sqrt(sum(moments.map((v) => v[1]!))) / Rm.length,
+  ];
 }
 
 /**

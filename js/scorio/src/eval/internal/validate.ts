@@ -10,11 +10,15 @@ export type Matrix = readonly number[] | readonly (readonly number[])[];
  *
  * A 1-D array is treated as a single row, matching `_as_2d_int_matrix`.
  */
-export function asMatrix(R: Matrix): number[][] {
+export function asMatrix(R: Matrix, allowEmpty = false): number[][] {
+  if (!Array.isArray(R) || (!allowEmpty && R.length === 0))
+    throw new Error("R must contain at least one question and trial");
   if (R.length === 0) return [[]];
   if (Array.isArray((R as readonly unknown[])[0])) {
     const rows = R as readonly (readonly number[])[];
     const ncols = rows[0]!.length;
+    if (!allowEmpty && ncols === 0)
+      throw new Error("R must contain at least one trial");
     return rows.map((row) => {
       if (row.length !== ncols) {
         throw new Error("R must be a rectangular 2D array.");
@@ -26,30 +30,14 @@ export function asMatrix(R: Matrix): number[][] {
 }
 
 function toInt(x: number): number {
-  // NumPy's `np.asarray(..., dtype=int)` truncates finite floating-point values
-  // toward zero, accepts booleans, and parses integer strings before the
-  // metric-specific range check. Mirror those runtime coercions even though
-  // the typed JS surface intentionally advertises numeric matrices.
   const raw = x as unknown;
-  let numeric: number;
-  if (typeof raw === "boolean") {
-    numeric = Number(raw);
-  } else if (typeof raw === "string") {
-    const stripped = raw.trim();
-    if (!/^[+-]?\d(?:_?\d)*$/.test(stripped)) {
-      throw new Error(`Outcome matrix entries must be integer-like; got ${raw}`);
-    }
-    numeric = Number(stripped.replace(/_/g, ""));
-  } else if (typeof raw === "number") {
-    numeric = raw;
-  } else {
-    throw new Error(`Outcome matrix entries must be numeric; got ${String(raw)}`);
+  if (typeof raw === "boolean") return Number(raw);
+  if (typeof raw !== "number" || !Number.isSafeInteger(raw)) {
+    throw new Error(
+      "Outcome matrix entries must be finite integer-valued numbers or booleans",
+    );
   }
-  if (!Number.isFinite(numeric)) {
-    throw new Error(`Outcome matrix entries must be finite; got ${x}`);
-  }
-  const value = Math.trunc(numeric);
-  return value === 0 ? 0 : value;
+  return raw === 0 ? 0 : raw;
 }
 
 /**
@@ -61,7 +49,7 @@ export function asPriorMatrix(R0: Matrix, rowCount: number): number[][] {
     return Array.from({ length: rowCount }, () => []);
   }
   if (Array.isArray((R0 as readonly unknown[])[0])) {
-    return asMatrix(R0);
+    return asMatrix(R0, true);
   }
 
   const flat = (R0 as readonly number[]).map(toInt);

@@ -16,7 +16,8 @@ function _prepare_categorical_input(R, w=nothing, R0=nothing)
         end
         wv = [0.0, 1.0]
     else
-        wv = Float64.(collect(w))
+        wv = _tp_vector(w, "w")
+        isempty(wv) && error("w must be nonempty")
     end
 
     M, _ = size(Rm)
@@ -79,30 +80,6 @@ function _eval_logsumexp(values::AbstractVector{<:Real})::Float64
     return Float64(max_value + log(sum(exp(Float64(v) - max_value) for v in values)))
 end
 
-function _dirichlet_nested_cumulative_moment(
-    total::Real,
-    a::Real,
-    b::Real,
-    k::Integer,
-)::Float64
-    total_f = Float64(total)
-    a_f = Float64(a)
-    b_f = Float64(b)
-    if b_f <= 0.0
-        error("b must be > 0 for nested cumulative moments")
-    end
-
-    log_denom = loggamma(total_f + 2.0 * k) - loggamma(total_f)
-    log_terms = zeros(Float64, k + 1)
-    @inbounds for r in 0:k
-        log_terms[r + 1] = loggamma(k + 1.0) - loggamma(r + 1.0) -
-                           loggamma(k - r + 1.0) +
-                           loggamma(a_f + k + r) - loggamma(a_f) +
-                           loggamma(b_f + k - r) - loggamma(b_f) -
-                           log_denom
-    end
-    return Float64(exp(_eval_logsumexp(log_terms)))
-end
 
 """
     max_at_k(R, k, w=nothing) -> Float64
@@ -111,70 +88,34 @@ Expected best reward among `k` samples drawn without replacement from each
 question's observed response bank.
 """
 function max_at_k(R, k::Integer, w)::Float64
-    Rm, wv, _ = _prepare_categorical_input(R, w, nothing)
-    M, N = size(Rm)
-    if !(1 <= k <= N)
-        error("k must satisfy 1 <= k <= N (N=$N); got k=$k")
-    end
-
-    coeff = [exp(_log_comb(i - 1, k - 1) - _log_comb(N, k)) for i in k:N]
-    vals = zeros(Float64, M)
-    @inbounds for row in 1:M
-        rewards = sort([wv[Rm[row, col] + 1] for col in 1:N])
-        vals[row] = sum(coeff .* rewards[k:N])
-    end
-    return Float64(sum(vals) / M)
+    Rm, wv, _ = _prepare_categorical_input(R, w); M, N = size(Rm)
+    _tp_integer(k); k <= N || error("k must not exceed N")
+    levels = sort(unique(wv)); offset, scale, normalized = _tp_scaled_rewards(levels)
+    scale == 0 && return offset
+    gaps = diff(normalized)
+    means = [normalized[1]+sum(gaps[j]*_pass_probability(N, count(c -> wv[c+1] > levels[j], row), k) for j in eachindex(gaps)) for row in eachrow(Rm)]
+    return offset+scale*(sum(means)/M)
 end
 
 function _max_at_k_bayes(R, k::Integer, w=nothing, R0=nothing)
-    gamma, levels = _grouped_posterior_params(R, w, R0)
-    M, L = size(gamma)
-    total = Float64(sum(gamma[1, :]))
-    if k < 1
-        error("k must be >= 1; got $k")
-    end
-    if L == 1
-        return Float64(levels[1]), 0.0, levels
-    end
-
-    gaps = diff(levels)
-    top = Float64(levels[end])
-    means = zeros(Float64, M)
-    vars_ = zeros(Float64, M)
-
-    @inbounds for row in 1:M
-        cum = cumsum(gamma[row, :])[1:(end - 1)]
-        e_ak = zeros(Float64, L - 1)
-        e_a2k = zeros(Float64, L - 1)
-        for idx in 1:(L - 1)
-            a = Float64(cum[idx])
-            b = total - a
-            e_ak[idx] = _beta_ratio(a, b, k, 0)
-            e_a2k[idx] = _beta_ratio(a, b, 2 * k, 0)
+    _tp_integer(k); gamma, levels = _grouped_posterior_params(R, w, R0)
+    offset, scale, normalized = _tp_scaled_rewards(levels)
+    scale == 0 && return offset, 0.0, levels
+    gaps = diff(normalized)
+    moments = [begin
+        total = sum(row); cum = cumsum(row)[1:end-1]
+        logs = [_tp_log_beta_power(a, total-a, k) for a in cum]
+        mean = normalized[1]+dot(gaps, -expm1.(logs))
+        var = 0.0
+        for i in eachindex(gaps), j in eachindex(gaps)
+            lower, upper = minmax(i, j)
+            cross = _tp_log_beta_power(cum[upper], total-cum[upper], 2k) + (i == j ? 0.0 : _tp_log_beta_power(cum[lower], cum[upper]-cum[lower], k))
+            var += gaps[i]*gaps[j]*_tp_log_difference(cross, logs[i]+logs[j])
         end
-
-        m = top - sum(gaps .* e_ak)
-        cross = zeros(Float64, L - 1, L - 1)
-        for i in 1:(L - 1)
-            cross[i, i] = e_a2k[i]
-            for j in (i + 1):(L - 1)
-                a = Float64(cum[i])
-                b = Float64(cum[j] - cum[i])
-                moment = _dirichlet_nested_cumulative_moment(total, a, b, k)
-                cross[i, j] = moment
-                cross[j, i] = moment
-            end
-        end
-
-        e2 = top * top - 2.0 * top * sum(gaps .* e_ak)
-        e2 += sum(gaps .* (cross * gaps))
-        means[row] = m
-        vars_[row] = max(0.0, e2 - m * m)
-    end
-
-    mu = Float64(sum(means) / M)
-    sigma = Float64(sqrt(sum(vars_)) / M)
-    return mu, sigma, levels
+        (mean, sqrt(_tp_variance(var)))
+    end for row in eachrow(gamma)]
+    M = size(gamma, 1)
+    return offset+scale*(sum(first, moments)/M), scale*foldl(hypot, last.(moments); init=0.0)/M, levels
 end
 
 """
@@ -190,6 +131,7 @@ function max_at_k_ci(
     confidence::Real,
     bounds,
 )::Tuple{Float64, Float64, Float64, Float64}
+    _tp_integer(k)
     if k == 1
         return bayes_ci(R, w, R0, confidence, bounds)
     end

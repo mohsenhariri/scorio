@@ -11,11 +11,13 @@ function _avg(
         return Float64(sum(Rm) / length(Rm))
     end
 
-    wv = Float64.(collect(w))
+    wv = _tp_vector(w, "w")
+    isempty(wv) && error("w must be nonempty")
     C = length(wv) - 1
     _validate_matrix_range(Rm, 0, C, "R")
 
-    return Float64(sum(wv[Rm .+ 1]) / length(Rm))
+    offset, scale, normalized = _tp_scaled_rewards(wv)
+    return Float64(offset + scale * (sum(normalized[Rm .+ 1]) / length(Rm)))
 end
 
 """
@@ -77,7 +79,8 @@ function avg(
         _validate_binary(Rm)
         wv = [0.0, 1.0]
     else
-        wv = Float64.(collect(w))
+        wv = _tp_vector(w, "w")
+    isempty(wv) && error("w must be nonempty")
     end
 
     _, N = size(Rm)

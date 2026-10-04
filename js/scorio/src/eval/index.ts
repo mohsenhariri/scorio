@@ -126,3 +126,21 @@ export {
   geoSpectrumStarAtK as geo_spectrum_star_at_k,
   geoSpectrumStarAtKCi as geo_spectrum_star_at_k_ci,
 };
+
+// TailPass returns a profile; utilities choose the scalar objective explicitly.
+export {
+  tailpass,
+  tailpassEmpirical,
+  tailpass_empirical,
+  TailPassProfile,
+  TailPassDraws,
+} from "./tailpass.js";
+export type {
+  TailPassOptions,
+  TailPassCIOptions,
+  SamplingOptions,
+  ScalarSummary,
+  ProfileSummary,
+} from "./tailpass.js";
+export * as tailpassWeights from "./tailpassWeights.js";
+export * as tailpass_weights from "./tailpassWeights.js";

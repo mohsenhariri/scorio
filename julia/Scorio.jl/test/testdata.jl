@@ -1,9 +1,9 @@
 # Shared simulation data loading for all test files.
-# Loads NPZ data from tests/data/ once and provides accessor functions
+# Loads packaged copies of the Python simulation fixtures once and provides accessor functions
 # matching the Python conftest.py fixtures.
 using NPZ
 
-const _DATA_DIR = normpath(joinpath(@__DIR__, "..", "..", "..", "tests", "data"))
+const _DATA_DIR = joinpath(@__DIR__, "fixtures")
 
 function _load_npz(path::String)::Dict{String, Array{Int}}
     raw = npzread(path)

@@ -1,7 +1,7 @@
 {
   "name": "scorio",
-  "version": "0.2.2",
-  "description": "Bayesian evaluation toolkit for stochastic models — a TypeScript port of the Scorio eval APIs (zero dependencies).",
+  "version": "0.2.3",
+  "description": "Bayesian evaluation, ranking, and answer aggregation toolkit — a zero-dependency TypeScript port of Scorio.",
   "keywords": [
     "bayesian",
     "statistics",

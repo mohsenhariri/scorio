@@ -13,14 +13,14 @@ isempty(unknown_families) || error(
 
 run_family(name::AbstractString) = RUN_ALL_TESTS || name in TEST_FAMILIES
 
-# Eval and rank share NPZ simulation fixtures. `Pkg.test` makes the declared
+# Eval, rank, and sinf share NPZ simulation fixtures. `Pkg.test` makes the declared
 # test-only dependency available for both full and focused runs.
-if run_family("eval") || run_family("rank")
+if run_family("eval") || run_family("rank") || run_family("sinf")
     include("testdata.jl")
 end
 
 @testset "Scorio.jl" begin
-    @test Scorio.VERSION == v"0.2.2"
+    @test Scorio.VERSION == v"0.2.3"
 
     @test isdefined(Scorio, :Eval)
     @test isdefined(Scorio, :Rank)
@@ -38,10 +38,10 @@ end
 end
 
 run_family("eval") && include("eval/test_eval_apis.jl")
+run_family("eval") && include("eval/test_tailpass.jl")
 run_family("rank") && include("rank/runtests_rank.jl")
 if run_family("sinf")
     include("sinf/test_sinf.jl")
-    include("sinf/test_sinf_av.jl")
 end
 run_family("aggregate") && include("aggregate/test_aggregate.jl")
 run_family("utils") && include("test_utils.jl")

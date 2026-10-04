@@ -105,7 +105,7 @@ function pass_at_k(R, k::Integer)::Float64
     _validate_binary(Rm)
 
     M, N = size(Rm)
-    if !(1 <= k <= N)
+    if k isa Bool || !(1 <= k <= N)
         error("k must satisfy 1 <= k <= N (N=$N); got k=$k")
     end
 
@@ -171,7 +171,7 @@ function pass_hat_k(R, k::Integer)::Float64
     _validate_binary(Rm)
 
     M, N = size(Rm)
-    if !(1 <= k <= N)
+    if k isa Bool || !(1 <= k <= N)
         error("k must satisfy 1 <= k <= N (N=$N); got k=$k")
     end
 
@@ -307,7 +307,7 @@ function g_pass_at_k_tau(
     if !(0.0 <= tau_f <= 1.0)
         error("tau must be in [0, 1]; got $tau")
     end
-    if !(1 <= k <= N)
+    if k isa Bool || !(1 <= k <= N)
         error("k must satisfy 1 <= k <= N (N=$N); got k=$k")
     end
 
@@ -388,7 +388,7 @@ function mg_pass_at_k(R, k::Integer)::Float64
     _validate_binary(Rm)
 
     M, N = size(Rm)
-    if !(1 <= k <= N)
+    if k isa Bool || !(1 <= k <= N)
         error("k must satisfy 1 <= k <= N (N=$N); got k=$k")
     end
 
@@ -435,6 +435,7 @@ function _binary_beta_posterior_params(
     alpha0::Real=1.0,
     beta0::Real=1.0,
 )::Tuple{Vector{Float64}, Vector{Float64}}
+    _tp_positive(alpha0, "alpha0"); _tp_positive(beta0, "beta0")
     Rm = _as_2d_int_matrix(R)
     _validate_binary(Rm)
 
@@ -445,204 +446,41 @@ function _binary_beta_posterior_params(
     return alpha, beta
 end
 
-function _pass_at_k_bayes(
-    R,
-    k::Integer;
-    alpha0::Real=1.0,
-    beta0::Real=1.0,
-)::Tuple{Float64, Float64}
-    Rm = _as_2d_int_matrix(R)
-    _validate_binary(Rm)
-
-    M, N = size(Rm)
-    if !(1 <= k <= N)
-        error("k must satisfy 1 <= k <= N (N=$N); got k=$k")
-    end
-
+function _pass_at_k_bayes(R, k::Integer; alpha0::Real=1.0, beta0::Real=1.0)::Tuple{Float64, Float64}
+    Rm = _as_2d_int_matrix(R); _validate_binary(Rm); M, N = size(Rm)
+    _tp_integer(k); k <= N || error("k must not exceed N")
     alpha, beta = _binary_beta_posterior_params(Rm; alpha0=alpha0, beta0=beta0)
-    means = zeros(Float64, M)
-    vars_ = zeros(Float64, M)
-
-    for i in 1:M
-        a_i = alpha[i]
-        b_i = beta[i]
-        e_qk = _beta_ratio(a_i, b_i, 0, k)
-        e_q2k = _beta_ratio(a_i, b_i, 0, 2 * k)
-
-        m = 1.0 - e_qk
-        e2 = 1.0 - 2.0 * e_qk + e_q2k
-        v = max(0.0, e2 - m * m)
-
-        means[i] = m
-        vars_[i] = v
-    end
-
-    mu = Float64(sum(means) / M)
-    sigma = Float64(sqrt(sum(vars_)) / M)
-    return mu, sigma
+    moments = [_tp_endpoint(k, a, b, true) for (a, b) in zip(alpha, beta)]
+    return sum(first, moments)/M, sqrt(sum(last, moments))/M
 end
 
-function _pass_hat_k_bayes(
-    R,
-    k::Integer;
-    alpha0::Real=1.0,
-    beta0::Real=1.0,
-)::Tuple{Float64, Float64}
-    Rm = _as_2d_int_matrix(R)
-    _validate_binary(Rm)
-
-    M, N = size(Rm)
-    if !(1 <= k <= N)
-        error("k must satisfy 1 <= k <= N (N=$N); got k=$k")
-    end
-
+function _pass_hat_k_bayes(R, k::Integer; alpha0::Real=1.0, beta0::Real=1.0)::Tuple{Float64, Float64}
+    Rm = _as_2d_int_matrix(R); _validate_binary(Rm); M, N = size(Rm)
+    _tp_integer(k); k <= N || error("k must not exceed N")
     alpha, beta = _binary_beta_posterior_params(Rm; alpha0=alpha0, beta0=beta0)
-    means = zeros(Float64, M)
-    vars_ = zeros(Float64, M)
-
-    for i in 1:M
-        a_i = alpha[i]
-        b_i = beta[i]
-        e_pk = _beta_ratio(a_i, b_i, k, 0)
-        e_p2k = _beta_ratio(a_i, b_i, 2 * k, 0)
-
-        m = e_pk
-        v = max(0.0, e_p2k - m * m)
-
-        means[i] = m
-        vars_[i] = v
-    end
-
-    mu = Float64(sum(means) / M)
-    sigma = Float64(sqrt(sum(vars_)) / M)
-    return mu, sigma
+    moments = [_tp_endpoint(k, a, b, false) for (a, b) in zip(alpha, beta)]
+    return sum(first, moments)/M, sqrt(sum(last, moments))/M
 end
 
-function _g_pass_at_k_tau_bayes(
-    R,
-    k::Integer,
-    tau::Real;
-    alpha0::Real=1.0,
-    beta0::Real=1.0,
-)::Tuple{Float64, Float64}
-    Rm = _as_2d_int_matrix(R)
-    _validate_binary(Rm)
-
-    M, N = size(Rm)
-    tau_f = Float64(tau)
-
-    if !(0.0 <= tau_f <= 1.0)
-        error("tau must be in [0, 1]; got $tau")
-    end
-    if !(1 <= k <= N)
-        error("k must satisfy 1 <= k <= N (N=$N); got k=$k")
-    end
-
-    if tau_f <= 0.0
-        return _pass_at_k_bayes(Rm, k; alpha0=alpha0, beta0=beta0)
-    end
-    if tau_f >= 1.0
-        return _pass_hat_k_bayes(Rm, k; alpha0=alpha0, beta0=beta0)
-    end
-
-    j0 = _tau_threshold(tau_f, k)
+function _g_pass_at_k_tau_bayes(R, k::Integer, tau::Real; alpha0::Real=1.0, beta0::Real=1.0)::Tuple{Float64, Float64}
+    Rm = _as_2d_int_matrix(R); _validate_binary(Rm); M, N = size(Rm)
+    _tp_integer(k); k <= N || error("k must not exceed N"); _tp_unit(tau, "tau")
+    tau <= 0 && return _pass_at_k_bayes(Rm, k; alpha0=alpha0, beta0=beta0)
+    tau >= 1 && return _pass_hat_k_bayes(Rm, k; alpha0=alpha0, beta0=beta0)
     alpha, beta = _binary_beta_posterior_params(Rm; alpha0=alpha0, beta0=beta0)
-
-    means = zeros(Float64, M)
-    vars_ = zeros(Float64, M)
-
-    js = collect(j0:k)
-    coeff = [_comb_float(k, j) for j in js]
-
-    for i in 1:M
-        a_i = alpha[i]
-        b_i = beta[i]
-
-        m = 0.0
-        for idx_j in eachindex(js)
-            j = js[idx_j]
-            c_j = coeff[idx_j]
-            m += c_j * _beta_ratio(a_i, b_i, j, k - j)
-        end
-
-        e2 = 0.0
-        for idx_j in eachindex(js)
-            j = js[idx_j]
-            c_j = coeff[idx_j]
-            for idx_l in eachindex(js)
-                l = js[idx_l]
-                c_l = coeff[idx_l]
-                e2 += c_j * c_l * _beta_ratio(a_i, b_i, j + l, 2 * k - (j + l))
-            end
-        end
-
-        v = max(0.0, e2 - m * m)
-        means[i] = m
-        vars_[i] = v
-    end
-
-    mu = Float64(sum(means) / M)
-    sigma = Float64(sqrt(sum(vars_)) / M)
-    return mu, sigma
+    cutoff = _tau_threshold(Float64(tau), k)
+    values = reshape(Float64.((0:k) .>= cutoff), :, 1)
+    moments = [_tp_binary_moments(k, a, b, values) for (a, b) in zip(alpha, beta)]
+    return sum(v[1][1] for v in moments)/M, sqrt(sum(v[2][1, 1] for v in moments))/M
 end
 
-function _mg_pass_at_k_bayes(
-    R,
-    k::Integer;
-    alpha0::Real=1.0,
-    beta0::Real=1.0,
-)::Tuple{Float64, Float64}
-    Rm = _as_2d_int_matrix(R)
-    _validate_binary(Rm)
-
-    M, N = size(Rm)
-    if !(1 <= k <= N)
-        error("k must satisfy 1 <= k <= N (N=$N); got k=$k")
-    end
-
+function _mg_pass_at_k_bayes(R, k::Integer; alpha0::Real=1.0, beta0::Real=1.0)::Tuple{Float64, Float64}
+    Rm = _as_2d_int_matrix(R); _validate_binary(Rm); M, N = size(Rm)
+    _tp_integer(k); k <= N || error("k must not exceed N")
     alpha, beta = _binary_beta_posterior_params(Rm; alpha0=alpha0, beta0=beta0)
-
-    majority = Int(ceil(0.5 * k))
-    if majority >= k
-        return 0.0, 0.0
-    end
-
-    js = collect((majority + 1):k)
-    coeff = [Float64((2.0 / k) * (j - majority) * _comb_float(k, j)) for j in js]
-
-    means = zeros(Float64, M)
-    vars_ = zeros(Float64, M)
-
-    for i in 1:M
-        a_i = alpha[i]
-        b_i = beta[i]
-
-        m = 0.0
-        for idx_j in eachindex(js)
-            j = js[idx_j]
-            c_j = coeff[idx_j]
-            m += c_j * _beta_ratio(a_i, b_i, j, k - j)
-        end
-
-        e2 = 0.0
-        for idx_j in eachindex(js)
-            j = js[idx_j]
-            c_j = coeff[idx_j]
-            for idx_l in eachindex(js)
-                l = js[idx_l]
-                c_l = coeff[idx_l]
-                e2 += c_j * c_l * _beta_ratio(a_i, b_i, j + l, 2 * k - (j + l))
-            end
-        end
-
-        v = max(0.0, e2 - m * m)
-        means[i] = m
-        vars_[i] = v
-    end
-
-    mu = Float64(sum(means) / M)
-    sigma = Float64(sqrt(sum(vars_)) / M)
-    return mu, sigma
+    values = reshape(2.0/k .* max.((0:k) .- cld(k, 2), 0), :, 1)
+    moments = [_tp_binary_moments(k, a, b, values) for (a, b) in zip(alpha, beta)]
+    return sum(v[1][1] for v in moments)/M, sqrt(sum(v[2][1, 1] for v in moments))/M
 end
 
 """

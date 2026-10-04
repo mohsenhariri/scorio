@@ -41,6 +41,9 @@ include("eval/maj.jl")
 include("eval/max_reward.jl")
 include("eval/geom.jl")
 include("eval/keyword_forwarding.jl")
+include("eval/tailpass_math.jl")
+include("eval/tailpass_weights.jl")
+include("eval/tailpass.jl")
 
 const unanimous_at_k = pass_hat_k
 const unanimous_at_k_ci = pass_hat_k_ci

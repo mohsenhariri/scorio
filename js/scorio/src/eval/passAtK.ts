@@ -7,11 +7,8 @@
  * arXiv:2406.12045.
  */
 
-import {
-  betaRatio,
-  hypergeomAtLeastOne,
-  hypergeomPmf,
-} from "./internal/math.js";
+import { positive, endpointMoments, sum } from "./internal/tailpass.js";
+import { hypergeomAtLeastOne, hypergeomPmf } from "./internal/math.js";
 import { normalCredibleInterval, type Bounds } from "./internal/ci.js";
 import {
   asMatrix,
@@ -21,7 +18,7 @@ import {
 } from "./internal/validate.js";
 
 function checkK(k: number, N: number): void {
-  if (!(k >= 1 && k <= N)) {
+  if (!Number.isSafeInteger(k) || !(k >= 1 && k <= N)) {
     throw new Error(`k must satisfy 1 <= k <= N (N=${N}); got k=${k}`);
   }
 }
@@ -56,6 +53,8 @@ function binaryBetaPosterior(
   alpha0: number,
   beta0: number,
 ): { alpha: number[]; beta: number[]; N: number } {
+  positive(alpha0, "alpha0");
+  positive(beta0, "beta0");
   validateBinary(Rm);
   const N = Rm[0]!.length;
   const c = rowSums(Rm);
@@ -73,23 +72,14 @@ function passAtKBayes(
   alpha0: number,
   beta0: number,
 ): [number, number] {
-  const Rm = asMatrix(R);
-  const { alpha, beta, N } = binaryBetaPosterior(Rm, alpha0, beta0);
+  const Rm = asMatrix(R),
+    { alpha, beta, N } = binaryBetaPosterior(Rm, alpha0, beta0);
   checkK(k, N);
-  const M = Rm.length;
-  let meanSum = 0;
-  let varSum = 0;
-  for (let i = 0; i < M; i++) {
-    const a = alpha[i]!;
-    const b = beta[i]!;
-    const eQk = betaRatio(a, b, 0, k); // E[(1-p)^k]
-    const eQ2k = betaRatio(a, b, 0, 2 * k); // E[(1-p)^(2k)]
-    const m = 1 - eQk;
-    const e2 = 1 - 2 * eQk + eQ2k;
-    meanSum += m;
-    varSum += Math.max(0, e2 - m * m);
-  }
-  return [meanSum / M, Math.sqrt(varSum) / M];
+  const moments = alpha.map((a, i) => endpointMoments(k, a, beta[i]!, true));
+  return [
+    sum(moments.map((v) => v[0])) / Rm.length,
+    Math.sqrt(sum(moments.map((v) => v[1]))) / Rm.length,
+  ];
 }
 
 /** Posterior mean/std for the i.i.d. Pass^k quantity `p^k`. */
@@ -99,21 +89,14 @@ function passHatKBayes(
   alpha0: number,
   beta0: number,
 ): [number, number] {
-  const Rm = asMatrix(R);
-  const { alpha, beta, N } = binaryBetaPosterior(Rm, alpha0, beta0);
+  const Rm = asMatrix(R),
+    { alpha, beta, N } = binaryBetaPosterior(Rm, alpha0, beta0);
   checkK(k, N);
-  const M = Rm.length;
-  let meanSum = 0;
-  let varSum = 0;
-  for (let i = 0; i < M; i++) {
-    const a = alpha[i]!;
-    const b = beta[i]!;
-    const ePk = betaRatio(a, b, k, 0); // E[p^k]
-    const eP2k = betaRatio(a, b, 2 * k, 0); // E[p^(2k)]
-    meanSum += ePk;
-    varSum += Math.max(0, eP2k - ePk * ePk);
-  }
-  return [meanSum / M, Math.sqrt(varSum) / M];
+  const moments = alpha.map((a, i) => endpointMoments(k, a, beta[i]!, false));
+  return [
+    sum(moments.map((v) => v[0])) / Rm.length,
+    Math.sqrt(sum(moments.map((v) => v[1]))) / Rm.length,
+  ];
 }
 
 /** Bayesian `[mu, sigma, lo, hi]` for i.i.d. Pass@k. */

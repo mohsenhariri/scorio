@@ -1,7 +1,7 @@
 """Scorio Julia package."""
 module Scorio
 
-const VERSION = v"0.2.2"
+const VERSION = v"0.2.3"
 
 include("numpy_rng.jl")
 include("eval.jl")
@@ -15,6 +15,14 @@ const Agg = Aggregate
 const agg = Aggregate
 
 module Eval
+using ..Scorio: tailpass, tailpass_empirical, TailPassProfile, TailPassDraws,
+    TailPassWeights, tailpass_weights, linear, moment, discovery, stability,
+    at_k, sample, summary, ci, linear_ci, moment_ci, power_mean, qrs, rollout,
+    harmonic, shortfall
+export tailpass, tailpass_empirical, TailPassProfile, TailPassDraws,
+    TailPassWeights, tailpass_weights, linear, moment, discovery, stability,
+    at_k, sample, summary, ci, linear_ci, moment_ci, power_mean, qrs, rollout,
+    harmonic, shortfall
 import ..Scorio
 using ..Scorio: bayes_ci,
     avg_ci,
@@ -166,61 +174,10 @@ export Prior,
 end
 
 module SInf
-using ..Scorio: ranking_confidence,
-    ci_from_mu_sigma,
-    should_stop,
-    should_stop_top1,
-    suggest_next_allocation,
-    confseq_mean,
-    confseq_mean_path,
-    fixed_ci_path,
-    score_confseq,
-    score_confseq_path,
-    precision_stop,
-    trial_scores,
-    question_scores,
-    paired_trial_diffs,
-    stream_from_tensor,
-    compare_paired,
-    compare_paired_path,
-    decide_better,
-    pairwise_confidence,
-    empirical_scores,
-    should_stop_top1_av,
-    should_stop_full_ranking,
-    suggest_next_allocation_stratified,
-    select_best_fixed_budget,
-    should_stop_sampling,
-    adaptive_consistency_stop,
-    counts_from_answers
-
-export ranking_confidence,
-    ci_from_mu_sigma,
-    should_stop,
-    should_stop_top1,
-    suggest_next_allocation,
-    confseq_mean,
-    confseq_mean_path,
-    fixed_ci_path,
-    score_confseq,
-    score_confseq_path,
-    precision_stop,
-    trial_scores,
-    question_scores,
-    paired_trial_diffs,
-    stream_from_tensor,
-    compare_paired,
-    compare_paired_path,
-    decide_better,
-    pairwise_confidence,
-    empirical_scores,
-    should_stop_top1_av,
-    should_stop_full_ranking,
-    suggest_next_allocation_stratified,
-    select_best_fixed_budget,
-    should_stop_sampling,
-    adaptive_consistency_stop,
-    counts_from_answers
+using ..Scorio: ranking_confidence, ci_from_mu_sigma, should_stop,
+    should_stop_top1, suggest_next_allocation
+export ranking_confidence, ci_from_mu_sigma, should_stop,
+    should_stop_top1, suggest_next_allocation
 end
 
 module Utils
@@ -274,33 +231,8 @@ export bayes,
     geo_spectrum_star_at_k,
     geo_spectrum_star_at_k_ci
 
-export ranking_confidence,
-    ci_from_mu_sigma,
-    should_stop,
-    should_stop_top1,
-    suggest_next_allocation,
-    confseq_mean,
-    confseq_mean_path,
-    fixed_ci_path,
-    score_confseq,
-    score_confseq_path,
-    precision_stop,
-    trial_scores,
-    question_scores,
-    paired_trial_diffs,
-    stream_from_tensor,
-    compare_paired,
-    compare_paired_path,
-    decide_better,
-    pairwise_confidence,
-    empirical_scores,
-    should_stop_top1_av,
-    should_stop_full_ranking,
-    suggest_next_allocation_stratified,
-    select_best_fixed_budget,
-    should_stop_sampling,
-    adaptive_consistency_stop,
-    counts_from_answers
+export ranking_confidence, ci_from_mu_sigma, should_stop,
+    should_stop_top1, suggest_next_allocation
 
 export competition_ranks_from_scores,
     rank_scores,

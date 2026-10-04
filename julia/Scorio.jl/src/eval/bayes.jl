@@ -99,7 +99,8 @@ function bayes(
             )
         end
     else
-        wv = Float64.(collect(w))
+        wv = _tp_vector(w, "w")
+        isempty(wv) && error("w must be nonempty")
     end
 
     M, N = size(Rm)
@@ -152,13 +153,13 @@ function bayes(
     n0_counts = _row_bincount(R0m, C + 1) .+ 1
     nu = n_counts .+ n0_counts
 
-    delta_w = wv .- wv[1]
-    mu = wv[1] + sum(nu * delta_w) / (M * T)
-
-    nu_over_T = nu ./ T
-    termA = vec(sum(nu_over_T .* reshape(delta_w .^ 2, 1, :), dims=2))
-    termB = (nu_over_T * delta_w) .^ 2
-    sigma = sqrt(sum(termA .- termB) / (M^2 * (T + 1)))
+    offset, scale, values = _tp_scaled_rewards(wv)
+    scale == 0 && return offset, 0.0
+    probabilities = nu ./ T
+    means = probabilities * values
+    mu = offset + scale * sum(means)/M
+    variances = [dot(probabilities[i, :], (values .- means[i]).^2)/(T+1) for i in 1:M]
+    sigma = scale * sqrt(sum(variances))/M
 
     return Float64(mu), Float64(sigma)
 end

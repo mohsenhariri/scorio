@@ -15,7 +15,7 @@
  * and are also importable directly from `scorio/rank`.
  *
  * Sequential-inference helpers live under the `sinf` namespace
- * (`scorio.sinf.confseqMean(...)`) and are also importable from `scorio/sinf`.
+ * (`scorio.sinf.shouldStop(...)`) and are also importable from `scorio/sinf`.
  *
  * Test-time-scaling aggregation lives under `aggregate` (with short alias
  * `agg`) and is also importable directly from `scorio/aggregate`.

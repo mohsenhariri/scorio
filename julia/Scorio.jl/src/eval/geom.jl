@@ -29,7 +29,7 @@ function _weighted_geometric_mean(
 end
 
 function _validate_beta_prior(alpha0::Real, beta0::Real)::Nothing
-    if alpha0 <= 0.0 || beta0 <= 0.0
+    if !isfinite(alpha0) || !isfinite(beta0) || alpha0 isa Bool || beta0 isa Bool || alpha0 <= 0.0 || beta0 <= 0.0
         error(
             "alpha0 and beta0 must both be > 0 for a Beta prior; got $alpha0, $beta0",
         )
@@ -38,14 +38,14 @@ function _validate_beta_prior(alpha0::Real, beta0::Real)::Nothing
 end
 
 function _validate_finite_bank_k(N::Integer, k::Integer)::Nothing
-    if !(1 <= k <= N)
+    if k isa Bool || !(1 <= k <= N)
         error("k must satisfy 1 <= k <= N (N=$N); got k=$k")
     end
     return nothing
 end
 
 function _validate_latent_k(k::Integer)::Nothing
-    if k < 1
+    if k isa Bool || k < 1
         error("k must be >= 1; got k=$k")
     end
     return nothing
@@ -189,64 +189,15 @@ function geo_spectrum_at_k(
     return _weighted_geometric_mean(pass_score, spectrum_score, lam_f, 1.0 - lam_f)
 end
 
-function _pass_and_spectrum_row_posterior_moments(
-    R,
-    k::Integer,
-    weights;
-    alpha0::Real=1.0,
-    beta0::Real=1.0,
-)
-    _validate_latent_k(k)
-    _validate_beta_prior(alpha0, beta0)
-    Rm = _as_2d_int_matrix(R)
-    _validate_binary(Rm)
-    M, _ = size(Rm)
+function _pass_and_spectrum_row_posterior_moments(R, k::Integer, weights; alpha0::Real=1.0, beta0::Real=1.0)
+    _validate_latent_k(k); _validate_beta_prior(alpha0, beta0)
+    Rm = _as_2d_int_matrix(R); _validate_binary(Rm)
     w = _validate_spectrum_weights(weights, k)
     alpha, beta = _binary_beta_posterior_params(Rm; alpha0=alpha0, beta0=beta0)
-    levels = _event_score_levels(w)
-    coeff = zeros(Float64, k + 1)
-    @inbounds for j in 1:k
-        coeff[j + 1] = Float64(levels[j + 1] * _comb_float(k, j))
-    end
-    active_js = [j for j in 1:k if coeff[j + 1] != 0.0]
-
-    mean_pass = zeros(Float64, M)
-    var_pass = zeros(Float64, M)
-    mean_spec = zeros(Float64, M)
-    var_spec = zeros(Float64, M)
-    cov_ps = zeros(Float64, M)
-
-    @inbounds for i in 1:M
-        a_i = alpha[i]
-        b_i = beta[i]
-        eqk = _beta_ratio(a_i, b_i, 0, k)
-        eq2k = _beta_ratio(a_i, b_i, 0, 2 * k)
-        m_pass = 1.0 - eqk
-        v_pass = max(0.0, eq2k - eqk * eqk)
-        m_spec = 0.0
-        e2_spec = 0.0
-        e_ps = 0.0
-
-        for j in active_js
-            c_j = coeff[j + 1]
-            moment_j = _beta_ratio(a_i, b_i, j, k - j)
-            m_spec += c_j * moment_j
-            e_ps += c_j * (moment_j - _beta_ratio(a_i, b_i, j, 2 * k - j))
-            for l in active_js
-                c_l = coeff[l + 1]
-                e2_spec += c_j * c_l *
-                           _beta_ratio(a_i, b_i, j + l, 2 * k - (j + l))
-            end
-        end
-
-        mean_pass[i] = m_pass
-        var_pass[i] = v_pass
-        mean_spec[i] = m_spec
-        var_spec[i] = max(0.0, e2_spec - m_spec * m_spec)
-        cov_ps[i] = e_ps - m_pass * m_spec
-    end
-
-    return mean_pass, var_pass, mean_spec, var_spec, cov_ps
+    values = hcat(Float64.((0:k) .> 0), _event_score_levels(w))
+    moments = [_tp_binary_moments(k, a, b, values) for (a, b) in zip(alpha, beta)]
+    endpoints = [_tp_endpoint(k, a, b, true) for (a, b) in zip(alpha, beta)]
+    return first.(endpoints), last.(endpoints), [v[1][2] for v in moments], [v[2][2, 2] for v in moments], [v[2][1, 2] for v in moments]
 end
 
 function _pass_and_spectrum_posterior_moments(

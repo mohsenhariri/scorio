@@ -38,9 +38,13 @@ describe("bayes", () => {
     expect(round(sigma, 6)).toBe(0.091998);
   });
   it("bayesCi matches docstring", () => {
-    const [mu, sigma, lo, hi] = bayesCi(Rbin, undefined, undefined, 0.95, [
-      0.0, 1.0,
-    ]);
+    const [mu, sigma, lo, hi] = bayesCi(
+      Rbin,
+      undefined,
+      undefined,
+      0.95,
+      [0.0, 1.0],
+    );
     expect(round(mu, 6)).toBe(0.642857);
     expect(round(sigma, 6)).toBe(0.118451);
     expect(round(lo, 4)).toBe(0.4107);
@@ -79,19 +83,19 @@ describe("pass family", () => {
   });
   it("passAtKCi matches docstring", () => {
     let [mu, sigma, lo, hi] = passAtKCi(Rbin, 1);
-    expect([round(mu, 6), round(sigma, 6), round(lo, 4), round(hi, 4)]).toEqual([
-      0.642857, 0.118451, 0.4107, 0.875,
-    ]);
+    expect([round(mu, 6), round(sigma, 6), round(lo, 4), round(hi, 4)]).toEqual(
+      [0.642857, 0.118451, 0.4107, 0.875],
+    );
     [mu, sigma, lo, hi] = passAtKCi(Rbin, 2);
-    expect([round(mu, 6), round(sigma, 6), round(lo, 4), round(hi, 4)]).toEqual([
-      0.839286, 0.097263, 0.6487, 1.0,
-    ]);
+    expect([round(mu, 6), round(sigma, 6), round(lo, 4), round(hi, 4)]).toEqual(
+      [0.839286, 0.097263, 0.6487, 1.0],
+    );
   });
   it("passHatKCi matches docstring", () => {
     const [mu, sigma, lo, hi] = passHatKCi(Rbin, 2);
-    expect([round(mu, 6), round(sigma, 6), round(lo, 4), round(hi, 4)]).toEqual([
-      0.446429, 0.146167, 0.1599, 0.7329,
-    ]);
+    expect([round(mu, 6), round(sigma, 6), round(lo, 4), round(hi, 4)]).toEqual(
+      [0.446429, 0.146167, 0.1599, 0.7329],
+    );
   });
 });
 
@@ -135,7 +139,9 @@ describe("Python eval parity regressions", () => {
     expect(tau[0]).toBeCloseTo(0.49999999999909595, 10);
     expect(tau.slice(1)).toEqual([0, tau[0], tau[0]]);
     expect(mg[0]).toBeCloseTo(0.4995004994995972, 10);
-    expect(mg.slice(1)).toEqual([0, mg[0], mg[0]]);
+    expect(mg[1]).toBeCloseTo(0.0004992510610436567, 12);
+    expect(mg[2]).toBeLessThan(mg[0]);
+    expect(mg[3]).toBeGreaterThan(mg[0]);
     expect(majority[0]).toBeCloseTo(0.49999999999909595, 10);
     expect(majority.slice(1)).toEqual([0, majority[0], majority[0]]);
   });
@@ -152,13 +158,15 @@ describe("Python eval parity regressions", () => {
     expect(unanimous[0]).toBeCloseTo(0.33338887037628834, 10);
     expect(unanimous[1]).toBeCloseTo(0.1178265814634313, 10);
     expect(mg[0]).toBeCloseTo(0.4995004994995975, 10);
-    expect(mg.slice(1)).toEqual([0, mg[0], mg[0]]);
-    expect(questionwise[0]).toBeCloseTo(0.40828229840166247, 10);
-    expect(questionwise[1]).toBeCloseTo(0.07214774062254051, 10);
-    expect(dataset[0]).toBeCloseTo(0.47142415242063146, 10);
-    expect(dataset[1]).toBeCloseTo(0.0931431091385532, 10);
-    expect(spectrum[0]).toBeCloseTo(0.5770377736500748, 10);
-    expect(spectrum[1]).toBeCloseTo(0.050997039520504835, 10);
+    expect(mg[1]).toBeCloseTo(0.0004992510610436567, 12);
+    expect(mg[2]).toBeLessThan(mg[0]);
+    expect(mg[3]).toBeGreaterThan(mg[0]);
+    expect(questionwise[0]).toBeCloseTo(0.4082822984018173, 10);
+    expect(questionwise[1]).toBeCloseTo(0.07214774062029897, 10);
+    expect(dataset[0]).toBeCloseTo(0.47142415242072083, 10);
+    expect(dataset[1]).toBeCloseTo(0.0931431091356629, 10);
+    expect(spectrum[0]).toBeCloseTo(0.5770377736504866, 10);
+    expect(spectrum[1]).toBeCloseTo(0.05099785485421503, 10);
     expect(star).toEqual(spectrum);
   });
 
@@ -175,7 +183,9 @@ describe("Python eval parity regressions", () => {
     ];
 
     expect(evalApi.bayes(R, w, flatR0)).toEqual(evalApi.bayes(R, w, nestedR0));
-    expect(evalApi.bayesCi(R, w, flatR0)).toEqual(evalApi.bayesCi(R, w, nestedR0));
+    expect(evalApi.bayesCi(R, w, flatR0)).toEqual(
+      evalApi.bayesCi(R, w, nestedR0),
+    );
     expect(evalApi.maxAtKCi(R, 2, w, flatR0)).toEqual(
       evalApi.maxAtKCi(R, 2, w, nestedR0),
     );
@@ -221,46 +231,16 @@ describe("Python eval parity regressions", () => {
     );
   });
 
-  it("mirrors NumPy integer coercion for boolean and integer-string outcomes", () => {
-    const runtimeInput = [
-      [false, "1", "0_0", true],
-      ["1", false, true, "1"],
-    ] as never;
-    expect(evalApi.passAtK(runtimeInput, 2)).toBe(
-      evalApi.passAtK(
-        [
-          [0, 1, 0, 1],
-          [1, 0, 1, 1],
-        ],
-        2,
-      ),
-    );
-    expect(() => evalApi.passAtK([["1.0"]] as never, 1)).toThrow(
-      /integer-like/,
-    );
-  });
-
-  it("matches Python's finite-float and generalized-k coercions", () => {
-    const binary = [
-      [0, 1, 0, 1, 0],
-      [1, 0, 1, 0, 1],
-    ];
-    const fractional = binary.map((row) => row.map((value) => value + 0.8));
-    expect(evalApi.passAtK(fractional, 1)).toBe(evalApi.passAtK(binary, 1));
-
-    const ci = evalApi.passAtKCi(binary, 2.5);
-    expect(ci[0]).toBeCloseTo(0.7762237762237763, 12);
-    expect(ci[1]).toBeCloseTo(0.12026162842209105, 12);
-    expect(Number.isNaN(evalApi.passAtK(binary, 2.5))).toBe(true);
-    expect(
-      evalApi.geomAtK(
-        [
-          [0, 1, 1],
-          [1, 0, 1],
-        ],
-        1.5,
-      ),
-    ).toBeCloseTo(0.7071067811865476, 12);
+  it("accepts booleans and rejects numeric strings and fractions", () => {
+    expect(evalApi.passAtK([[false, true]] as never, 1)).toBeCloseTo(0.5, 14);
+    for (const invalid of ["1", 0.5, NaN, Infinity]) {
+      expect(() => evalApi.passAtK([[invalid, 1]] as never, 1)).toThrow();
+    }
+    for (const k of [1.5, 2.5, NaN, Infinity]) {
+      expect(() => evalApi.passAtK([[0, 1, 1]], k)).toThrow();
+      expect(() => evalApi.passAtKCi([[0, 1, 1]], k)).toThrow();
+      expect(() => evalApi.geomAtK([[0, 1, 1]], k)).toThrow();
+    }
   });
 
   it("exports exactly Python's snake_case eval surface plus camelCase aliases", () => {
@@ -293,13 +273,22 @@ describe("Python eval parity regressions", () => {
       "pass_at_k_ci",
       "pass_hat_k",
       "pass_hat_k_ci",
+      "tailpass",
+      "tailpass_empirical",
+      "tailpass_weights",
       "threshold_spectrum_at_k",
       "threshold_spectrum_at_k_ci",
       "unanimous_at_k",
       "unanimous_at_k_ci",
     ];
     const snakeCaseExports = Object.keys(evalApi)
-      .filter((name) => name === "avg" || name === "bayes" || name.includes("_"))
+      .filter(
+        (name) =>
+          name === "avg" ||
+          name === "bayes" ||
+          name === "tailpass" ||
+          name.includes("_"),
+      )
       .sort();
 
     expect(snakeCaseExports).toEqual(pythonPublicNames);
