@@ -23,10 +23,13 @@ def extract_changelog_section(changelog: str, version: str) -> list[str]:
 
     end = len(lines)
     for index in range(start + 2, len(lines)):
-        if lines[index].startswith("Version ") and index + 1 < len(lines):
-            if _is_underline(lines[index + 1], "-"):
-                end = index
-                break
+        if (
+            lines[index].startswith("Version ")
+            and index + 1 < len(lines)
+            and _is_underline(lines[index + 1], "-")
+        ):
+            end = index
+            break
 
     return lines[start:end]
 
@@ -68,7 +71,11 @@ def main() -> None:
         sys.exit(1)
 
     version = (
-        sys.argv[1].removeprefix("python-v").removeprefix("julia-v").removeprefix("v")
+        sys.argv[1]
+        .removeprefix("python-v")
+        .removeprefix("julia-v")
+        .removeprefix("js-v")
+        .removeprefix("v")
     )
 
     try:

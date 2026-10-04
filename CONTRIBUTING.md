@@ -84,12 +84,17 @@ make format-check
 make test
 make pkg-check
 make jl-test
+make js-test
+make -C js typecheck
+make -C js pack
 ```
 
-5. Commit the tracked release changes and push them:
+5. Review and stage the release changes, including new source, tests, and
+   package assets, then commit and push them:
 
 ```bash
-git add -u
+git status --short
+git add <release-file-paths>
 git commit -m "Prepare vX.Y.Z release"
 git push origin main
 ```
@@ -99,12 +104,14 @@ git push origin main
 ```bash
 make release-py
 make release-jl
+make release-js
 ```
 
 `make release-py` creates the Python GitHub release from the matching
 `docs/changelog.rst` version section and triggers PyPI publishing.
 `make release-jl` dispatches Julia registration; after registration succeeds,
 TagBot creates the Julia tag and GitHub release.
+`make release-js` creates the npm GitHub release and triggers npm publishing.
 
 ## Docstrings
 

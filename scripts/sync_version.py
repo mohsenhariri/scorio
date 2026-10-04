@@ -1,3 +1,4 @@
+import json
 import re
 import sys
 from pathlib import Path
@@ -80,9 +81,20 @@ def main():
         Path("CITATION.cff"),
         [(r"(?m)^version: .*$", f"version: {version}")],
     )
-    tag_replacement = [(r"scorio\.git@v\d+\.\d+\.\d+", f"scorio.git@v{version}")]
+    tag_replacement = [
+        (r"scorio\.git@(?:python-)?v\d+\.\d+\.\d+", f"scorio.git@python-v{version}")
+    ]
     update_file(root, Path("README.md"), tag_replacement)
     update_file(root, Path("README_PyPI.md"), tag_replacement)
+
+    for relative_path in ("js/scorio/package.json", "js/scorio/package-lock.json"):
+        path = root / relative_path
+        data = json.loads(path.read_text())
+        data["version"] = version
+        if "packages" in data:
+            data["packages"][""]["version"] = version
+        path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+        print(f"Updated {relative_path}")
 
     print(f"\nAll versions synced to {version}")
 
