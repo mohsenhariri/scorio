@@ -224,10 +224,16 @@ function g_pass_at_k(R, k::Integer)::Float64
     return pass_hat_k(R, k)
 end
 
-# `max(1, ceil(tau * k))`, nudged down by a small tolerance so float error on a
-# whole product (`0.28 * 25 == 7.000000000000001`) does not add one. Mirrors
-# `_keep_count` in `aggregate/base.jl`.
-_tau_threshold(tau::Float64, k::Integer)::Int = max(1, ceil(Int, tau * k - 1e-9))
+# `max(1, ceil(tau * k))` using the representable `j / k` boundaries.
+# Comparing tau with the boundary avoids multiplication rounding at grid points
+# and preserves even the next float above them, without a fixed tolerance.
+function _tau_threshold(tau::Float64, k::Integer)::Int
+    threshold = floor(Int, tau * k)
+    if tau > threshold / k
+        threshold += 1
+    end
+    return max(1, threshold)
+end
 
 """
     g_pass_at_k_tau(R, k, tau) -> Float64

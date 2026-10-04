@@ -102,6 +102,13 @@ describe("tau threshold when tau * k is a whole number", () => {
   const bank = (ones: number, n: number) => [
     [...Array(ones).fill(1), ...Array(n - ones).fill(0)],
   ];
+  // Positive IEEE doubles have monotonically increasing bit representations.
+  const adjacentFloat = (value: number, direction: -1 | 1): number => {
+    const view = new DataView(new ArrayBuffer(8));
+    view.setFloat64(0, value);
+    view.setBigUint64(0, view.getBigUint64(0) + BigInt(direction));
+    return view.getFloat64(0);
+  };
 
   it.each(cases)("needs exactly %i of %i successes", (j, k) => {
     expect(gPassAtKTau(bank(j, k), k, j / k)).toBeCloseTo(1.0, 12);
@@ -109,6 +116,32 @@ describe("tau threshold when tau * k is a whole number", () => {
     const exact = gPassAtKTauCi(bank(j, k), k, j / k);
     const below = gPassAtKTauCi(bank(j, k), k, (j - 0.5) / k);
     exact.forEach((v, i) => expect(v).toBeCloseTo(below[i]!, 12));
+  });
+
+  it.each<[number, number]>([
+    [1, 3],
+    [7, 25],
+    [15, 29],
+    [7, 100],
+    [29, 100],
+    [24, 25],
+  ])("preserves thresholds adjacent to %i / %i", (j, k) => {
+    const R = bank(j, k);
+    const boundary = j / k;
+    const lowerCi = gPassAtKTauCi(R, k, (j - 0.5) / k);
+    const upperCi = gPassAtKTauCi(R, k, (j + 0.5) / k);
+    for (const tau of [adjacentFloat(boundary, -1), boundary]) {
+      expect(gPassAtKTau(R, k, tau)).toBeCloseTo(1.0, 12);
+      gPassAtKTauCi(R, k, tau).forEach((v, i) =>
+        expect(v).toBeCloseTo(lowerCi[i]!, 12),
+      );
+    }
+    for (const tau of [adjacentFloat(boundary, 1), boundary + 2e-11]) {
+      expect(gPassAtKTau(R, k, tau)).toBeCloseTo(0.0, 12);
+      gPassAtKTauCi(R, k, tau).forEach((v, i) =>
+        expect(v).toBeCloseTo(upperCi[i]!, 12),
+      );
+    }
   });
 
   it("matches Python reference at tau = 0.28, k = 25", () => {

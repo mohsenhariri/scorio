@@ -32,13 +32,15 @@ from .utils import normal_credible_interval
 def _tau_threshold(tau: float, k: int) -> int:
     r"""Return the success threshold :math:`\max(1, \lceil \tau k \rceil)`.
 
-    ``tau * k`` is nudged down by a small tolerance before the ceiling so that
-    floating-point error on a whole product (e.g. ``0.28 * 25 ==
-    7.000000000000001``) does not raise the threshold by one. This matters for
-    the usual ``tau = j / k`` grids. It mirrors ``_keep_count`` in
-    ``scorio.aggregate._base``.
+    Use the representable ``j / k`` boundaries so that ``tau = j / k`` requires
+    exactly ``j`` successes even when ``tau * k`` rounds above the integer.
+    Comparing ``tau`` with the boundary also preserves values strictly above
+    it, including the next representable float, without a fixed tolerance.
     """
-    return max(1, math.ceil(tau * k - 1e-9))
+    threshold = math.floor(tau * k)
+    if tau > threshold / k:
+        threshold += 1
+    return max(1, threshold)
 
 
 def g_pass_at_k(R: np.ndarray, k: int) -> float:

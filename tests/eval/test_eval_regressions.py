@@ -8,6 +8,7 @@ import numpy as np
 import pytest
 
 from scorio import eval as scorio_eval
+from scorio.eval.gpass import _tau_threshold
 
 EvalCall = Callable[[np.ndarray], object]
 KCall = Callable[[np.ndarray, float], object]
@@ -428,6 +429,39 @@ def test_g_pass_tau_threshold_is_exact_when_tau_k_is_whole(j: int, k: int) -> No
     assert scorio_eval.g_pass_at_k_tau_ci(R, k, j / k) == pytest.approx(
         scorio_eval.g_pass_at_k_tau_ci(R, k, (j - 0.5) / k)
     )
+
+
+@pytest.mark.parametrize(
+    ("j", "k"), ((1, 3), (7, 25), (15, 29), (7, 100), (29, 100), (24, 25))
+)
+def test_g_pass_tau_preserves_adjacent_thresholds(j: int, k: int) -> None:
+    exactly_j = np.array([[1] * j + [0] * (k - j)], dtype=int)
+    boundary = j / k
+    lower_ci = scorio_eval.g_pass_at_k_tau_ci(exactly_j, k, (j - 0.5) / k)
+    upper_ci = scorio_eval.g_pass_at_k_tau_ci(exactly_j, k, (j + 0.5) / k)
+
+    for tau in (np.nextafter(boundary, 0.0), boundary):
+        assert scorio_eval.g_pass_at_k_tau(exactly_j, k, tau) == pytest.approx(1.0)
+        assert scorio_eval.g_pass_at_k_tau_ci(exactly_j, k, tau) == pytest.approx(
+            lower_ci
+        )
+    for tau in (np.nextafter(boundary, 1.0), boundary + 2e-11):
+        assert scorio_eval.g_pass_at_k_tau(exactly_j, k, tau) == pytest.approx(0.0)
+        assert scorio_eval.g_pass_at_k_tau_ci(exactly_j, k, tau) == pytest.approx(
+            upper_ci
+        )
+
+
+@pytest.mark.parametrize(
+    ("j", "k"), ((25_000_007, 50_000_003), (50_000_006, 100_000_007))
+)
+def test_g_pass_tau_threshold_at_large_sample_counts(j: int, k: int) -> None:
+    # Exercise the threshold directly without allocating an enormous outcome bank.
+    # At these grid points the multiplication error exceeds the old 1e-9 offset.
+    boundary = j / k
+    assert _tau_threshold(np.nextafter(boundary, 0.0), k) == j
+    assert _tau_threshold(boundary, k) == j
+    assert _tau_threshold(np.nextafter(boundary, 1.0), k) == j + 1
 
 
 def test_g_pass_tau_threshold_on_every_j_over_k_grid_point() -> None:

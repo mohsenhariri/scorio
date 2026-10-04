@@ -37,13 +37,15 @@ function checkTau(tau: number): void {
 }
 
 /**
- * Success threshold `max(1, ceil(τk))`. `τk` is nudged down by a small
- * tolerance so float error on a whole product (`0.28 * 25` is
- * `7.000000000000001`) does not add one. Mirrors `resolveKeepCount` in
- * `aggregate/internal/base.ts`.
+ * Success threshold `max(1, ceil(τk))` using the representable `j / k`
+ * boundaries. Comparing `tau` with the boundary avoids multiplication
+ * rounding at grid points and preserves even the next float above them,
+ * without a fixed tolerance.
  */
 function tauThreshold(tau: number, k: number): number {
-  return Math.max(1, Math.ceil(tau * k - 1e-9));
+  let threshold = Math.floor(tau * k);
+  if (tau > threshold / k) threshold += 1;
+  return Math.max(1, threshold);
 }
 
 /** Per-row Beta posterior parameters `[alpha, beta]` for binary outcomes. */

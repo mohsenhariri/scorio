@@ -94,6 +94,8 @@ Fixed
   e.g. ``tau = 0.28, k = 25`` (``0.28 * 25 == 7.000000000000001``) or
   ``tau = j / k`` grid points. This affects all three implementations and,
   in the JavaScript and Julia ports, Maj@k for ``k = 29, 52, 56, ...``.
+  Thresholds strictly above a ``j / k`` boundary still require an additional
+  success, without a fixed numerical tolerance.
 
 Version 0.2.2 (2026-04-28)
 --------------------------
