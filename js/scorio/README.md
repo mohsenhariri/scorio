@@ -1,5 +1,7 @@
 # scorio
 
+[JavaScript / TypeScript documentation](https://mohsenhariri.github.io/scorio/javascript/)
+
 Bayesian evaluation toolkit for stochastic models — a TypeScript/JavaScript port of [Scorio](https://github.com/mohsenhariri/scorio).
 
 It provides these main API families:
@@ -8,6 +10,7 @@ It provides these main API families:
 - **`scorio/rank`** — 40+ ranking estimators that order multiple models from a binary (or categorical) response tensor: eval-metric, voting, pairwise-rating (Elo/Glicko/TrueSkill), Bradley-Terry / Plackett-Luce / Rao-Kupper, IRT (Rasch/2PL/3PL/MML and multidimensional MIRT), graph (PageRank/spectral/α-Rank/Nash), seriation, and Hodge-theoretic methods.
 - **`scorio/aggregate`** — test-time-scaling confidence signals, PRM reward reduction, Best-of-N and voting rules, and online early stopping over candidate answer pools.
 - **`scorio/utils`** — score-to-rank conversion, ranking correlation statistics, and collision-free hashes for permutations and rankings with ties.
+- `scorio/sinf` provides stopping and allocation decisions from posterior means and standard deviations.
 
 - **Zero runtime dependencies** — pure TypeScript (special functions, linear algebra, optimization, and an LP solver reimplemented from `scipy`/`numpy`).
 - **Dual ESM + CommonJS** builds with full type declarations.
@@ -57,7 +60,7 @@ scorio.passAtKCi(B, 2); // [mu, sigma, lo, hi]
 
 ### Point estimators vs. credible intervals
 
-Point estimators return a scalar score. Every metric has a companion `*Ci` function (and a `*_ci` alias) returning `[mu, sigma, lo, hi]`, where `mu` is the estimate, `sigma` the posterior standard deviation, and `lo`/`hi` a normal-approximation credible interval.
+`bayes` and `avg` return `[mu, sigma]`; the other metrics in the table below return a scalar. Their `*Ci` functions (and `*_ci` aliases) return `[mu, sigma, lo, hi]` with a normal-approximation credible interval. For pass-family metrics, the interval companion uses a posterior mean that can differ from the empirical point estimate. TailPass returns a profile with a separate utility and interval API.
 
 ## API
 
@@ -126,7 +129,7 @@ const R = [
 
 rank.borda(R).ranking;          // [1, 2]
 rank.elo(R).scores;             // final Elo ratings
-rank.bradleyTerry(R, { maxIter: 100 }).ranking;
+rank.bradleyTerryMap(R, { prior: 1, maxIter: 500 }).ranking;
 rank.bayes(R, { quantile: 0.05 });   // conservative, uncertainty-aware
 rank.raschMap(R, { prior: 1.0 });    // MAP IRT with a Gaussian prior
 
@@ -178,6 +181,8 @@ npm install
 npm test          # vitest golden tests (parity with the Python reference)
 npm run build     # tsup -> dist/ (ESM + CJS + d.ts)
 npm run typecheck
+npm run docs      # TypeDoc site from the current source
+npm run docs:check # check guide examples and generated links
 ```
 
 ## License

@@ -1,10 +1,12 @@
 /**
- * Test-time-scaling answer aggregation — TypeScript port of `scorio.aggregate`.
+ * Answer selection and stopping rules, imported from `scorio/aggregate`.
  *
  * Functions are available in idiomatic camelCase and as snake_case aliases.
  * Candidate-pool selection follows the Python return contract: a scalar for a
  * single question, an array for a batch, and optional representative index /
  * score fields in a fixed tuple order.
+ *
+ * @module aggregate
  */
 
 import * as confidence from "./confidence.js";

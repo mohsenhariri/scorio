@@ -54,6 +54,42 @@ jobs:
           path: julia/Scorio.jl/docs/build
           retention-days: 1
 
+  build-javascript-docs:
+    name: Build JavaScript Documentation
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: js/scorio
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: js/scorio/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check types
+        run: npm run typecheck
+
+      - name: Build documentation
+        run: npm run docs
+
+      - name: Check examples and documentation links
+        run: npm run docs:check
+
+      - name: Upload JavaScript docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: javascript-docs
+          path: js/scorio/docs/_build
+          retention-days: 1
+
   build-landing-page:
     name: Build Landing Page
     runs-on: ubuntu-latest
@@ -70,7 +106,7 @@ jobs:
 
   deploy:
     name: Deploy to GitHub Pages
-    needs: [build-julia-docs, build-landing-page]
+    needs: [build-julia-docs, build-javascript-docs, build-landing-page]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
@@ -87,15 +123,24 @@ jobs:
           name: landing-page
           path: landing-page
 
+      - name: Download JavaScript docs
+        uses: actions/download-artifact@v4
+        with:
+          name: javascript-docs
+          path: javascript-docs
+
       - name: Organize deployment structure
         run: |
-          mkdir -p deploy/julia
+          mkdir -p deploy/julia deploy/javascript
           
           # Copy landing page to root
           cp -r landing-page/* deploy/
           
           # Copy Julia docs to /julia subdirectory
           cp -r julia-docs/* deploy/julia/
+
+          # Copy TypeDoc output to /javascript
+          cp -a javascript-docs/. deploy/javascript/
           
           # Create .nojekyll to bypass Jekyll processing
           touch deploy/.nojekyll

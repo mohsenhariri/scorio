@@ -1,9 +1,11 @@
 /**
- * Ranking utilities — TypeScript port of `scorio.utils`.
+ * Score conversion, ranking comparisons, and hashes, imported from `scorio/utils`.
  *
  * Public functions are exported in camelCase and under snake_case aliases that
  * match Python. Combinatorial hashes use `bigint` once a result exceeds
  * JavaScript's safe-integer range; smaller results remain ordinary numbers.
+ *
+ * @module utils
  */
 
 import { normPpf } from "../rank/internal/special.js";

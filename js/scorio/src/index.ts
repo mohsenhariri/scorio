@@ -1,12 +1,12 @@
 /**
- * Scorio — Bayesian evaluation toolkit for stochastic models.
+ * Scorio evaluates repeated outcomes, ranks models, and selects sampled answers.
  *
  * This entry point exposes the evaluation metrics under the `eval` namespace,
  * mirroring `import scorio; scorio.eval.bayes(...)` in Python:
  *
  * ```ts
  * import { eval as scorioEval } from "scorio";
- * const [mu, sigma] = scorioEval.bayes(R, w);
+ * const [mu, sigma] = scorioEval.bayes([0, 1, 1]);
  * ```
  *
  * The metrics are also importable directly from `scorio/eval`.
@@ -22,6 +22,8 @@
  *
  * Ranking comparison and collision-free ranking hashes live under `utils`
  * and are also importable directly from `scorio/utils`.
+ *
+ * @module scorio
  */
 
 import * as aggregate from "./aggregate/index.js";

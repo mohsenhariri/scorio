@@ -1,14 +1,17 @@
 /**
  * Scorio evaluation metrics and uncertainty estimators.
  *
- * TypeScript port of `scorio.eval`. Point estimators return a scalar score;
- * companion `*Ci` / `*_ci` functions return `[mu, sigma, lo, hi]`, where `mu`
- * is the estimate, `sigma` the posterior standard deviation, and `lo`/`hi`
- * a normal-approximation credible interval.
+ * Import from `scorio/eval`. `bayes` and `avg` return `[mean, std]`; most
+ * other metrics return a scalar. Their `*Ci` / `*_ci` companions return
+ * `[mean, std, lo, hi]` with a normal-approximation interval. Pass-family
+ * interval functions use posterior means, which can differ from the empirical
+ * point estimates. TailPass returns a threshold profile with separate utilities.
  *
  * Every metric is exported under two names: an idiomatic camelCase name
  * (`passAtK`) and a snake_case alias matching the Python/Julia API
  * (`pass_at_k`).
+ *
+ * @module eval
  */
 
 import { bayes, bayesCi } from "./bayes.js";

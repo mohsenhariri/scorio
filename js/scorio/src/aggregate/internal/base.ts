@@ -42,7 +42,7 @@ export interface SelectionReturnOptions<
 }
 
 /**
- * Candidate-retention setting for {@link resolveKeepCount}.
+ * Candidate-retention setting for score-filtered selection.
  *
  * Numeric values reproduce Python's runtime convention: integer values are
  * counts and non-integers in `(0, 1]` are fractions. JavaScript cannot

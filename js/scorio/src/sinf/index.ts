@@ -1,9 +1,18 @@
-/** Sequential inference helpers matching Python's posterior mean/std API. */
+/**
+ * Stopping and allocation helpers, imported from `scorio/sinf`.
+ *
+ * Functions consume posterior means and standard deviations from evaluation.
+ * They return decisions or model indices; the caller runs any further trials.
+ *
+ * @module sinf
+ */
 import { ndtri } from "../eval/internal/math.js";
 import { normCdf } from "../rank/internal/special.js";
 
 export interface StopOptions {
+  /** Desired confidence level. Default: 0.95. */
   confidence?: number;
+  /** Compare normal intervals or pairwise ordering probabilities. */
   method?: "ci_overlap" | "zscore";
 }
 /** Normal-approximation confidence in the pairwise ordering. */
@@ -18,6 +27,7 @@ export function rankingConfidence(
   const z = Math.abs(muA - muB) / denominator;
   return { rho: normCdf(z), z };
 }
+/** Build a two-sided normal interval, optionally clipped to a score range. */
 export function ciFromMuSigma(
   mu: number,
   sigma: number,
@@ -32,6 +42,10 @@ export function ciFromMuSigma(
     hi: options.clip ? Math.min(options.clip[1], mu + half) : mu + half,
   };
 }
+/**
+ * Whether a normal interval is narrow enough at the chosen confidence level.
+ * Supply exactly one of `maxCiWidth` (full width) or `maxHalfWidth`.
+ */
 export function shouldStop(
   sigma: number,
   options: {
@@ -58,6 +72,10 @@ function leaderOf(
     );
   return mus.reduce((best, value, j) => (value > mus[best]! ? j : best), 0);
 }
+/**
+ * Whether the model with the largest posterior mean is separated from all others.
+ * Returns its zero-based index and the indices of remaining ambiguous models.
+ */
 export function shouldStopTop1(
   mus: readonly number[],
   sigmas: readonly number[],
@@ -85,6 +103,10 @@ export function shouldStopTop1(
     );
   return { stop: ambiguous.length === 0, leader, ambiguous };
 }
+/**
+ * Suggest the current leader and its least-separated competitor for more trials.
+ * Requires at least two models. Both returned indices are zero-based.
+ */
 export function suggestNextAllocation(
   mus: readonly number[],
   sigmas: readonly number[],

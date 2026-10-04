@@ -6,10 +6,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
     <!-- Primary Meta Tags -->
-    <title>Scorio - Bayesian Framework for LLM Evaluation and Ranking | Python & Julia</title>
-    <meta name="title" content="Scorio - Bayesian Framework for LLM Evaluation and Ranking | Python & Julia">
-    <meta name="description" content="Scorio implements test-time scaling metrics, including Bayes@N, with uncertainty quantification for evaluating and ranking Large Language Models. Available as Python (scorio) and Julia (Scorio.jl) packages.">
-    <meta name="keywords" content="Bayesian evaluation, LLM evaluation, LLM ranking, test-time scaling, machine learning, Python, Julia, Bayes@N, Pass@k, uncertainty quantification, AI benchmarking, scorio">
+    <title>Scorio - Bayesian Framework for LLM Evaluation and Ranking | Python, Julia & JavaScript</title>
+    <meta name="title" content="Scorio - Bayesian Framework for LLM Evaluation and Ranking | Python, Julia & JavaScript">
+    <meta name="description" content="Scorio implements test-time scaling metrics, including Bayes@N, with uncertainty quantification for evaluating and ranking Large Language Models. Available for Python, Julia, and JavaScript / TypeScript.">
+    <meta name="keywords" content="Bayesian evaluation, LLM evaluation, LLM ranking, test-time scaling, machine learning, Python, Julia, JavaScript, TypeScript, npm, Bayes@N, Pass@k, uncertainty quantification, AI benchmarking, scorio">
     <meta name="author" content="Mohsen Hariri">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://mohsenhariri.github.io/scorio/">
@@ -39,7 +39,7 @@
         "description": "Bayesian framework for Large Language Model evaluation and ranking that implements test-time scaling metrics, including Bayes@N, with uncertainty quantification",
         "url": "https://mohsenhariri.github.io/scorio/",
         "codeRepository": "https://github.com/mohsenhariri/scorio",
-        "programmingLanguage": ["Python", "Julia"],
+        "programmingLanguage": ["Python", "Julia", "TypeScript", "JavaScript"],
         "license": "https://opensource.org/licenses/MIT",
         "author": {
             "@type": "Person",
@@ -81,6 +81,8 @@
             --python-hover: #2b5d8b;
             --julia: #9558b2;
             --julia-hover: #7a4694;
+            --javascript: #2563eb;
+            --javascript-hover: #1d4ed8;
             --bg: #fafafa;
             --card-bg: #ffffff;
             --text: #1f2937;
@@ -193,6 +195,8 @@
         }
         
         .card {
+            display: flex;
+            flex-direction: column;
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 1rem;
@@ -244,6 +248,10 @@
         .btn:active {
             transform: scale(0.98);
         }
+
+        .card .btn {
+            margin-top: auto;
+        }
         
         .btn-python {
             background: var(--python);
@@ -261,6 +269,15 @@
         
         .btn-julia:hover {
             background: var(--julia-hover);
+        }
+
+        .btn-javascript {
+            background: var(--javascript);
+            color: white;
+        }
+
+        .btn-javascript:hover {
+            background: var(--javascript-hover);
         }
         
         .features {
@@ -456,6 +473,9 @@
                 <a href="https://julialang.org/" target="_blank" rel="noopener">
                     <img src="https://img.shields.io/badge/julia-1.6+-9558B2.svg" alt="Julia 1.6+">
                 </a>
+                <a href="https://www.npmjs.com/package/scorio" target="_blank" rel="noopener">
+                    <img src="https://img.shields.io/npm/v/scorio?color=2563eb" alt="scorio on npm">
+                </a>
             </div>
             
             <section class="cards" aria-label="Documentation">
@@ -473,7 +493,7 @@
                         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                         </svg>
-                        Python Documentation
+                        Python Docs
                     </a>
                 </article>
                 
@@ -492,7 +512,25 @@
                         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                         </svg>
-                        Julia Documentation
+                        Julia Docs
+                    </a>
+                </article>
+
+                <article class="card">
+                    <h2>
+                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <rect x="1" y="1" width="22" height="22" rx="2" fill="var(--javascript)"/>
+                            <text x="5" y="18" fill="white" font-size="12" font-weight="700" font-family="Arial, sans-serif">JS</text>
+                        </svg>
+                        JavaScript
+                    </h2>
+                    <p class="version">scorio on npm</p>
+                    <p>JavaScript / TypeScript documentation</p>
+                    <a href="./javascript/" class="btn btn-javascript">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                        </svg>
+                        JavaScript Docs
                     </a>
                 </article>
             </section>
@@ -588,6 +626,9 @@
                         <path d="M12.042 23.648c-.01-.006-.021-.012-.031-.018a.04.04 0 01.031.018zm.124-.065a.06.06 0 01-.031.013.06.06 0 00.031-.013zm5.834-21.108v7.242l-5.2 1.908V4.563l5.2-2.088zm-5.2 9.15v7.242L7.6 20.775v-7.242l5.2-1.908zm0-2l5.2-1.908-5.2-1.908-5.2 1.908 5.2 1.908z"/>
                     </svg>
                     PyPI
+                </a>
+                <a href="https://www.npmjs.com/package/scorio" class="link" target="_blank" rel="noopener">
+                    npm
                 </a>
             </nav>
         </div>

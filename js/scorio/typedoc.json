@@ -1,0 +1,56 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "name": "Scorio",
+  "includeVersion": true,
+  "entryPoints": [
+    "src/index.ts",
+    "src/eval/index.ts",
+    "src/rank/index.ts",
+    "src/aggregate/index.ts",
+    "src/sinf/index.ts",
+    "src/utils/index.ts"
+  ],
+  "entryPointStrategy": "resolve",
+  "plugin": ["typedoc-plugin-missing-exports"],
+  "internalModule": "Referenced types",
+  "collapseInternalModule": true,
+  "tsconfig": "tsconfig.json",
+  "readme": "docs/index.md",
+  "projectDocuments": [
+    "docs/installation.md",
+    "docs/data.md",
+    "docs/evaluation.md",
+    "docs/tailpass.md",
+    "docs/ranking.md",
+    "docs/aggregation.md",
+    "docs/sequential-inference.md",
+    "docs/utilities.md"
+  ],
+  "out": "docs/_build",
+  "customCss": "docs/scorio.css",
+  "favicon": "../../docs-landing/assets/s.svg",
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "excludeExternals": true,
+  "navigation": {
+    "includeGroups": false,
+    "includeCategories": false,
+    "includeFolders": false,
+    "excludeReferences": true
+  },
+  "sortEntryPoints": false,
+  "searchInComments": true,
+  "searchInDocuments": true,
+  "navigationLinks": {
+    "Scorio": "https://mohsenhariri.github.io/scorio/",
+    "npm": "https://www.npmjs.com/package/scorio",
+    "GitHub": "https://github.com/mohsenhariri/scorio"
+  },
+  "sidebarLinks": {
+    "Python documentation": "https://scorio.readthedocs.io/",
+    "Julia documentation": "https://mohsenhariri.github.io/scorio/julia/"
+  },
+  "hostedBaseUrl": "https://mohsenhariri.github.io/scorio/javascript/",
+  "githubPages": true,
+  "treatWarningsAsErrors": true
+}

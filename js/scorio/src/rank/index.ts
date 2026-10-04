@@ -1,5 +1,5 @@
 /**
- * Scorio ranking methods — TypeScript port of `scorio.rank`.
+ * Model ranking methods, imported from `scorio/rank`.
  *
  * Ranking estimators for binary (and, for `bayes`, categorical) response
  * tensors of shape `(L, M, N)` (`L` models, `M` questions, `N` trials). Every
@@ -9,6 +9,8 @@
  *
  * Each method is exported under an idiomatic camelCase name and a snake_case
  * alias matching the Python/Julia API.
+ *
+ * @module rank
  */
 
 // ---------------------------------------------------------------------------

@@ -121,9 +121,25 @@ TagBot creates the Julia tag and GitHub release.
 
 ## Documentation
 
-Build docs locally:
+Build the Python, Julia, or JavaScript documentation locally:
 ```bash
-make docs
+make py-docs-build
+make jl-docs-build
+make -C js install
+make js-docs-build
+make js-docs-check
 ```
 
-Full documentation: https://scorio.readthedocs.io/
+Run `make js-docs-serve` to preview the TypeDoc site at `http://localhost:4003`.
+The JavaScript guides are in `js/scorio/docs/`; API pages are generated from
+the public source entry points. `js-docs-check` type-checks and runs guide
+examples against the built package, then checks generated local links and
+anchors. Generated HTML is ignored by Git.
+
+The documentation workflow builds the JavaScript site on pull requests and
+deploys it under `/javascript/` alongside the landing page and Julia docs on
+pushes to `main`. npm publishing remains a separate release workflow.
+
+Published docs: [Python](https://scorio.readthedocs.io/),
+[Julia](https://mohsenhariri.github.io/scorio/julia/), and
+[JavaScript / TypeScript](https://mohsenhariri.github.io/scorio/javascript/).

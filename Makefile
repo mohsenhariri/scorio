@@ -2,7 +2,7 @@
 SRC:=scorio/
 JULIA_PROJECT:=julia/Scorio.jl
 
-.PHONY: format format-check lint clean build install test pkg-check pkg-publish-test pkg-publish sync-version release-py release-jl release-js js-build js-test jl-install jl-test jl-test-slow py-docs-build py-docs-clean py-docs-serve jl-docs-build jl-docs-clean jl-docs-serve landing-serve
+.PHONY: format format-check lint clean build install test pkg-check pkg-publish-test pkg-publish sync-version release-py release-jl release-js js-build js-test jl-install jl-test jl-test-slow py-docs-build py-docs-clean py-docs-serve jl-docs-build jl-docs-clean jl-docs-serve js-docs-build js-docs-check js-docs-clean js-docs-serve landing-serve
 .PHONY: test-eval-py test-rank-py test-rank-py-slow test-eval-jl test-rank-jl test-rank-jl-slow
 
 format-check:
@@ -113,6 +113,19 @@ jl-docs-clean:
 
 jl-docs-serve:
 	python -m http.server --directory $(JULIA_PROJECT)/docs/build 4001
+
+## JavaScript / TypeScript Docs
+js-docs-build:
+	$(MAKE) -C js docs
+
+js-docs-check:
+	$(MAKE) -C js docs-check
+
+js-docs-clean:
+	$(MAKE) -C js docs-clean
+
+js-docs-serve:
+	cd js/scorio/docs/_build && python3 -m http.server 4003
 
 landing-serve:
 	python -m http.server --directory docs-landing 4002

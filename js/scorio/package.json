@@ -12,7 +12,7 @@
   ],
   "license": "MIT",
   "author": "Mohsen Hariri <mohsen.hariri@case.edu>",
-  "homepage": "https://scorio.readthedocs.io/",
+  "homepage": "https://mohsenhariri.github.io/scorio/javascript/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mohsenhariri/scorio.git",
@@ -70,6 +70,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
+    "docs": "typedoc --options typedoc.json",
+    "docs:check": "npm run build && node scripts/check-docs.mjs",
     "prepublishOnly": "npm run build"
   },
   "engines": {
@@ -77,6 +79,8 @@
   },
   "devDependencies": {
     "tsup": "^8.3.0",
+    "typedoc": "0.28.20",
+    "typedoc-plugin-missing-exports": "4.1.4",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"
   }
