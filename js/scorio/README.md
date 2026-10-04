@@ -1,6 +1,6 @@
 # scorio
 
-[JavaScript / TypeScript documentation](https://mohsenhariri.github.io/scorio/javascript/)
+[**JavaScript/TypeScript** documentation](https://mohsenhariri.github.io/scorio/javascript/)
 
 Bayesian evaluation toolkit for stochastic models — a TypeScript/JavaScript port of [Scorio](https://github.com/mohsenhariri/scorio).
 

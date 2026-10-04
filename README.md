@@ -17,6 +17,7 @@
   <a href="https://www.npmjs.com/package/scorio"><img alt="npm package" src="https://img.shields.io/npm/v/scorio.svg"></a>
   <a href="https://scorio.readthedocs.io/en/latest/"><img alt="Python Docs" src="https://readthedocs.org/projects/scorio/badge/?version=latest"></a>
   <a href="https://mohsenhariri.github.io/scorio/julia/"><img alt="Julia Docs" src="https://img.shields.io/badge/docs-Julia-9558B2.svg"></a>
+  <a href="https://mohsenhariri.github.io/scorio/javascript/"><img alt="JavaScript/TypeScript Docs" src="https://img.shields.io/badge/docs-JavaScript%2FTypeScript-F7DF1E.svg"></a>
 </p>
 
 ---
@@ -29,6 +30,7 @@
 |----------|--------------|--------|
 | **Python** | [scorio.readthedocs.io](https://scorio.readthedocs.io/en/latest/) | [![ReadTheDocs](https://readthedocs.org/projects/scorio/badge/?version=latest)](https://scorio.readthedocs.io/en/latest/) |
 | **Julia** | [mohsenhariri.github.io/scorio/julia](https://mohsenhariri.github.io/scorio/julia/) | [![GitHub Pages](https://img.shields.io/badge/docs-stable-blue.svg)](https://mohsenhariri.github.io/scorio/julia/) |
+| **JavaScript/TypeScript** | [mohsenhariri.github.io/scorio/javascript](https://mohsenhariri.github.io/scorio/javascript/) | [![GitHub Pages](https://img.shields.io/badge/docs-stable-blue.svg)](https://mohsenhariri.github.io/scorio/javascript/) |
 
 ---
 
@@ -345,6 +347,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Landing Page**: [mohsenhariri.github.io/scorio](https://mohsenhariri.github.io/scorio/)
 - **Python Docs**: [scorio.readthedocs.io](https://scorio.readthedocs.io/en/latest/)
 - **Julia Docs**: [mohsenhariri.github.io/scorio/julia](https://mohsenhariri.github.io/scorio/julia/)
+- **JavaScript/TypeScript Docs**: [mohsenhariri.github.io/scorio/javascript](https://mohsenhariri.github.io/scorio/javascript/)
 - **Repository**: [github.com/mohsenhariri/scorio](https://github.com/mohsenhariri/scorio)
 - **Issues**: [github.com/mohsenhariri/scorio/issues](https://github.com/mohsenhariri/scorio/issues)
 - **Papers**:
