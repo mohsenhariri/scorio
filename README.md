@@ -266,22 +266,73 @@ If you use Scorio in your research, please cite the relevant papers:
 
 ## Contributing
 
-We welcome contributions from the community! To report a bug, propose a feature, or add an evaluation, ranking, or aggregation method, please see our [Contributing Guide](CONTRIBUTING.md).
+Bug reports, feature requests, and new evaluation, ranking, or aggregation methods are welcome. See the [contributing guide](CONTRIBUTING.md) to get started.
 
-Guidelines for coding agents are in [AGENTS.md](AGENTS.md) / [CLAUDE.md](CLAUDE.md).
+### Contributors
 
-<p>
-  <a href="https://github.com/mohsenhariri"><img src="https://avatars.githubusercontent.com/u/55762597?s=64&amp;v=4" width="32" height="32" align="middle" alt="">&nbsp;@mohsenhariri</a>
-  <a href="https://github.com/HarryHills3588"><img src="https://avatars.githubusercontent.com/u/118565544?s=64&amp;v=4" width="32" height="32" align="middle" alt="">&nbsp;@HarryHills3588</a>
-  <a href="https://github.com/NahalShahini989"><img src="https://avatars.githubusercontent.com/u/127443481?s=64&amp;v=4" width="32" height="32" align="middle" alt="">&nbsp;@NahalShahini989</a>
-  <a href="https://github.com/ben072292"><img src="https://avatars.githubusercontent.com/u/15337083?s=64&amp;v=4" width="32" height="32" align="middle" alt="">&nbsp;@ben072292</a>
-  <a href="https://github.com/mecaneer23"><img src="https://avatars.githubusercontent.com/u/74385377?s=64&amp;v=4" width="32" height="32" align="middle" alt="">&nbsp;@mecaneer23</a>
-  <a href="https://github.com/Amirsamandar"><img src="https://avatars.githubusercontent.com/u/90907234?s=64&amp;v=4" width="32" height="32" align="middle" alt="">&nbsp;@Amirsamandar</a>
-  <a href="https://github.com/SreehariSankar"><img src="https://avatars.githubusercontent.com/u/54915320?s=64&amp;v=4" width="32" height="32" align="middle" alt="">&nbsp;@SreehariSankar</a>
-  <a href="https://github.com/kv-248" title="Keshav Chhabra"><img src="https://avatars.githubusercontent.com/u/129301383?s=64&amp;v=4" width="32" height="32" align="middle" alt="">&nbsp;@kv-248</a>
-</p>
+<table>
+  <tr>
+    <td align="center" width="25%">
+      <a href="https://github.com/mohsenhariri">
+        <img src="https://avatars.githubusercontent.com/u/55762597?s=128&amp;v=4" width="56" height="56" alt=""><br>
+        <sub>@mohsenhariri</sub>
+      </a>
+    </td>
+    <td align="center" width="25%">
+      <a href="https://github.com/HarryHills3588">
+        <img src="https://avatars.githubusercontent.com/u/118565544?s=128&amp;v=4" width="56" height="56" alt=""><br>
+        <sub>@HarryHills3588</sub>
+      </a>
+    </td>
+    <td align="center" width="25%">
+      <a href="https://github.com/NahalShahini989">
+        <img src="https://avatars.githubusercontent.com/u/127443481?s=128&amp;v=4" width="56" height="56" alt=""><br>
+        <sub>@NahalShahini989</sub>
+      </a>
+    </td>
+    <td align="center" width="25%">
+      <a href="https://github.com/ben072292">
+        <img src="https://avatars.githubusercontent.com/u/15337083?s=128&amp;v=4" width="56" height="56" alt=""><br>
+        <sub>@ben072292</sub>
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="25%">
+      <a href="https://github.com/mecaneer23">
+        <img src="https://avatars.githubusercontent.com/u/74385377?s=128&amp;v=4" width="56" height="56" alt=""><br>
+        <sub>@mecaneer23</sub>
+      </a>
+    </td>
+    <td align="center" width="25%">
+      <a href="https://github.com/Amirsamandar">
+        <img src="https://avatars.githubusercontent.com/u/90907234?s=128&amp;v=4" width="56" height="56" alt=""><br>
+        <sub>@Amirsamandar</sub>
+      </a>
+    </td>
+    <td align="center" width="25%">
+      <a href="https://github.com/SreehariSankar">
+        <img src="https://avatars.githubusercontent.com/u/54915320?s=128&amp;v=4" width="56" height="56" alt=""><br>
+        <sub>@SreehariSankar</sub>
+      </a>
+    </td>
+    <td align="center" width="25%">
+      <a href="https://github.com/kv-248" title="Keshav Chhabra">
+        <img src="https://avatars.githubusercontent.com/u/129301383?s=128&amp;v=4" width="56" height="56" alt=""><br>
+        <sub>@kv-248</sub>
+      </a>
+    </td>
+  </tr>
+</table>
 
-See the complete, current list on GitHub’s [Contributors page](https://github.com/mohsenhariri/scorio/graphs/contributors).
+[View all contributors on GitHub](https://github.com/mohsenhariri/scorio/graphs/contributors).
+
+<details>
+<summary>Guidelines for coding agents</summary>
+
+See [AGENTS.md](AGENTS.md) and [CLAUDE.md](CLAUDE.md) for repository instructions.
+
+</details>
 
 ## License
 
