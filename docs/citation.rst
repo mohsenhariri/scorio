@@ -25,6 +25,18 @@ Bayesian Evaluation Framework
 Paper links: `OpenReview <https://openreview.net/forum?id=PTXi3Ef4sT>`__ |
 `arXiv <https://arxiv.org/abs/2510.04265>`__
 
+TailPass
+--------
+
+.. code-block:: bibtex
+
+   @unpublished{hariri2026tailpass,
+     title={Success Has a Shape: {TailPass}@k for Repeated Sampling Evaluation},
+     author={Hariri, Mohsen and Hinczewski, Michael and Ayday, Erman and Chaudhary, Vipin},
+     year={2026},
+     note={Preprint}
+   }
+
 Ranking Methods
 ---------------
 

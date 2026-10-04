@@ -3,11 +3,23 @@ Changelog
 
 All notable changes to this project will be documented in this file.
 
-Unreleased
-----------
+Version 0.2.3 (2026-10-04)
+--------------------------
 
 Added
 ~~~~~
+
+- **TailPass (Python, Julia, and JavaScript/TypeScript)**: ``eval.tailpass``
+  returns a reusable posterior
+  threshold profile with exact means and joint covariance, discounted prior
+  evidence, and categorical rubric scores. Convex threshold weights define
+  linear utilities; moment, discovery, and stability summaries integrate the
+  full score distribution. Shared posterior draws support equal-tailed
+  intervals, QRS/power means, common-threshold rollout utilities, harmonic
+  balance, and reference-profile shortfall. ``tailpass_empirical`` provides
+  the explicitly finite-bank counterpart. Weight constructors include moment,
+  Beta, maximum-entropy, endpoint, uniform, and user-defined payoff weights.
+  All three implementations share deterministic Python reference fixtures.
 
 - **Aggregation subpackage** (``scorio.aggregate``): test-time-scaling
   answer aggregation across five categories: confidence signals from token
@@ -75,14 +87,19 @@ Changed
   statistics and stable finite/posterior count-score kernels. The documented
   functional API, signatures, and valid-input aggregation semantics are
   unchanged.
-- Python evaluation inputs now reject fractional, non-finite, and non-integral
+- Evaluation inputs in all three implementations now reject fractional,
+  non-finite, and non-integral
   values before conversion, and bounded credible intervals cannot invert when
-  their mean lies outside the requested bounds. The JavaScript and Julia ports
-  retain the 0.2.2 coercion and clipping behavior pending a synchronized port;
-  their old edge-case compatibility tests no longer describe Python.
+  their mean lies outside the requested bounds. Julia and JavaScript now follow
+  these contracts and use stable posterior count moments and scaled categorical
+  rewards.
 
 Fixed
 ~~~~~
+
+- Version synchronization now updates npm package and lockfile metadata.
+- Restored npm's missing sequential-inference module and aligned the Julia
+  exports and tests with Python's five posterior mean/std decision helpers.
 
 - Large finite banks and high latent budgets no longer overflow binomial/Beta
   coefficient products in Pass, AUC, generalized-pass, Geom, or spectrum
