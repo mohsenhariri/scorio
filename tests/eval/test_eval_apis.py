@@ -825,6 +825,8 @@ def test_eval_apis_on_simulation_dataset_slice(top_p_model_slice: np.ndarray) ->
 
 def test_public_eval_api_exports_have_valid_smoke_calls(binary_ref: np.ndarray) -> None:
     api_calls = {
+        "tailpass": lambda: scorio_eval.tailpass(binary_ref, 2),
+        "tailpass_empirical": lambda: scorio_eval.tailpass_empirical(binary_ref, 2),
         "bayes": lambda: scorio_eval.bayes(binary_ref),
         "bayes_ci": lambda: scorio_eval.bayes_ci(binary_ref),
         "avg": lambda: scorio_eval.avg(binary_ref),
@@ -873,6 +875,12 @@ def test_public_eval_api_exports_have_valid_smoke_calls(binary_ref: np.ndarray) 
 
     for name, fn in api_calls.items():
         out = fn()
+        if name in {"tailpass", "tailpass_empirical"}:
+            profile = out.mean if name == "tailpass" else out
+            assert profile.shape == (2,)
+            assert np.all(np.isfinite(profile))
+            assert np.all((profile >= 0) & (profile <= 1))
+            continue
         if name.endswith("_ci"):
             mu, sigma, lo, hi = out
             assert np.isfinite(mu)

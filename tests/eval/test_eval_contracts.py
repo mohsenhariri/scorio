@@ -185,7 +185,7 @@ def _latent_k_ci_call(name: str, values: np.ndarray, k: int) -> object:
 
 
 def test_public_exports_are_exact() -> None:
-    assert scorio_eval.__all__ == list(EXPECTED_EXPORTS)
+    assert scorio_eval.__all__ == [*EXPECTED_EXPORTS, "tailpass", "tailpass_empirical"]
     assert set(EXPECTED_PARAMETERS) == set(EXPECTED_EXPORTS)
 
 

@@ -13,6 +13,8 @@ PYTHON_EXAMPLE_FILES = [
     pathlib.Path("docs/index.rst"),
     pathlib.Path("docs/quickstart.rst"),
     pathlib.Path("docs/examples.rst"),
+    pathlib.Path("docs/api/eval.rst"),
+    pathlib.Path("scorio/eval/README.md"),
     pathlib.Path("README.md"),
     pathlib.Path("README_PyPI.md"),
 ]

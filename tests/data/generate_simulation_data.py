@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 
 import numpy as np
@@ -23,6 +24,12 @@ def main() -> None:
 
     np.savez_compressed(out_dir / "R_top_p.npz", **top_p)
     np.savez_compressed(out_dir / "R_greedy.npz", **greedy)
+
+    # Julia packages must carry test data within their registered subdirectory.
+    julia_fixtures = out_dir.parents[1] / "julia/Scorio.jl/test/fixtures"
+    julia_fixtures.mkdir(parents=True, exist_ok=True)
+    for name in ("R_top_p.npz", "R_greedy.npz"):
+        shutil.copyfile(out_dir / name, julia_fixtures / name)
 
 
 if __name__ == "__main__":
