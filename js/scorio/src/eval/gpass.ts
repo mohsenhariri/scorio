@@ -36,6 +36,18 @@ function checkTau(tau: number): void {
   }
 }
 
+/**
+ * Success threshold `max(1, ceil(τk))` using the representable `j / k`
+ * boundaries. Comparing `tau` with the boundary avoids multiplication
+ * rounding at grid points and preserves even the next float above them,
+ * without a fixed tolerance.
+ */
+function tauThreshold(tau: number, k: number): number {
+  let threshold = Math.floor(tau * k);
+  if (tau > threshold / k) threshold += 1;
+  return Math.max(1, threshold);
+}
+
 /** Per-row Beta posterior parameters `[alpha, beta]` for binary outcomes. */
 function binaryBetaPosterior(
   Rm: readonly (readonly number[])[],
@@ -79,7 +91,7 @@ export function gPassAtKTau(R: Matrix, k: number, tau: number): number {
   }
 
   const nu = rowSums(Rm);
-  const j0 = Math.max(1, Math.ceil(tau * k));
+  const j0 = tauThreshold(tau, k);
   const M = Rm.length;
   const vals = nu.map((v) => hypergeomSf(N, v, k, j0));
   return vals.reduce((s, v) => s + v, 0) / M;
@@ -205,7 +217,7 @@ function gPassAtKTauBayes(
   }
 
   const M = Rm.length;
-  const j0 = Math.ceil(tau * k);
+  const j0 = tauThreshold(tau, k);
   const js: number[] = [];
   for (let j = j0; j <= k; j++) js.push(j);
   const coeff = js.map((j) => comb(k, j));

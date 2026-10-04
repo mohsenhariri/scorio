@@ -132,6 +132,60 @@ using Scorio
         @test Scorio.Eval.mg_pass_at_k_ci(R, 1) == (0.0, 0.0, 0.0, 0.0)
     end
 
+    @testset "G-Pass tau threshold when tau * k is whole" begin
+        # (j, k) pairs where (j / k) * k rounds above j in Float64.
+        for (j, k) in ((7, 25), (14, 25), (15, 29), (29, 35), (21, 38))
+            exactly_j = reshape([ones(Int, j); zeros(Int, k - j)], 1, k)
+            one_short = reshape([ones(Int, j - 1); zeros(Int, k - j + 1)], 1, k)
+            @test Scorio.Eval.g_pass_at_k_tau(exactly_j, k, j / k) ≈ 1.0 atol = 1e-12
+            @test Scorio.Eval.g_pass_at_k_tau(one_short, k, j / k) ≈ 0.0 atol = 1e-12
+            exact = Scorio.Eval.g_pass_at_k_tau_ci(exactly_j, k, j / k)
+            below = Scorio.Eval.g_pass_at_k_tau_ci(exactly_j, k, (j - 0.5) / k)
+            @test all(isapprox.(collect(exact), collect(below); atol=1e-12))
+        end
+
+        # Python: eval.g_pass_at_k_tau_ci(R7, 25, 0.28)
+        R7 = reshape([ones(Int, 7); zeros(Int, 18)], 1, 25)
+        mu7, sigma7, _, _ = Scorio.Eval.g_pass_at_k_tau_ci(R7, 25, 0.28)
+        @test mu7 ≈ 0.5893754878280344 atol = 1e-10
+        @test sigma7 ≈ 0.2781303668356882 atol = 1e-10
+
+        # Maj@k uses tau = (fld(k, 2) + 1) / k; for k = 29, 15 / 29 * 29 > 15.
+        # Python: eval.maj_at_k(R15, 29) -> 1.0, eval.maj_at_k_ci(R15, 29)
+        R15 = reshape([ones(Int, 15); zeros(Int, 14)], 1, 29)
+        @test Scorio.Eval.maj_at_k(R15, 29) ≈ 1.0 atol = 1e-12
+        mu15, sigma15, _, _ = Scorio.Eval.maj_at_k_ci(R15, 29)
+        @test mu15 ≈ 0.5508635905453951 atol = 1e-10
+        @test sigma15 ≈ 0.2841588085739448 atol = 1e-10
+    end
+
+    @testset "G-Pass preserves adjacent tau thresholds" begin
+        for (j, k) in ((1, 3), (7, 25), (15, 29), (7, 100), (29, 100), (24, 25))
+            exactly_j = reshape([ones(Int, j); zeros(Int, k - j)], 1, k)
+            boundary = j / k
+            lower_ci = Scorio.Eval.g_pass_at_k_tau_ci(exactly_j, k, (j - 0.5) / k)
+            upper_ci = Scorio.Eval.g_pass_at_k_tau_ci(exactly_j, k, (j + 0.5) / k)
+            for tau in (prevfloat(boundary), boundary)
+                @test Scorio.Eval.g_pass_at_k_tau(exactly_j, k, tau) ≈ 1.0 atol = 1e-12
+                actual_ci = Scorio.Eval.g_pass_at_k_tau_ci(exactly_j, k, tau)
+                @test all(isapprox.(collect(actual_ci), collect(lower_ci); atol=1e-12))
+            end
+            for tau in (nextfloat(boundary), boundary + 2e-11)
+                @test Scorio.Eval.g_pass_at_k_tau(exactly_j, k, tau) ≈ 0.0 atol = 1e-12
+                actual_ci = Scorio.Eval.g_pass_at_k_tau_ci(exactly_j, k, tau)
+                @test all(isapprox.(collect(actual_ci), collect(upper_ci); atol=1e-12))
+            end
+        end
+
+        # Check large budgets without allocating large outcome matrices.
+        for (j, k) in ((25_000_007, 50_000_003), (50_000_006, 100_000_007))
+            boundary = j / k
+            @test Scorio._tau_threshold(prevfloat(boundary), k) == j
+            @test Scorio._tau_threshold(boundary, k) == j
+            @test Scorio._tau_threshold(nextfloat(boundary), k) == j + 1
+        end
+    end
+
     @testset "Validation and vector input" begin
         for fn in (
             Scorio.Eval.pass_at_k,
@@ -534,7 +588,8 @@ if isdefined(@__MODULE__, :top_p_task_aime25)
         end
         M, N = size(Rm)
         denom = Float64(binomial(N, k))
-        j0 = Int(ceil(tau * k))
+        # Locate the first passing grid boundary independently of the implementation.
+        j0 = first(j for j in 1:k if tau <= j / k)
         values = zeros(Float64, M)
         for row in 1:M
             nu = sum(Rm[row, :])

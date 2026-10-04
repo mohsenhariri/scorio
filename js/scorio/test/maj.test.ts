@@ -34,3 +34,19 @@ describe("majAtKCi", () => {
     expect(round(hi, 4)).toBe(0.9824);
   });
 });
+
+describe("majAtK where (floor(k/2) + 1) / k * k rounds up", () => {
+  // k = 29: tau = 15/29 and 15/29 * 29 = 15.000000000000002 in doubles.
+  const R15 = [[...Array(15).fill(1), ...Array(14).fill(0)]];
+
+  it("matches Python reference for k=29", () => {
+    // python: eval.maj_at_k(R15, 29) -> 1.0
+    expect(majAtK(R15, 29)).toBeCloseTo(1.0, 12);
+    // python: eval.maj_at_k_ci(R15, 29) -> (0.5508635905453951, 0.2841588085739448, 0.0, 1.0)
+    const [mu, sigma, lo, hi] = majAtKCi(R15, 29);
+    expect(round(mu, 6)).toBe(0.550864);
+    expect(round(sigma, 6)).toBe(0.284159);
+    expect(round(lo, 4)).toBe(0);
+    expect(round(hi, 4)).toBe(1);
+  });
+});

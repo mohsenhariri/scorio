@@ -224,6 +224,17 @@ function g_pass_at_k(R, k::Integer)::Float64
     return pass_hat_k(R, k)
 end
 
+# `max(1, ceil(tau * k))` using the representable `j / k` boundaries.
+# Comparing tau with the boundary avoids multiplication rounding at grid points
+# and preserves even the next float above them, without a fixed tolerance.
+function _tau_threshold(tau::Float64, k::Integer)::Int
+    threshold = floor(Int, tau * k)
+    if tau > threshold / k
+        threshold += 1
+    end
+    return max(1, threshold)
+end
+
 """
     g_pass_at_k_tau(R, k, tau) -> Float64
 
@@ -305,7 +316,7 @@ function g_pass_at_k_tau(
     end
 
     nu = vec(sum(Rm, dims=2))
-    j0 = Int(ceil(tau_f * k))
+    j0 = _tau_threshold(tau_f, k)
     if j0 > k
         return 0.0
     end
@@ -534,7 +545,7 @@ function _g_pass_at_k_tau_bayes(
         return _pass_hat_k_bayes(Rm, k; alpha0=alpha0, beta0=beta0)
     end
 
-    j0 = Int(ceil(tau_f * k))
+    j0 = _tau_threshold(tau_f, k)
     alpha, beta = _binary_beta_posterior_params(Rm; alpha0=alpha0, beta0=beta0)
 
     means = zeros(Float64, M)

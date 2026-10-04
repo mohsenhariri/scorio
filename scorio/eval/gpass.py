@@ -29,6 +29,20 @@ from .pass_at_k import pass_hat_k, pass_hat_k_ci
 from .utils import normal_credible_interval
 
 
+def _tau_threshold(tau: float, k: int) -> int:
+    r"""Return the success threshold :math:`\max(1, \lceil \tau k \rceil)`.
+
+    Use the representable ``j / k`` boundaries so that ``tau = j / k`` requires
+    exactly ``j`` successes even when ``tau * k`` rounds above the integer.
+    Comparing ``tau`` with the boundary also preserves values strictly above
+    it, including the next representable float, without a fixed tolerance.
+    """
+    threshold = math.floor(tau * k)
+    if tau > threshold / k:
+        threshold += 1
+    return max(1, threshold)
+
+
 def g_pass_at_k(R: np.ndarray, k: int) -> float:
     r"""
     Performance evaluation using G-Pass@k.
@@ -148,7 +162,7 @@ def g_pass_at_k_tau(R: np.ndarray, k: int, tau: float) -> float:
     if tau <= 0.0:
         return CountScore.pass_at_k(k).mean(bank)
 
-    threshold = max(1, int(math.ceil(tau * k)))
+    threshold = _tau_threshold(tau, k)
     return CountScore.threshold_at_k(k, threshold).mean(bank)
 
 
@@ -230,7 +244,7 @@ def _g_pass_at_k_tau_bayes(
     if not (0.0 <= tau <= 1.0):
         raise ValueError(f"tau must be in [0, 1]; got {tau}")
     k = validate_finite_k(bank.trial_count, k)
-    threshold = max(1, int(math.ceil(tau * k)))
+    threshold = _tau_threshold(tau, k)
     moments = posterior_moments(
         bank,
         CountScore.threshold_at_k(k, threshold),
