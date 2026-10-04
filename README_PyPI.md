@@ -83,7 +83,7 @@ pip install scorio
 pip install "git+https://github.com/mohsenhariri/scorio.git"
 
 # Install a specific tag
-pip install "git+https://github.com/mohsenhariri/scorio.git@v0.2.2"
+pip install "git+https://github.com/mohsenhariri/scorio.git@python-v0.2.3"
 
 # Install from local repository
 pip install -e .
