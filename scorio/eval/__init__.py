@@ -21,6 +21,10 @@ Point estimators return a scalar score. Companion ``*_ci`` functions return
 posterior standard deviation under the method assumptions, and ``lo`` and
 ``hi`` define a normal-approximation credible interval.
 
+``tailpass`` returns a posterior profile with joint covariance and reusable
+utility methods. ``tailpass_empirical`` returns a finite-bank profile array.
+TailPass credible intervals can use shared posterior Monte Carlo draws.
+
 Available Families
 ------------------
 - Bayes family: ``bayes`` and ``bayes_ci``.
@@ -38,6 +42,7 @@ Available Families
   ``geom_at_k`` is the questionwise geometric blend; ``geom_ds_at_k`` is the
   dataset-level Pass/Unanimous blend.
 - Max-reward family: ``max_at_k`` and ``max_at_k_ci``.
+- TailPass profiles: ``tailpass`` and ``tailpass_empirical``.
 """
 
 from .auc import auc_at_k, auc_at_k_ci
@@ -66,6 +71,7 @@ from .gpass import (
 from .maj import maj_at_k, maj_at_k_ci
 from .max_reward import max_at_k, max_at_k_ci
 from .pass_at_k import pass_at_k, pass_at_k_ci, pass_hat_k, pass_hat_k_ci
+from .tailpass import tailpass, tailpass_empirical
 
 unanimous_at_k = pass_hat_k
 unanimous_at_k_ci = pass_hat_k_ci
@@ -111,4 +117,7 @@ __all__ = [
     "geo_spectrum_at_k_ci",
     "geo_spectrum_star_at_k",
     "geo_spectrum_star_at_k_ci",
+    # TailPass profiles and their utility methods
+    "tailpass",
+    "tailpass_empirical",
 ]

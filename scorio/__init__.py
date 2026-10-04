@@ -3,7 +3,8 @@
 Modules
 ------------------
 - ``scorio.eval`` provides scalar metrics such as Bayes@N, average metrics,
-  and Pass-family metrics with uncertainty helpers.
+  and Pass-family metrics with uncertainty helpers, plus TailPass posterior
+  profiles with explicit utility summaries.
 - ``scorio.rank`` provides ranking methods based on evaluation metrics,
   pairwise models, voting, IRT, graph methods, and more.
 - ``scorio.sinf`` provides sequential inference helpers for adaptive stopping
@@ -20,7 +21,7 @@ Modules
 
 """
 
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 
 from . import aggregate, eval, rank, sinf, utils
 

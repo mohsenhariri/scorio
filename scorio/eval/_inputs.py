@@ -9,7 +9,7 @@ import numpy as np
 import numpy.typing as npt
 
 
-def _readonly_int64(values: np.ndarray) -> npt.NDArray[np.int64]:
+def _readonly_int64(values: npt.ArrayLike) -> npt.NDArray[np.int64]:
     """Return a defensive, read-only int64 copy."""
     array = np.array(values, dtype=np.int64, order="C", copy=True)
     array.setflags(write=False)
