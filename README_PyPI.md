@@ -34,7 +34,9 @@
 
 ## News
 
-- **August 2026**: Preprint of our paper ["Test-Time Scaling in Reasoning LLMs: Inference Regimes, Evaluation, and Reproducibility"](https://arxiv.org/abs/2608.04001) is available. We will release reasoning traces and evaluation scripts soon.
+- **October 2026** 📦: Our reasoning datasets [Scorio Trace](https://huggingface.co/datasets/harimo/scorio-trace), [Scorio Lite](https://huggingface.co/datasets/harimo/scorio-lite), [Scorio Math](https://huggingface.co/buckets/harimo/scorio-math), and [Scorio GPQA](https://huggingface.co/buckets/harimo/scorio-gpqa) are now available on Hugging Face. Explore the [tutorial notebooks](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/README.md) for evaluation, ranking, and answer aggregation.
+
+- **August 2026**: Preprint of our paper ["Test-Time Scaling in Reasoning LLMs: Inference Regimes, Evaluation, and Reproducibility"](https://arxiv.org/abs/2608.04001) is available.
 
 - **July 2026** 📦: [Scorio](https://www.npmjs.com/package/scorio) is now available on **npm**. Read [our blog post](https://mohsenhariri.github.io/posts.html).
 
@@ -51,6 +53,19 @@ This repository contains three packages:
 1. **[`scorio`](https://github.com/mohsenhariri/scorio/tree/main/scorio)** - Python implementation
 2. **[`Scorio.jl`](https://github.com/mohsenhariri/scorio/tree/main/julia/Scorio.jl)** - Julia implementation
 3. **[`scorio`](https://github.com/mohsenhariri/scorio/tree/main/js)** - JS/TS implementation
+
+---
+
+## Datasets
+
+| Dataset | Attempts | Notebooks |
+| --- | ---: | --- |
+| [Scorio Trace](https://huggingface.co/datasets/harimo/scorio-trace) | 192,000 | [Explore](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/trace/trace.ipynb) - [Eval](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/trace/eval.ipynb) - [Rank](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/trace/rank.ipynb) - [Aggregate](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/trace/aggregate.ipynb) |
+| [Scorio Lite](https://huggingface.co/datasets/harimo/scorio-lite) | 1,211,520 | [Explore](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/lite/lite.ipynb) - [Eval](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/lite/eval.ipynb) - [Rank](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/lite/rank.ipynb) - [Aggregate](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/lite/aggregate.ipynb) |
+| [Scorio Math](https://huggingface.co/buckets/harimo/scorio-math) | 59,520 | [Explore](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/math/math.ipynb) - [Eval](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/math/eval.ipynb) - [Rank](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/math/rank.ipynb) - [Aggregate](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/math/aggregate.ipynb) |
+| [Scorio GPQA](https://huggingface.co/buckets/harimo/scorio-gpqa) | 1,152,000 | [Explore](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/gpqa/gpqa.ipynb) - [Eval](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/gpqa/eval.ipynb) - [Rank](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/gpqa/rank.ipynb) - [Aggregate](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/gpqa/aggregate.ipynb) |
+
+Scorio Lite contains the same attempts as Scorio Math and Scorio GPQA without the top-20 candidate distributions; its `meta-*` configurations also omit token lists for smaller downloads. See the [dataset guide](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/README.md) for loading details and schemas.
 
 ---
 
@@ -254,52 +269,16 @@ We welcome contributions from the community! To report a bug, propose a feature,
 
 Guidelines for coding agents are in [AGENTS.md](AGENTS.md) / [CLAUDE.md](CLAUDE.md).
 
-<table>
-  <tr>
-    <td align="center">
-      <a href="https://github.com/mohsenhariri">
-        <img src="https://avatars.githubusercontent.com/u/55762597?s=96&amp;v=4" width="80" height="80" alt="@mohsenhariri"><br>
-        <sub><b>@mohsenhariri</b></sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/HarryHills3588">
-        <img src="https://avatars.githubusercontent.com/u/118565544?s=96&amp;v=4" width="80" height="80" alt="@HarryHills3588"><br>
-        <sub><b>@HarryHills3588</b></sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/NahalShahini989">
-        <img src="https://avatars.githubusercontent.com/u/127443481?s=96&amp;v=4" width="80" height="80" alt="@NahalShahini989"><br>
-        <sub><b>@NahalShahini989</b></sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/ben072292">
-        <img src="https://avatars.githubusercontent.com/u/15337083?s=96&amp;v=4" width="80" height="80" alt="@ben072292"><br>
-        <sub><b>@ben072292</b></sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/mecaneer23">
-        <img src="https://avatars.githubusercontent.com/u/74385377?s=96&amp;v=4" width="80" height="80" alt="@mecaneer23"><br>
-        <sub><b>@mecaneer23</b></sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/Amirsamandar">
-        <img src="https://avatars.githubusercontent.com/u/90907234?s=96&amp;v=4" width="80" height="80" alt="@Amirsamandar"><br>
-        <sub><b>@Amirsamandar</b></sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/SreehariSankar">
-        <img src="https://avatars.githubusercontent.com/u/54915320?s=96&amp;v=4" width="80" height="80" alt="@SreehariSankar"><br>
-        <sub><b>@SreehariSankar</b></sub>
-      </a>
-    </td>
-  </tr>
-</table>
+<p>
+  <a href="https://github.com/mohsenhariri"><img src="https://avatars.githubusercontent.com/u/55762597?s=64&amp;v=4" width="32" height="32" align="middle" alt="">&nbsp;@mohsenhariri</a>
+  <a href="https://github.com/HarryHills3588"><img src="https://avatars.githubusercontent.com/u/118565544?s=64&amp;v=4" width="32" height="32" align="middle" alt="">&nbsp;@HarryHills3588</a>
+  <a href="https://github.com/NahalShahini989"><img src="https://avatars.githubusercontent.com/u/127443481?s=64&amp;v=4" width="32" height="32" align="middle" alt="">&nbsp;@NahalShahini989</a>
+  <a href="https://github.com/ben072292"><img src="https://avatars.githubusercontent.com/u/15337083?s=64&amp;v=4" width="32" height="32" align="middle" alt="">&nbsp;@ben072292</a>
+  <a href="https://github.com/mecaneer23"><img src="https://avatars.githubusercontent.com/u/74385377?s=64&amp;v=4" width="32" height="32" align="middle" alt="">&nbsp;@mecaneer23</a>
+  <a href="https://github.com/Amirsamandar"><img src="https://avatars.githubusercontent.com/u/90907234?s=64&amp;v=4" width="32" height="32" align="middle" alt="">&nbsp;@Amirsamandar</a>
+  <a href="https://github.com/SreehariSankar"><img src="https://avatars.githubusercontent.com/u/54915320?s=64&amp;v=4" width="32" height="32" align="middle" alt="">&nbsp;@SreehariSankar</a>
+  <a href="https://github.com/kv-248" title="Keshav Chhabra"><img src="https://avatars.githubusercontent.com/u/129301383?s=64&amp;v=4" width="32" height="32" align="middle" alt="">&nbsp;@kv-248</a>
+</p>
 
 See the complete, current list on GitHub’s [Contributors page](https://github.com/mohsenhariri/scorio/graphs/contributors).
 
