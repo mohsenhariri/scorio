@@ -1,0 +1,21 @@
+:root {
+  --light-color-link: #2563eb;
+  --dark-color-link: #93c5fd;
+}
+
+.tsd-page-title h1 {
+  letter-spacing: -0.025em;
+}
+
+.tsd-typography {
+  line-height: 1.65;
+}
+
+.tsd-typography table {
+  display: block;
+  overflow-x: auto;
+}
+
+.tsd-typography th {
+  text-align: left;
+}

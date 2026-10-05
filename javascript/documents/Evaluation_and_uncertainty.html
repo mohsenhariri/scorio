@@ -1,0 +1,116 @@
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>Evaluation and uncertainty | Scorio - v0.2.3</title><link rel="icon" href="../assets/favicon.svg" type="image/svg+xml"/><meta name="description" content="Documentation for Scorio"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><link rel="stylesheet" href="../assets/custom.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script><script>for (let k in localStorage) if (k.includes("tsd-accordion-") && k.includes("Referenced types")) localStorage.setItem(k, "false");</script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">Scorio - v0.2.3</a>
+<div id="tsd-toolbar-links"><a href="https://mohsenhariri.github.io/scorio/">Scorio</a><a href="https://www.npmjs.com/package/scorio">npm</a><a href="https://github.com/mohsenhariri/scorio">GitHub</a></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
+<ul role="listbox" id="tsd-search-results"></ul>
+<div id="tsd-search-status" aria-live="polite" aria-atomic="true">
+<div>Preparing search index...</div></div></dialog><a href="#" class="tsd-widget menu" id="tsd-toolbar-menu-trigger" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-menu"></use></svg></a></div></header>
+<div class="container container-main">
+<div class="col-content">
+<div class="tsd-page-title">
+<ul class="tsd-breadcrumb" aria-label="Breadcrumb">
+<li><a href="" aria-current="page">Evaluation and uncertainty</a></li></ul></div>
+<div class="tsd-panel tsd-typography"><p>Evaluation starts with repeated outcomes for one model. The functions average
+over questions, so each question contributes equally. The
+<a href="Data_shapes.html">data guide</a> describes binary and categorical inputs. The
+<a href="../modules/eval.html" class="tsd-kind-module">API reference</a> lists the exported metrics and their signatures.</p>
+<h2 id="bayesn-and-the-observed-average" class="tsd-anchor-link">Bayes@N and the observed average<a href="#bayesn-and-the-observed-average" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p><code>bayes(R, w?, R0?)</code> returns <code>[mean, std]</code>. It adds one prior count per category,
+then adds the observed counts from <code>R</code> and any prior outcomes from <code>R0</code>.
+<code>std</code> is the posterior standard deviation of the mean performance across
+questions.</p>
+<p><code>avg(R, w?)</code> also returns two numbers. Its first value is the observed weighted
+average; its second is a Bayesian uncertainty estimate rescaled to the average
+scale. It does not accept <code>R0</code>.</p>
+<pre><code class="ts"><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">avg</span><span class="hl-1">, </span><span class="hl-2">bayes</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&quot;scorio/eval&quot;</span><span class="hl-1">;</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">R</span><span class="hl-1"> = [[</span><span class="hl-6">0</span><span class="hl-1">, </span><span class="hl-6">1</span><span class="hl-1">, </span><span class="hl-6">1</span><span class="hl-1">, </span><span class="hl-6">0</span><span class="hl-1">, </span><span class="hl-6">1</span><span class="hl-1">], [</span><span class="hl-6">1</span><span class="hl-1">, </span><span class="hl-6">1</span><span class="hl-1">, </span><span class="hl-6">0</span><span class="hl-1">, </span><span class="hl-6">1</span><span class="hl-1">, </span><span class="hl-6">1</span><span class="hl-1">]];</span><br/><span class="hl-4">const</span><span class="hl-1"> [</span><span class="hl-5">observed</span><span class="hl-1">, </span><span class="hl-5">observedStd</span><span class="hl-1">] = </span><span class="hl-7">avg</span><span class="hl-1">(</span><span class="hl-5">R</span><span class="hl-1">);</span><br/><span class="hl-4">const</span><span class="hl-1"> [</span><span class="hl-5">posterior</span><span class="hl-1">, </span><span class="hl-5">posteriorStd</span><span class="hl-1">] = </span><span class="hl-7">bayes</span><span class="hl-1">(</span><span class="hl-5">R</span><span class="hl-1">);</span><br/><br/><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-7">log</span><span class="hl-1">(</span><span class="hl-2">observed</span><span class="hl-1">);  </span><span class="hl-8">// =&gt; 0.7</span><br/><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-7">log</span><span class="hl-1">(</span><span class="hl-2">posterior</span><span class="hl-1">); </span><span class="hl-8">// about 0.642857</span><br/><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-7">log</span><span class="hl-1">(</span><span class="hl-2">observedStd</span><span class="hl-1">, </span><span class="hl-2">posteriorStd</span><span class="hl-1">);</span>
+</code><button type="button">Copy</button></pre>
+
+<p>The difference between the two means is expected. Bayes@N includes the prior,
+which pulls estimates away from the extremes when few trials are available.</p>
+<h2 id="sampling-metrics" class="tsd-anchor-link">Sampling metrics<a href="#sampling-metrics" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>The scalar metrics below answer different questions about a bank of completions.
+For the binary pass and majority families, <code>k</code> is an integer from <code>1</code> to the
+observed trial count <code>N</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Quantity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>passAtK(R, k)</code></td>
+<td>Probability at least one of <code>k</code> selected trials succeeds</td>
+</tr>
+<tr>
+<td><code>passHatK(R, k)</code>, <code>unanimousAtK(R, k)</code>, <code>gPassAtK(R, k)</code></td>
+<td>Probability all <code>k</code> selected trials succeed</td>
+</tr>
+<tr>
+<td><code>gPassAtKTau(R, k, tau)</code></td>
+<td>Probability of at least <code>max(1, ceil(tau × k))</code> successes</td>
+</tr>
+<tr>
+<td><code>mgPassAtK(R, k)</code></td>
+<td>Average of generalized pass thresholds over the upper half of the threshold range</td>
+</tr>
+<tr>
+<td><code>majAtK(R, k)</code></td>
+<td>Probability a strict majority of the selected trials succeeds</td>
+</tr>
+<tr>
+<td><code>aucAtK(R, k)</code></td>
+<td>Normalized trapezoidal area under Pass@1 through Pass@k</td>
+</tr>
+<tr>
+<td><code>maxAtK(R, k, w?)</code></td>
+<td>Expected maximum rubric score in <code>k</code> selected trials</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="ts"><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">passAtK</span><span class="hl-1">, </span><span class="hl-2">passHatK</span><span class="hl-1">, </span><span class="hl-2">majAtK</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&quot;scorio/eval&quot;</span><span class="hl-1">;</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">R</span><span class="hl-1"> = [[</span><span class="hl-6">0</span><span class="hl-1">, </span><span class="hl-6">1</span><span class="hl-1">, </span><span class="hl-6">1</span><span class="hl-1">, </span><span class="hl-6">0</span><span class="hl-1">, </span><span class="hl-6">1</span><span class="hl-1">], [</span><span class="hl-6">1</span><span class="hl-1">, </span><span class="hl-6">1</span><span class="hl-1">, </span><span class="hl-6">0</span><span class="hl-1">, </span><span class="hl-6">1</span><span class="hl-1">, </span><span class="hl-6">1</span><span class="hl-1">]];</span><br/><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-7">log</span><span class="hl-1">(</span><span class="hl-7">passAtK</span><span class="hl-1">(</span><span class="hl-5">R</span><span class="hl-1">, </span><span class="hl-6">2</span><span class="hl-1">));  </span><span class="hl-8">// =&gt; 0.95</span><br/><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-7">log</span><span class="hl-1">(</span><span class="hl-7">passHatK</span><span class="hl-1">(</span><span class="hl-5">R</span><span class="hl-1">, </span><span class="hl-6">2</span><span class="hl-1">)); </span><span class="hl-8">// =&gt; 0.45</span><br/><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-7">log</span><span class="hl-1">(</span><span class="hl-7">majAtK</span><span class="hl-1">(</span><span class="hl-5">R</span><span class="hl-1">, </span><span class="hl-6">3</span><span class="hl-1">));   </span><span class="hl-8">// =&gt; 0.85</span>
+</code><button type="button">Copy</button></pre>
+
+<p><code>majAtK</code> counts correct outcomes. Actual voting over answer strings is handled
+by <code>majorityVote</code> in <a href="Answer_aggregation.html">aggregation</a>.</p>
+<p>The API also includes <code>geomAtK</code>, <code>geomDsAtK</code>, <code>geoSpectrumAtK</code>,
+<code>geoSpectrumStarAtK</code>, and <code>thresholdSpectrumAtK</code> for geometric and threshold
+blends. Their parameters and definitions are in the API reference.</p>
+<h2 id="credible-intervals" class="tsd-anchor-link">Credible intervals<a href="#credible-intervals" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>The <code>*Ci</code> functions return <code>[mean, std, lo, hi]</code>. The usual confidence default
+is <code>0.95</code>, and the interval uses a normal approximation. Pass-family intervals
+clip to <code>[0, 1]</code> by default; <code>bayesCi</code> and <code>avgCi</code> accept optional bounds and
+do not clip unless you pass them.</p>
+<pre><code class="ts"><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">bayesCi</span><span class="hl-1">, </span><span class="hl-2">passAtK</span><span class="hl-1">, </span><span class="hl-2">passAtKCi</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&quot;scorio/eval&quot;</span><span class="hl-1">;</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">R</span><span class="hl-1"> = [[</span><span class="hl-6">0</span><span class="hl-1">, </span><span class="hl-6">1</span><span class="hl-1">, </span><span class="hl-6">1</span><span class="hl-1">, </span><span class="hl-6">0</span><span class="hl-1">, </span><span class="hl-6">1</span><span class="hl-1">], [</span><span class="hl-6">1</span><span class="hl-1">, </span><span class="hl-6">1</span><span class="hl-1">, </span><span class="hl-6">0</span><span class="hl-1">, </span><span class="hl-6">1</span><span class="hl-1">, </span><span class="hl-6">1</span><span class="hl-1">]];</span><br/><span class="hl-4">const</span><span class="hl-1"> [</span><span class="hl-5">mean</span><span class="hl-1">, </span><span class="hl-5">std</span><span class="hl-1">, </span><span class="hl-5">lo</span><span class="hl-1">, </span><span class="hl-5">hi</span><span class="hl-1">] = </span><span class="hl-7">bayesCi</span><span class="hl-1">(</span><span class="hl-5">R</span><span class="hl-1">, </span><span class="hl-4">undefined</span><span class="hl-1">, </span><span class="hl-4">undefined</span><span class="hl-1">, </span><span class="hl-6">0.95</span><span class="hl-1">, [</span><span class="hl-6">0</span><span class="hl-1">, </span><span class="hl-6">1</span><span class="hl-1">]);</span><br/><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-7">log</span><span class="hl-1">(</span><span class="hl-2">mean</span><span class="hl-1">, </span><span class="hl-2">std</span><span class="hl-1">, </span><span class="hl-2">lo</span><span class="hl-1">, </span><span class="hl-2">hi</span><span class="hl-1">);</span><br/><br/><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-7">log</span><span class="hl-1">(</span><span class="hl-7">passAtK</span><span class="hl-1">(</span><span class="hl-5">R</span><span class="hl-1">, </span><span class="hl-6">2</span><span class="hl-1">));       </span><span class="hl-8">// empirical estimate: 0.95</span><br/><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-7">log</span><span class="hl-1">(</span><span class="hl-7">passAtKCi</span><span class="hl-1">(</span><span class="hl-5">R</span><span class="hl-1">, </span><span class="hl-6">2</span><span class="hl-1">)[</span><span class="hl-6">0</span><span class="hl-1">]); </span><span class="hl-8">// posterior mean: about 0.839286</span>
+</code><button type="button">Copy</button></pre>
+
+<p>The interval companion's mean can differ from the scalar point estimate.
+For <code>passAtK</code>, the point estimator samples the observed bank without
+replacement. <code>passAtKCi</code> instead summarizes the i.i.d. success quantity under a
+Beta posterior, with success and failure prior concentrations both <code>1</code> by
+default. Report which estimate you use.</p>
+<p>TailPass has its own profile and interval API. Read the
+<a href="TailPass_profiles.html">TailPass guide</a> when you need several success thresholds or want
+to choose a utility explicitly.</p>
+</div></div>
+<div class="col-sidebar">
+<div class="page-menu">
+<div class="tsd-navigation settings">
+<details class="tsd-accordion"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>Settings</h3></summary>
+<div class="tsd-accordion-details">
+<div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span>
+<ul id="tsd-filter-options">
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-protected" name="protected"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Protected</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li></ul></div>
+<div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div>
+<details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>On This Page</h3></summary>
+<div class="tsd-accordion-details"><a href="#bayesn-and-the-observed-average"><span>Bayes@<wbr/>N and the observed average</span></a><a href="#sampling-metrics"><span>Sampling metrics</span></a><a href="#credible-intervals"><span>Credible intervals</span></a></div></details></div>
+<div class="site-menu">
+<nav id="tsd-sidebar-links" class="tsd-navigation"><a href="https://scorio.readthedocs.io/">Python documentation</a><a href="https://mohsenhariri.github.io/scorio/julia/">Julia documentation</a><a href="https://mohsenhariri.github.io/scorio/" class="tsd-nav-link">Scorio</a><a href="https://www.npmjs.com/package/scorio" class="tsd-nav-link">npm</a><a href="https://github.com/mohsenhariri/scorio" class="tsd-nav-link">GitHub</a></nav>
+<nav class="tsd-navigation"><a href="../modules.html">Scorio - v0.2.3</a>
+<ul class="tsd-small-nested-navigation" id="tsd-nav-container">
+<li>Loading...</li></ul></nav></div></div></div><footer>
+<p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer>
+<div class="overlay"></div></body></html>
