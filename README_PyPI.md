@@ -36,7 +36,7 @@
 
 ## News
 
-- **October 2026** 📦: Our reasoning datasets [Scorio Trace](https://huggingface.co/datasets/harimo/scorio-trace), [Scorio Lite](https://huggingface.co/datasets/harimo/scorio-lite), [Scorio Math](https://huggingface.co/buckets/harimo/scorio-math), and [Scorio GPQA](https://huggingface.co/buckets/harimo/scorio-gpqa) are now available on Hugging Face. Explore the [tutorial notebooks](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/README.md) for evaluation, ranking, and answer aggregation.
+- **September 2026** 🤗: Our reasoning datasets [Scorio Trace](https://huggingface.co/datasets/harimo/scorio-trace), [Scorio Lite](https://huggingface.co/datasets/harimo/scorio-lite), [Scorio Math](https://huggingface.co/buckets/harimo/scorio-math), and [Scorio GPQA](https://huggingface.co/buckets/harimo/scorio-gpqa) are now available on Hugging Face. Explore the [tutorial notebooks](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/README.md) for evaluation, ranking, and answer aggregation.
 
 - **August 2026**: Preprint of our paper ["Test-Time Scaling in Reasoning LLMs: Inference Regimes, Evaluation, and Reproducibility"](https://arxiv.org/abs/2608.04001) is available.
 
@@ -52,9 +52,9 @@
 
 This repository contains three packages:
 
-1. **[`scorio`](https://github.com/mohsenhariri/scorio/tree/main/scorio)** - Python implementation
-2. **[`Scorio.jl`](https://github.com/mohsenhariri/scorio/tree/main/julia/Scorio.jl)** - Julia implementation
-3. **[`scorio`](https://github.com/mohsenhariri/scorio/tree/main/js)** - JS/TS implementation
+1. **[`scorio`](https://github.com/mohsenhariri/scorio/tree/main/scorio)** - Python implementation [<img src="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/pypi/pypi-original.svg" alt="PyPI" width="24" height="24" align="middle">](https://pypi.org/project/scorio/)
+2. **[`Scorio.jl`](https://github.com/mohsenhariri/scorio/tree/main/julia/Scorio.jl)** - Julia implementation [<img src="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.17.0/icons/julia/julia-original.svg" alt="Julia" width="24" height="24" align="middle">](https://platform.juliahub.com/ui/Packages/General/Scorio)
+3. **[`scorio`](https://github.com/mohsenhariri/scorio/tree/main/js)** - JS/TS implementation [<img src="https://raw.githubusercontent.com/mohsenhariri/scorio/main/assets/npm.svg" alt="npm" width="36" height="15" align="middle">](https://www.npmjs.com/package/scorio)
 
 ---
 
