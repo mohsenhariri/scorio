@@ -1,9 +1,10 @@
 """Convex threshold weights for binary TailPass utilities.
 
-Entry ``t - 1`` values reaching at least ``t`` successes among ``k`` attempts.
-These weights describe preferences, independently of the evaluation prior.
-For categorical moment utilities, use ``profile.moment(lam)``: a categorical
-bank can attain scores between the binary reporting thresholds.
+Entry ``t - 1`` assigns weight to the probability of at least ``t`` successes
+among ``k`` attempts. Weights are nonnegative and sum to one. They specify
+preferences over thresholds, independently of the evaluation prior.
+For categorical moment utilities, use ``profile.moment(lam)`` to include
+partial credit between the binary reporting thresholds.
 """
 
 from __future__ import annotations
@@ -36,7 +37,10 @@ def uniform_weights(k: int) -> NDArray[np.float64]:
 
 
 def threshold_weights(k: int, threshold: int) -> NDArray[np.float64]:
-    """Assign all value to reaching ``threshold`` successes, from 1 to k."""
+    """Put weight 1 on the probability of at least ``threshold`` successes.
+
+    Require 1 <= threshold <= k.
+    """
     k = validate_latent_k(k)
     threshold = _integral_scalar(threshold, name="threshold")
     if not 1 <= threshold <= k:
@@ -47,12 +51,12 @@ def threshold_weights(k: int, threshold: int) -> NDArray[np.float64]:
 
 
 def discovery_weights(k: int) -> NDArray[np.float64]:
-    """Assign all value to finding at least one success."""
+    """Put weight 1 on the probability of at least one success."""
     return threshold_weights(k, 1)
 
 
 def stability_weights(k: int) -> NDArray[np.float64]:
-    """Assign all value to all k attempts succeeding."""
+    """Put weight 1 on the probability of all k attempts succeeding."""
     return threshold_weights(k, k)
 
 
@@ -61,7 +65,7 @@ def moment_weights(k: int, lam: float) -> NDArray[np.float64]:
 
     ``lam=1`` gives uniform weights. Smaller exponents emphasize discovery;
     larger exponents emphasize repeatability. The limits at zero and infinity
-    are supplied explicitly by ``discovery_weights`` and ``stability_weights``.
+    are given by ``discovery_weights`` and ``stability_weights``.
     """
     k = validate_latent_k(k)
     lam = _finite_positive_scalar(lam, name="lam")
@@ -73,10 +77,13 @@ def moment_weights(k: int, lam: float) -> NDArray[np.float64]:
 
 
 def beta_weights(k: int, theta: float, kappa: float) -> NDArray[np.float64]:
-    """Bin Beta threshold mass by mean ``theta`` and concentration ``kappa``.
+    """Return weights from a Beta threshold distribution.
+
+    Each weight is the probability mass between successive thresholds t/k.
+    The distribution has mean ``theta`` and concentration ``kappa``.
 
     Args:
-        k: Positive reporting budget.
+        k: Positive number of attempts.
         theta: Mean fractional threshold, strictly between zero and one.
         kappa: Finite positive concentration around that threshold.
     """
@@ -130,9 +137,10 @@ def maxent_weights(k: int, mean_threshold: float) -> NDArray[np.float64]:
 
 
 def payoff_weights(payoff: ArrayLike) -> NDArray[np.float64]:
-    """Convert monotone ``u(0), ..., u(k)`` to marginal threshold weights.
+    """Convert a nondecreasing payoff ``u(0), ..., u(k)`` to threshold weights.
 
     The payoff must start at zero and end at one. Its length determines k.
+    The weights are the increments ``u(t) - u(t-1)``.
     """
     values = _real_vector(payoff, name="payoff")
     if values.ndim != 1 or values.size < 2:

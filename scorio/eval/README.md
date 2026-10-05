@@ -65,10 +65,10 @@ Notes:
 
 ## TailPass profiles and utilities
 
-TailPass is a posterior profile of threshold probabilities. A declared utility
-over that profile produces a scalar score. See *Success Has a Shape: TailPass@k
-for Repeated Sampling Evaluation*, Sections 2–3 and Appendix C
-([BibTeX](../../citations/tailpass.bib)).
+TailPass estimates the probability that the average score over `k` future
+attempts meets each threshold. Use a utility method to turn the profile into
+a scalar score. See *Success Has a Shape: TailPass@k
+for Repeated Sampling Evaluation*, ([BibTeX](../../citations/tailpass.bib)).
 
 ```python
 import numpy as np
@@ -88,45 +88,49 @@ qrs_summary = draws.summary(draws.qrs())
 
 | API | Result / interpretation |
 | --- | --- |
-| `tailpass(R, k, w=None, R0=None, eta=1, prior=1)` | Reusable posterior profile; `k` may exceed the observed trial count |
-| `profile.mean`, `.std`, `.covariance` | Joint posterior summaries of the dataset profile |
+| `tailpass(R, k, w=None, R0=None, eta=1, prior=1)` | Posterior threshold profile; `k` may exceed the observed trial count |
+| `profile.mean`, `.std`, `.covariance` | Posterior mean, standard deviation, and covariance of the profile averaged across questions |
 | `profile.question_mean` | Per-question posterior mean profiles |
 | `profile.linear(weights)` | Exact `(mu, sigma)` for a convex combination, including cross-threshold covariance |
-| `profile.moment(lam)` | Exact `(mu, sigma)` for the full-score power-moment utility |
-| `profile.discovery()`, `.stability()` | Positive-credit and full-credit endpoint utilities |
+| `profile.moment(lam)` | Exact `(mu, sigma)` for the expected payoff `(average score)**lam` |
+| `profile.discovery()`, `.stability()` | Exact `(mu, sigma)` for the probability of positive credit or every attempt receiving full credit |
 | `profile.ci()`, `.linear_ci(weights)`, `.moment_ci(lam)` | Monte Carlo summaries and equal-tailed intervals; `method="normal"` uses exact moments with a Gaussian approximation |
-| `profile.sample(n_draws, rng=...)` | Shared latent draws for all thresholds and utilities |
-| `draws.power_mean(q)`, `.qrs()`, `.rollout(m)`, `.harmonic(alpha)` | Nonlinear utility draws, averaged after question-level evaluation |
-| `draws.shortfall(target)` | Reference-profile shortfall draws; lower is better |
+| `profile.sample(n_draws, rng=...)` | Posterior draws of outcome probabilities, reused across thresholds and utilities |
+| `draws.power_mean(q)`, `.qrs()`, `.rollout(m)`, `.harmonic(alpha)` | Nonlinear utilities evaluated per question, then averaged, for each posterior draw |
+| `draws.shortfall(target)` | Shortfall below a target profile for each posterior draw; lower is better |
 | `draws.summary(values)` | Monte Carlo `(mu, sigma, lo, hi)` from shared draws |
-| `profile.at_k(k)`, `draws.at_k(k)` | Another reporting budget with the same evidence or latent draws |
-| `tailpass_empirical(R, k, w=None)` | Without-replacement finite-bank profile array, requiring `k <= N` |
+| `profile.at_k(k)`, `draws.at_k(k)` | A different number of future attempts, using the same posterior or draws |
+| `tailpass_empirical(R, k, w=None)` | Threshold probabilities from sampling observed trials without replacement; requires `k <= N` |
 
 `scorio.eval.tailpass_weights` provides `discovery_weights`, `stability_weights`,
 `threshold_weights`, `uniform_weights`, `moment_weights`, `beta_weights`,
-`maxent_weights`, and `payoff_weights`. These arrays value binary thresholds
-1, ..., k and can be passed to `profile.linear`. They are separate from rubric
-scores `w` and the posterior prior. `linear` requires weights summing to one;
-existing `threshold_spectrum_at_k` retains its subnormalized-weight convention.
+`maxent_weights`, and `payoff_weights`. Each array assigns weights to the binary
+success thresholds 1, ..., k and can be passed to `profile.linear`. Utility
+weights specify preferences over thresholds; `w` gives rubric scores, and
+`prior` sets the Dirichlet concentrations. `linear` requires nonnegative weights
+summing to one. The separate `threshold_spectrum_at_k` API accepts weights
+summing to less than one.
 
-Binary uniform weights match Bayes@N under the same prior. Categorical moment
-utilities retain partial credit between reporting thresholds, so use
-`profile.moment(lam)` for the exact power payoff. Categorical uniform-grid
-weights need not give the first-moment utility. Use `discovery()` for
-positive-credit discovery, including credit below the first grid threshold.
+On the default binary grid, uniform weights match Bayes@N under the same prior.
+For categorical outcomes, use `profile.moment(lam)` to include partial credit
+between reporting thresholds. Uniform weights on the reporting grid need not
+give the first-moment utility. `discovery()` measures the probability of
+positive credit, including credit below the first default threshold.
 
-Shared draws preserve dependence between utilities and budgets. Profile
-intervals are pointwise uncertainty in latent expected performance, conditional
-on the observed questions. For nonlinear power means, `aggregation="profile"`
-selects compression after averaging questions; the default is `"question"`.
-A nonlinear transform of the posterior mean generally differs from its
-posterior expected value.
+Reuse posterior draws to compare utilities or different values of `k` while
+preserving their dependence. Profile intervals describe uncertainty in expected
+performance on the observed questions, separately for each threshold. For
+nonlinear power means, the default `aggregation="question"` applies the
+transform to each question's profile before averaging. `aggregation="profile"`
+averages the profiles first. Applying a nonlinear transform to the posterior
+mean generally differs from averaging the transformed posterior draws.
 
-Exact count enumeration is capped at 20,000 states and covariance at 4,000,000
-count pairs or output entries. Categorical moments 1, 2, and 4 have efficient
-paths independent of the full bank-count grid. See the
+Exact count enumeration is limited to 20,000 states and covariance to 4,000,000
+count pairs or output entries. Categorical moments with `lam` equal to 1, 2,
+or 4 avoid enumerating the full count grid. See the
 [API documentation](https://scorio.readthedocs.io/en/latest/api/eval.html)
-for inference methods and limits. TailPass is available in Python, Julia, and JavaScript/TypeScript.
+for interval methods and computational limits. TailPass is also available in
+Julia and JavaScript/TypeScript.
 
 ## Bayesian and Average Metrics
 

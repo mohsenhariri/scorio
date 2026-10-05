@@ -17,26 +17,33 @@ Point estimators return a scalar score. Companion ``*_ci`` functions return
 ``(mu, sigma, lo, hi)``, where ``mu`` is the posterior mean or point estimate,
 ``sigma`` is the posterior standard deviation under the metric's uncertainty
 model, and ``lo`` and ``hi`` define a normal-approximation credible interval.
-TailPass returns a profile object; its utility methods supply scalar summaries.
+TailPass returns a profile object; its utility methods return scalar summaries.
 Its interval methods also support equal-tailed posterior Monte Carlo intervals.
 
 .. currentmodule:: scorio.eval
 
-TailPass profiles and utilities (Python)
-------------------------------------------------------------
+.. _tailpass-profiles-and-utilities-python:
 
-TailPass reports the probability of reaching each required average score in a
-fresh bank of ``k`` attempts. For binary outcomes, its coordinates require
-1, ..., k successes. The observed number of trials supplies evidence; the
-reporting budget ``k`` may be larger or smaller.
+TailPass profiles and utilities
+-------------------------------
 
-Choose a utility explicitly to produce a scalar. Convex threshold weights
-give ``mean = weights @ profile.mean`` and
-``variance = weights @ profile.covariance @ weights``. Uniform binary weights
-recover Bayes@N with the same prior; endpoint weights recover posterior
-discovery and stability. ``moment(lam)`` values the average bank score raised
-to ``lam``. It integrates that payoff over future outcomes and then over the
-posterior, rather than raising a posterior mean to that power.
+TailPass estimates the probability that the average score over ``k`` future
+attempts meets each threshold. With the default thresholds, binary profiles
+report the probabilities of at least 1, ..., k successes. ``k`` is the number
+of future attempts; the observed trial count ``N`` supplies evidence and may
+differ from ``k``.
+
+Use a utility method to turn the profile into a scalar score. For nonnegative
+threshold weights summing to one, ``linear(weights)`` gives
+``mean = weights @ profile.mean`` and
+``variance = weights @ profile.covariance @ weights``. On the default binary
+grid, uniform weights recover Bayes@N with the same prior. Weighting only the
+first or last threshold gives the posterior probability of at least one
+success (discovery) or all ``k`` successes (stability).
+
+``moment(lam)`` computes the expected payoff ``(average score)**lam``. The
+power is applied to each possible future score before averaging over future
+outcomes and the posterior.
 
 .. code-block:: python
 
@@ -50,54 +57,59 @@ posterior, rather than raising a posterior mean to that power.
    mu, sigma = profile.linear(weights)
    assert np.allclose((mu, sigma), profile.moment(lam=2))
 
-   # One posterior sample supports multiple utilities and their differences.
+   # Reuse the draws to compare utilities.
    draws = profile.sample(n_draws=2000, rng=42)
    moment_summary = draws.summary(draws.moment(2))
    qrs_summary = draws.summary(draws.qrs())
    difference_summary = draws.summary(draws.moment(2) - draws.moment(4))
-   other_budget = draws.at_k(16)  # preserves the same latent draws
+   other_budget = draws.at_k(16)  # reuse the draws for 16 future attempts
 
-``tailpass`` uses ``prior + counts(R) + eta * counts(R0)``. The default
-concentration is one per original category. ``prior`` can supply a scalar,
-category vector, or question-by-category matrix. Binary concentrations are
-ordered as ``[failure, success]``. The transfer weight ``eta`` is in [0, 1].
-Keep this evidence model fixed when comparing utility preferences.
+The posterior concentrations are ``prior + counts(R) + eta * counts(R0)``.
+The default prior concentration is one per original category. ``prior`` accepts
+a scalar, a category vector, or a question-by-category matrix. Binary
+concentrations are ordered as ``[failure, success]``. ``eta`` sets the fraction
+of auxiliary counts included, from zero to one. Use the same evidence and prior
+when comparing utilities.
 
 For categorical outcomes, pass rubric scores ``w`` in [0, 1]. ``weights``
-always refers to utility weights on the reported thresholds. Categorical
-``moment`` integrates the full attainable score distribution: partial credit
-between reporting thresholds is retained. For example, a deterministic score
-of 0.5 at ``k=1`` has first-moment utility 0.5 even though it never reaches the
-default reporting threshold 1. ``discovery()`` measures strictly positive
-credit, including credit below the first grid threshold; ``stability()``
-requires every attempt to receive score 1.
+refers to utility weights on the reported thresholds. ``moment`` accounts for
+every attainable average score, including partial credit between thresholds.
+For example, a deterministic score of 0.5 at ``k=1`` has first-moment utility
+0.5 even though it never reaches the default threshold 1. ``discovery()``
+measures the probability of strictly positive credit, including credit below
+the first default threshold; ``stability()`` requires every attempt to receive
+score 1.
 
-All nonlinear summaries operate on each posterior draw. ``power_mean`` and
-``qrs`` average question-level summaries by default. Specify
-``aggregation="profile"`` to transform the already averaged profile instead.
-``rollout(m)`` keeps the replication-probability scale, ``harmonic(alpha)``
-balances discovery and stability, and ``shortfall(target)`` measures violations
-of a target profile (lower is better). Spectrum weights refer to the chosen
-discrete reporting grid, including for categorical rubrics.
+Nonlinear utilities are evaluated for each posterior draw. By default,
+``power_mean`` and ``qrs`` apply the transform to each question's profile, then
+average across questions. Use ``aggregation="profile"`` to average the profiles
+before applying the transform. ``rollout(m)`` reports the probability that
+``m`` independent banks meet a common threshold, averaged using threshold
+weights. ``harmonic(alpha)`` computes a weighted harmonic mean of discovery
+and stability probabilities. ``shortfall(target)`` measures how far profiles
+fall below a target (lower is better). Spectrum weights apply to the selected
+discrete threshold grid, including for categorical rubrics.
 
-``ci``, ``linear_ci``, and ``moment_ci`` default to ``method="mc"``: all four
+``ci``, ``linear_ci``, and ``moment_ci`` default to ``method="mc"``. All four
 returned statistics are Monte Carlo estimates. ``method="normal"`` uses exact
-moments and clipped Gaussian intervals. Reusing ``sample`` avoids resampling
-for each utility. Intervals concern the latent expected performance on the
-observed questions. They are coordinatewise credible intervals, not
-simultaneous bands or predictive intervals for newly realized banks.
+moments and Gaussian intervals clipped to [0, 1]. Call ``sample`` once to reuse
+draws across utilities. Profile intervals describe uncertainty in expected
+performance on the observed questions, separately for each threshold. They
+are not simultaneous bands or predictive intervals for future banks.
 
-The explicitly empirical ``tailpass_empirical`` samples without replacement
-from R and requires ``k <= N``. It returns an array. Dotting this binary
-profile with uniform weights gives observed accuracy; its first and last
-coordinates match finite-bank ``pass_at_k`` and ``pass_hat_k``.
+``tailpass_empirical`` samples without replacement from ``R`` and requires
+``k <= N``. It returns an array of threshold probabilities. For binary outcomes
+on the default grid, averaging the entries gives observed accuracy. The first
+and last entries match finite-bank ``pass_at_k`` and ``pass_hat_k``.
 
-Exact general categorical calculations enumerate count states. Requests above
-20,000 states raise ``ValueError`` before allocation; exact covariance is also
-limited to 4,000,000 count pairs or output entries. Shared draws provide a
-covariance alternative when the count grid fits, but still require that grid
-for general profiles. Categorical moments 1, 2, and 4 use a separate low-degree
-expansion; their draws, and discovery/stability, avoid the full count grid.
+General categorical profiles are computed by enumerating category-count states.
+Requests above 20,000 states raise ``ValueError`` before allocation. Exact
+covariance is limited to 4,000,000 count pairs or output entries. Use posterior
+draws when exact covariance exceeds this limit; general profiles still require
+a count grid within the state limit. Categorical moments with ``lam`` equal to
+1, 2, or 4 use a low-degree polynomial expansion. These moments and
+discovery/stability utilities avoid the full count grid in both exact and
+Monte Carlo calculations.
 
 .. autofunction:: tailpass
 

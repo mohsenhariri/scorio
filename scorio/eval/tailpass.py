@@ -1,8 +1,9 @@
 """TailPass posterior profiles and utilities for repeated sampling.
 
-TailPass describes the probability of reaching each required bank score under
-fresh, conditionally independent attempts. A profile has no default scalar
-score: call ``linear(weights)`` or select a named utility such as ``moment``.
+TailPass estimates the probability that the average score over k future
+attempts meets each threshold. Attempts are conditionally independent given
+each question's outcome probabilities. Use ``linear(weights)`` or a named
+utility such as ``moment`` to turn the profile into a scalar score.
 
 Reference:
     Hariri, Hinczewski, Ayday, and Chaudhary (2026), *Success Has a Shape:
@@ -109,28 +110,29 @@ def tailpass(
     prior: ArrayLike = 1.0,
     thresholds: ArrayLike | None = None,
 ) -> TailPassProfile:
-    """Prepare a reusable posterior TailPass profile.
+    """Estimate a posterior TailPass profile for k future attempts.
 
     Args:
         R: Question-by-trial categorical outcomes; 1D means one question.
-        k: Positive reporting budget, independent of the observed trial count.
+        k: Positive number of future attempts; may differ from the trial count.
         w: Category scores in [0, 1]. Defaults to [0, 1] for binary R.
         R0: Optional auxiliary outcomes for the same questions, as in ``bayes``.
-        eta: Auxiliary-count transfer weight in [0, 1].
+        eta: Fraction of R0 counts added to the posterior, in [0, 1].
         prior: Positive Dirichlet concentrations: a scalar, a length-(C+1)
             vector, or an M-by-(C+1) matrix for categories 0, ..., C.
             Entries follow category order; binary [failure, success] = [1, 1]
             is the default Beta(1, 1) prior.
         thresholds: Required average rubric scores in [0, 1], in increasing
-            order. Defaults to 1/k, ..., 1. Threshold zero is always met;
-            discovery means strictly positive credit instead.
+            order. Defaults to 1/k, ..., 1. Threshold zero is always met.
+            Discovery requires strictly positive credit.
 
     Returns:
-        A profile with exact moments, scalar utilities, and posterior sampling.
+        A profile with exact posterior moments, utility methods, and sampling.
 
     Notes:
         The posterior is ``prior + counts(R) + eta * counts(R0)``. Questions
-        are independent under this model. R0 should be disjoint evidence.
+        are independent under this model. R0 should contain evidence disjoint
+        from R.
         Equal-score categories are merged by adding their concentrations,
         preserving the original Dirichlet prior mass.
 
@@ -174,11 +176,11 @@ def tailpass(
 
 @dataclass(frozen=True, eq=False)
 class TailPassProfile:
-    """Posterior-backed profile constructed by :func:`tailpass`.
+    """Posterior threshold profile returned by :func:`tailpass`.
 
     ``mean`` and ``std`` have one entry per threshold; ``covariance`` describes
-    their joint uncertainty. ``question_mean`` retains the question axis.
-    Expensive arrays are computed on first access and stored read-only.
+    their joint uncertainty. ``question_mean`` gives one profile per question.
+    Arrays are computed on first access and cached as read-only.
     """
 
     k: int
@@ -248,8 +250,8 @@ class TailPassProfile:
         """Exact joint posterior covariance of the dataset profile.
 
         Independent question covariances are summed and divided by M squared.
-        Exact enumeration has size limits; posterior draws provide an explicit
-        Monte Carlo alternative when the covariance calculation is too large.
+        Exact enumeration has size limits. Use posterior draws to estimate
+        covariance when the exact calculation is too large.
         """
         counts, _, log_coeff = self._grid
         if max(len(counts), len(self.thresholds)) ** 2 > MAX_COVARIANCE_PAIRS:
@@ -310,7 +312,7 @@ class TailPassProfile:
         return mean, math.sqrt(variance)
 
     def linear(self, weights: ArrayLike) -> tuple[float, float]:
-        """Exact mean/std of a convex combination of the reported thresholds.
+        """Return exact posterior mean and std for a weighted threshold profile.
 
         Args:
             weights: One finite nonnegative weight per threshold, summing to one.
@@ -326,16 +328,17 @@ class TailPassProfile:
         return self._payoff_moments(payoff)
 
     def moment(self, lam: float) -> tuple[float, float]:
-        """Exact mean/std of E[(average future rubric score)**lam].
+        """Return exact posterior mean and std of the moment utility.
 
         Args:
-            lam: Finite positive exponent. One gives posterior mean rubric
-                credit (Bayes@N with matching priors); larger exponents value
-                high bank scores more heavily.
+            lam: Finite positive exponent. One gives the posterior mean rubric
+                score (Bayes@N with matching priors). Larger exponents give
+                more weight to high average scores.
 
-        This integrates the full attainable score distribution, independently
-        of the reporting grid. First, second, and fourth categorical moments
-        have fast paths that avoid enumerating all k-attempt category counts.
+        The utility is the expected payoff ``(average future rubric score)**lam``
+        for each set of outcome probabilities. It includes every attainable
+        score, independently of the reporting grid. Categorical moments with
+        lam equal to 1, 2, or 4 avoid enumerating all k-attempt category counts.
         """
         lam = _finite_positive_scalar(lam, name="lam")
         parameters, _, frequencies = self._states
@@ -371,33 +374,38 @@ class TailPassProfile:
         return self._aggregate(means, variances, frequencies)
 
     def discovery(self) -> tuple[float, float]:
-        """Exact mean/std of positive bank credit (the moment limit at 0+).
+        """Return exact posterior mean and std of the discovery probability.
 
-        For categorical rubrics this can differ from the first reported grid
-        coordinate: even credit below 1/k counts as discovery.
+        Discovery is the probability of positive credit, the moment limit at
+        0+. For categorical rubrics, credit below the first default threshold
+        1/k also counts.
         """
         return self._endpoint(False)
 
     def stability(self) -> tuple[float, float]:
-        """Exact mean/std of every attempt receiving full rubric credit 1."""
+        """Return exact posterior mean and std of the stability probability.
+
+        Stability requires every attempt to receive full rubric credit 1.
+        """
         return self._endpoint(True)
 
     def at_k(self, k: int, *, thresholds: ArrayLike | None = None) -> TailPassProfile:
-        """Reuse the fitted posterior at another positive reporting budget."""
+        """Reuse the posterior for a different positive number of attempts."""
         k = validate_latent_k(k)
         return TailPassProfile(
             k, _thresholds(k, thresholds), self._parameters, self._scores
         )
 
     def sample(self, n_draws: int = 4000, *, rng: RNG = None) -> TailPassDraws:
-        """Draw independent question probabilities, shared across all utilities.
+        """Sample each question's outcome probabilities from the posterior.
 
         Args:
             n_draws: At least two posterior draws.
             rng: NumPy Generator, integer seed, or None.
 
-        Stores latent probabilities (draws by questions by distinct scores),
-        rather than a potentially much larger tensor of question profiles.
+        The stored array has axes for draws, questions, and distinct rubric
+        scores. Question profiles are computed as needed. Reuse the draws
+        across utilities to preserve their dependence.
         """
         n_draws = _integral_scalar(n_draws, name="n_draws")
         if n_draws < 2:
@@ -513,7 +521,10 @@ class TailPassDraws:
         return self.profile @ weights
 
     def moment(self, lam: float) -> FloatArray:
-        """Draws of the full-score moment utility, independent of the grid."""
+        """Evaluate the expected power payoff for each draw, using all scores.
+
+        The calculation is independent of the threshold grid.
+        """
         lam = _finite_positive_scalar(lam, name="lam")
         values = np.zeros(len(self._probabilities))
         if lam in (1.0, 2.0, 4.0):
@@ -551,13 +562,14 @@ class TailPassDraws:
         *,
         aggregation: Literal["question", "profile"] = "question",
     ) -> FloatArray:
-        """Weighted spectrum power means, computed question-first by default.
+        """Compute weighted power means of each question's threshold profile.
 
         Args:
             q: Positive power-mean exponent (distinct from moment utility lam).
             weights: Convex weights on the reported thresholds; default uniform.
-            aggregation: Apply the nonlinear transform before (question) or
-                after (profile) averaging questions. These differ for q != 1.
+            aggregation: With "question", transform each question's profile,
+                then average. With "profile", average first, then transform.
+                These differ for q != 1.
         """
         q = _finite_positive_scalar(q, name="q")
         size = len(self._source.thresholds)
@@ -595,15 +607,21 @@ class TailPassDraws:
         *,
         aggregation: Literal["question", "profile"] = "question",
     ) -> FloatArray:
-        """Quadratic RMS spectrum draws; uniform binary weights give L2@k."""
+        """Compute quadratic root mean square (QRS) for each posterior draw.
+
+        Uniform weights on the default binary grid give L2@k.
+        """
         return self.power_mean(2.0, weights, aggregation=aggregation)
 
     def rollout(self, m: int, weights: ArrayLike | None = None) -> FloatArray:
-        """Common-threshold m-rollout utility, on its probability scale.
+        """Probability that m independent banks meet the same threshold.
 
         Args:
             m: Integer number of independent k-attempt rollouts, at least two.
             weights: Convex threshold weights; default uniform.
+
+        Threshold probabilities are raised to m, then averaged across
+        thresholds and questions.
         """
         m = _integral_scalar(m, name="m")
         if m < 2:
@@ -615,11 +633,12 @@ class TailPassDraws:
         return self._apply(lambda values: values**m @ weights)
 
     def harmonic(self, alpha: float = 0.5) -> FloatArray:
-        """Question-first harmonic balance of discovery and full credit.
+        """Compute the harmonic mean of discovery and stability per question.
 
         ``alpha`` in [0, 1] weights discovery; ``1-alpha`` weights stability.
-        Discovery means positive bank credit and stability means bank credit 1,
-        including for categorical rubrics. This is independent of the grid.
+        Discovery means positive credit; stability requires every attempt to
+        receive score 1, including for categorical rubrics. The calculation
+        is independent of the threshold grid.
         """
         alpha = _unit_interval(alpha, "alpha")
         values = np.zeros(len(self._probabilities))
@@ -645,11 +664,11 @@ class TailPassDraws:
         return values / self._source.question_count
 
     def discovery(self) -> FloatArray:
-        """Shared draws of the probability of positive bank credit."""
+        """Evaluate the probability of positive credit for each draw."""
         return self.harmonic(1.0)
 
     def stability(self) -> FloatArray:
-        """Shared draws of the probability of full bank credit."""
+        """Evaluate the probability of full credit on every attempt per draw."""
         return self.harmonic(0.0)
 
     def shortfall(
@@ -659,7 +678,7 @@ class TailPassDraws:
         *,
         epsilon: float = 0.01,
     ) -> FloatArray:
-        """Question-first reference-profile shortfall; lower values are better.
+        """Measure how far each question's profile falls below the target.
 
         Args:
             target: Nonincreasing target profile in [0, 1].
@@ -667,8 +686,9 @@ class TailPassDraws:
                 default all ones. These need not sum to one.
             epsilon: Positive multiplier for the total weighted shortfall.
 
-        Returns max(weighted shortfall) + epsilon * sum(weighted shortfall)
-        within each question, then averages questions on each posterior draw.
+        Compute max(weighted shortfall) + epsilon * sum(weighted shortfall)
+        for each question, then average across questions on each draw.
+        Lower values are better.
         """
         size = len(self._source.thresholds)
         target = _real_vector(target, name="target")
@@ -694,7 +714,7 @@ class TailPassDraws:
         return self._apply(transform)
 
     def at_k(self, k: int, *, thresholds: ArrayLike | None = None) -> TailPassDraws:
-        """Reuse these same latent draws at a different reporting budget."""
+        """Reuse the draws for a different number of future attempts."""
         return TailPassDraws(
             self._source.at_k(k, thresholds=thresholds), self._probabilities
         )
@@ -702,11 +722,11 @@ class TailPassDraws:
     def summary(
         self, values: ArrayLike | None = None, *, confidence: float = 0.95
     ) -> Summary:
-        """Monte Carlo mean/std and equal-tailed interval along the draw axis.
+        """Return Monte Carlo mean, std, and an equal-tailed credible interval.
 
         Args:
             values: Utility draws, or None for the dataset profile draws.
-                Differences between utilities from this draw set are supported.
+                Can also be differences between utilities from these draws.
             confidence: Posterior mass strictly between zero and one.
 
         Intervals are coordinatewise. Values are not clipped, allowing utility
@@ -742,12 +762,13 @@ def tailpass_empirical(
         R: Question-by-trial outcomes, or a 1D single-question bank.
         k: Integer satisfying 1 <= k <= N.
         w: Category scores in [0, 1]; defaults to binary [0, 1].
-        thresholds: Increasing required bank scores, default 1/k, ..., 1.
+        thresholds: Increasing required average scores, default 1/k, ..., 1.
 
     Returns:
         Dataset mean threshold probabilities, without posterior uncertainty.
-        Binary endpoints recover finite-bank Pass@k and unanimity. This has
-        no R0 or prior arguments: the observed bank defines the distribution.
+        On the default binary grid, the first and last entries give finite-bank
+        Pass@k and unanimity. The observed trials define the distribution;
+        this function has no R0 or prior arguments.
     """
     bank = prepare_categorical_bank(R, w=w)
     k = validate_finite_k(bank.trial_count, k)

@@ -10,14 +10,13 @@ Added
 ~~~~~
 
 - **TailPass (Python, Julia, and JavaScript/TypeScript)**: ``eval.tailpass``
-  returns a reusable posterior
-  threshold profile with exact means and joint covariance, discounted prior
-  evidence, and categorical rubric scores. Convex threshold weights define
-  linear utilities; moment, discovery, and stability summaries integrate the
-  full score distribution. Shared posterior draws support equal-tailed
-  intervals, QRS/power means, common-threshold rollout utilities, harmonic
-  balance, and reference-profile shortfall. ``tailpass_empirical`` provides
-  the explicitly finite-bank counterpart. Weight constructors include moment,
+  returns a posterior threshold profile with exact means and joint covariance,
+  discounted prior evidence, and categorical rubric scores. Convex threshold
+  weights define linear utilities; moment, discovery, and stability summaries
+  integrate the full score distribution. Shared posterior draws support
+  equal-tailed intervals, QRS/power means, common-threshold rollout utilities,
+  harmonic balance, and reference-profile shortfall. ``tailpass_empirical`` samples
+  observed trials without replacement. Weight constructors include moment,
   Beta, maximum-entropy, endpoint, uniform, and user-defined payoff weights.
   All three implementations share deterministic Python reference fixtures.
 
