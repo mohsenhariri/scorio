@@ -1,9 +1,8 @@
-# Sitemap for Scorio Documentation
+# Google reads this file only at https://mohsenhariri.github.io/robots.txt.
+# On the project site (/scorio/robots.txt), it is only a reference copy.
+# Add the Sitemap line below to the hostname root's existing robots.txt,
+# or submit it in Google Search Console. See CONTRIBUTING.md.
 User-agent: *
 Allow: /
 
 Sitemap: https://mohsenhariri.github.io/scorio/sitemap.xml
-
-# Additional documentation locations
-# Python docs: https://scorio.readthedocs.io/
-# Julia docs: https://mohsenhariri.github.io/scorio/julia/

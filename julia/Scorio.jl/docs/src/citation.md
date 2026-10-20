@@ -1,12 +1,16 @@
 # Citation
 
+```@meta
+Description = "Cite Scorio.jl and the research behind Bayesian LLM evaluation and model ranking. Paper links and BibTeX entries for Scorio research."
+```
+
 If you use Scorio.jl or Scorio in your research, please cite the relevant papers:
 
 ## Bayesian Evaluation Framework
 
 ```@raw html
 <p>
-  <img src="assets/ICLR.svg" alt="ICLR logo" width="72">
+  <img src="../assets/ICLR.svg" alt="ICLR logo" width="72">
 </p>
 ```
 
@@ -28,7 +32,7 @@ Paper links: [OpenReview](https://openreview.net/forum?id=PTXi3Ef4sT) |
 
 ```@raw html
 <p>
-  <img src="assets/ACL.svg" alt="ACL logo" width="72">
+  <img src="../assets/ACL.svg" alt="ACL logo" width="72">
 </p>
 ```
 

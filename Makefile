@@ -4,6 +4,7 @@ JULIA_PROJECT:=julia/Scorio.jl
 
 .PHONY: format format-check lint clean build install test pkg-check pkg-publish-test pkg-publish sync-version release-py release-jl release-js js-build js-test jl-install jl-test jl-test-slow py-docs-build py-docs-clean py-docs-serve jl-docs-build jl-docs-clean jl-docs-serve js-docs-build js-docs-check js-docs-clean js-docs-serve landing-serve
 .PHONY: test-eval-py test-rank-py test-rank-py-slow test-eval-jl test-rank-jl test-rank-jl-slow
+.PHONY: docs-site-build docs-seo-check docs-seo-test
 
 format-check:
 	ruff format --check $(SRC)
@@ -126,6 +127,21 @@ js-docs-clean:
 
 js-docs-serve:
 	cd js/scorio/docs/_build && python3 -m http.server 4003
+
+docs-site-build: jl-docs-build js-docs-build
+	rm -rf build/docs-site
+	mkdir -p build/docs-site/julia build/docs-site/javascript
+	cp -a docs-landing/. build/docs-site/
+	cp -a $(JULIA_PROJECT)/docs/build/. build/docs-site/julia/
+	cp -a js/scorio/docs/_build/. build/docs-site/javascript/
+	touch build/docs-site/.nojekyll
+	python scripts/docs_seo.py build/docs-site
+
+docs-seo-check:
+	python scripts/docs_seo.py build/docs-site --check
+
+docs-seo-test:
+	python -m unittest discover -s tests/docs -v
 
 landing-serve:
 	python -m http.server --directory docs-landing 4002

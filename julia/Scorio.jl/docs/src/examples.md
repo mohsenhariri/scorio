@@ -1,5 +1,9 @@
 # Examples
 
+```@meta
+Description = "Scorio.jl examples for Bayesian LLM evaluation and model ranking in Julia, including Bayes@N scores, posterior uncertainty, and repeated outcome matrices."
+```
+
 ## Bayesian Evaluation
 
 The `bayes` function implements the Bayes@N framework. It takes a matrix of outcomes `R`, a weight vector `w`, and optionally a matrix of prior outcomes `R0`.

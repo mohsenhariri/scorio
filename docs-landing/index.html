@@ -8,8 +8,7 @@
     <!-- Primary Meta Tags -->
     <title>Scorio - Bayesian Framework for LLM Evaluation and Ranking | Python, Julia & JavaScript</title>
     <meta name="title" content="Scorio - Bayesian Framework for LLM Evaluation and Ranking | Python, Julia & JavaScript">
-    <meta name="description" content="Scorio implements test-time scaling metrics, including Bayes@N, with uncertainty quantification for evaluating and ranking Large Language Models. Available for Python, Julia, and JavaScript/TypeScript.">
-    <meta name="keywords" content="Bayesian evaluation, LLM evaluation, LLM ranking, test-time scaling, machine learning, Python, Julia, JavaScript, TypeScript, npm, Bayes@N, Pass@k, uncertainty quantification, AI benchmarking, scorio">
+    <meta name="description" content="Scorio implements test-time scaling metrics, including Bayes@N, with uncertainty quantification for evaluating and ranking Large Language Models. Available for Python, Julia, and JavaScript.">
     <meta name="author" content="Mohsen Hariri">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://mohsenhariri.github.io/scorio/">
@@ -39,7 +38,7 @@
         "description": "Bayesian framework for Large Language Model evaluation and ranking that implements test-time scaling metrics, including Bayes@N, with uncertainty quantification",
         "url": "https://mohsenhariri.github.io/scorio/",
         "codeRepository": "https://github.com/mohsenhariri/scorio",
-        "programmingLanguage": ["Python", "Julia", "TypeScript", "JavaScript"],
+        "programmingLanguage": ["Python", "Julia", "JavaScript"],
         "license": "https://opensource.org/licenses/MIT",
         "author": {
             "@type": "Person",
@@ -60,6 +59,11 @@
                 "@type": "ScholarlyArticle",
                 "name": "Scorio.jl: A Julia package for ranking stochastic responses",
                 "url": "https://arxiv.org/abs/2603.14103"
+            },
+            {
+                "@type": "ScholarlyArticle",
+                "name": "Test-Time Scaling in Reasoning LLMs: Inference Regimes, Evaluation, and Reproducibility",
+                "url": "https://arxiv.org/abs/2608.04001"
             }
         ]
     }
@@ -464,6 +468,9 @@
                 <a href="https://arxiv.org/abs/2603.14103" target="_blank" rel="noopener">
                     <img src="https://img.shields.io/badge/arXiv-2603.14103-b31b1b.svg" alt="Scorio.jl arXiv paper">
                 </a>
+                <a href="https://arxiv.org/abs/2608.04001" target="_blank" rel="noopener">
+                    <img src="https://img.shields.io/badge/arXiv-2608.04001-b31b1b.svg" alt="Test-time scaling arXiv paper">
+                </a>
                 <a href="https://github.com/mohsenhariri/scorio/blob/main/LICENSE" target="_blank" rel="noopener">
                     <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="MIT License">
                 </a>
@@ -522,18 +529,20 @@
                             <rect x="1" y="1" width="22" height="22" rx="2" fill="var(--javascript)"/>
                             <text x="5" y="18" fill="white" font-size="12" font-weight="700" font-family="Arial, sans-serif">JS</text>
                         </svg>
-                        JavaScript/TypeScript
+                        JavaScript
                     </h2>
                     <p class="version">scorio on npm</p>
-                    <p><strong>JS/TS</strong> documentation</p>
+                    <p>JavaScript Documentation</p>
                     <a href="./javascript/" class="btn btn-javascript">
                         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                             <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                         </svg>
-                        JavaScript/TypeScript Docs
+                        JavaScript Docs
                     </a>
                 </article>
             </section>
+
+            <p><a href="./sitemap.html">Browse all Scorio documentation and API references</a></p>
 
             <section class="papers" aria-labelledby="papers-heading">
                 <h2 id="papers-heading">Papers</h2>
@@ -572,6 +581,18 @@
                                 JuliaCon 2026
                             </span>
                             <span class="paper-id">arXiv:2603.14103</span>
+                        </span>
+                    </a>
+                    <a class="paper" href="https://arxiv.org/abs/2608.04001" target="_blank" rel="noopener">
+                        <strong>Test-Time Scaling in Reasoning LLMs: Inference Regimes, Evaluation, and Reproducibility</strong>
+                        <span class="paper-meta">
+                            <span class="venue">
+                                <span class="venue-logo-shell">
+                                    <img class="venue-logo" src="./assets/arXiv.svg" alt="arXiv logo">
+                                </span>
+                                arXiv preprint
+                            </span>
+                            <span class="paper-id">arXiv:2608.04001</span>
                         </span>
                     </a>
                 </div>
@@ -620,6 +641,12 @@
                         <path d="M4 4v16h16V8.414l-4-4H4zm16 16H4v-2h16v2zm0-4H4V6h10v4h4v6zM8 8h4v2H8V8zm0 4h8v2H8v-2z"/>
                     </svg>
                     Scorio.jl Paper
+                </a>
+                <a href="https://arxiv.org/abs/2608.04001" class="link" target="_blank" rel="noopener">
+                    <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M4 4v16h16V8.414l-4-4H4zm16 16H4v-2h16v2zm0-4H4V6h10v4h4v6zM8 8h4v2H8V8zm0 4h8v2H8v-2z"/>
+                    </svg>
+                    Test-Time Scaling Paper
                 </a>
                 <a href="https://pypi.org/project/scorio/" class="link" target="_blank" rel="noopener">
                     <svg class="icon" viewBox="0 0 24 24" fill="currentColor">

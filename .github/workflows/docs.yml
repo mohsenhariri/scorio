@@ -104,13 +104,22 @@ jobs:
           path: docs-landing
           retention-days: 1
 
-  deploy:
-    name: Deploy to GitHub Pages
+  assemble-site:
+    name: Assemble and Validate Documentation Site
     needs: [build-julia-docs, build-javascript-docs, build-landing-page]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Test SEO build checks
+        run: python -m unittest discover -s tests/docs -v
+
       - name: Download Julia docs
         uses: actions/download-artifact@v4
         with:
@@ -145,9 +154,28 @@ jobs:
           # Create .nojekyll to bypass Jekyll processing
           touch deploy/.nojekyll
           
-          # List structure for debugging
-          echo "Deployment structure:"
-          find deploy -type f | head -50
+      - name: Generate search metadata and sitemaps, then validate
+        run: python scripts/docs_seo.py deploy
+
+      - name: Upload validated site
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation-site
+          path: deploy
+          include-hidden-files: true
+          retention-days: 1
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: assemble-site
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    steps:
+      - name: Download validated site
+        uses: actions/download-artifact@v4
+        with:
+          name: documentation-site
+          path: deploy
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

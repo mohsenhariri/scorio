@@ -1,5 +1,9 @@
 # Evaluation API
 
+```@meta
+Description = "Evaluate LLMs in Julia with Scorio.Eval: Bayes@N posterior means and uncertainty, Pass@k, majority voting, and categorical outcome metrics."
+```
+
 Evaluation methods operate on outcome matrices `R` with shape `(M, N)` (or vectors
 coerced to `1 x N`).
 

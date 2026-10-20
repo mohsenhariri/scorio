@@ -1,5 +1,9 @@
 # Aggregation (`Scorio.Aggregate`)
 
+```@meta
+Description = "Select answers from sampled LLM completions in Julia with Scorio.Aggregate: majority voting, best-of-N, reward and confidence scoring, and online stopping."
+```
+
 Test-time scaling utilities live under `Scorio.Aggregate` (also available as
 `Scorio.Agg` and `Scorio.agg`). Candidate pools are vectors for one question or
 `M × N` matrices for a batch. To match Python exactly, returned indices are

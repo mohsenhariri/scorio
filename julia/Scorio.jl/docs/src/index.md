@@ -1,5 +1,9 @@
 # Scorio.jl
 
+```@meta
+Description = "Scorio.jl: Bayesian LLM evaluation and ranking in Julia. Install Scorio, compute Bayes@N with uncertainty, and compare models from repeated outcomes."
+```
+
 ```@raw html
 <p align="center">
   <picture>
@@ -54,6 +58,9 @@ println("Scores = ", scores)
 
 - [API Reference](api.md)
 - [Examples](examples.md)
+- [Scorio project and language editions](https://mohsenhariri.github.io/scorio/)
+- [Python documentation](https://scorio.readthedocs.io/)
+- [JavaScript documentation](https://mohsenhariri.github.io/scorio/javascript/)
 
 ## References
 

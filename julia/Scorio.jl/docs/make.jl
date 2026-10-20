@@ -6,8 +6,9 @@ const Remotes = Documenter.Remotes
 makedocs(
     sitename = "Scorio.jl",
     format = Documenter.HTML(
-        prettyurls = get(ENV, "CI", nothing) == "true",
+        prettyurls = true,
         canonical = "https://mohsenhariri.github.io/scorio/julia/",
+        description = "Scorio.jl documentation: Bayesian LLM evaluation, model ranking, and answer aggregation in Julia.",
         edit_link = "main",
         assets = ["assets/favicon.ico", "assets/scorio.css"],
         sidebar_sitename = false,

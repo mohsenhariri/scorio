@@ -1,5 +1,9 @@
 # Ranking API
 
+```@meta
+Description = "Rank LLMs in Julia with Scorio.Rank: Bayesian, Bradley-Terry, voting, IRT, graph, and listwise methods for repeated responses on shared questions."
+```
+
 ## Priors
 
 ```@docs
