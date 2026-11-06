@@ -197,7 +197,12 @@ def compare_rankings(
     if not (np.isfinite(g).all() and np.isfinite(t).all()):
         raise ValueError("ranked lists must not contain NaN or inf.")
 
-    diffs = (t - g).astype(float)
+    if np.issubdtype(g.dtype, np.integer) and np.issubdtype(t.dtype, np.integer):
+        # Subtract as Python integers to avoid unsigned wraparound or signed
+        # overflow, without rounding large adjacent integers before subtraction.
+        diffs = (t.astype(object) - g.astype(object)).astype(float)
+    else:
+        diffs = (t - g).astype(float)
     fraction_mismatched = float(np.sum(diffs != 0) / n)
 
     max_disp = float(np.max(np.abs(diffs))) / (n - 1) if n > 1 else 0.0

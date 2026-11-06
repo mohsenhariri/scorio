@@ -3,6 +3,16 @@ Changelog
 
 All notable changes to this project will be documented in this file.
 
+Unreleased
+----------
+
+Fixed
+~~~~~
+
+- Python ``compare_rankings`` computes integer displacements without unsigned
+  wraparound or signed overflow, preserving differences between large adjacent
+  integers before conversion to floating point.
+
 Version 0.2.3 (2026-10-04)
 --------------------------
 

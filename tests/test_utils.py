@@ -196,6 +196,23 @@ class TestCompareRankings:
         with pytest.raises(ValueError, match="same non-zero length"):
             compare_rankings([1, 2], [1, 2, 3])
 
+    @pytest.mark.parametrize("dtype", [np.uint8, np.uint16, np.uint32, np.uint64])
+    def test_unsigned_rank_displacement(self, dtype) -> None:
+        a = np.array([1, 2, 3, 4, 5], dtype=dtype)
+        b = np.array([5, 2, 3, 4, 1], dtype=dtype)
+        for left, right in [(a, b), (b, a)]:
+            result = compare_rankings(left, right)
+            assert result["max_disp"] == pytest.approx(1.0)
+            assert result["fraction_mismatched"] == pytest.approx(0.4)
+
+    @pytest.mark.parametrize("dtype", [np.int64, np.uint64])
+    def test_integer_displacement_preserves_small_differences(self, dtype) -> None:
+        # Converting each input to float before subtracting would lose this swap.
+        a = np.array([2**53, 2**53 + 1], dtype=dtype)
+        result = compare_rankings(a, a[::-1])
+        assert result["max_disp"] == pytest.approx(1.0)
+        assert result["fraction_mismatched"] == pytest.approx(1.0)
+
     def test_empty_raises(self) -> None:
         with pytest.raises(ValueError, match="same non-zero length"):
             compare_rankings([], [])
