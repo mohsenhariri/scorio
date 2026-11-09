@@ -73,7 +73,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install Inspect integration dependencies
-        run: pip install -e ".[dev,inspect]"
+        run: pip install -e ".[inspect]" "pytest>=9.0.2"
 
       - name: Test Inspect integration
         run: pytest tests/integrations -q
