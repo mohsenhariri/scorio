@@ -67,6 +67,7 @@ Contents
    installation
    quickstart
    examples
+   integrations/inspect
 
 .. toctree::
    :maxdepth: 2

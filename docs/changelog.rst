@@ -3,6 +3,18 @@ Changelog
 
 All notable changes to this project will be documented in this file.
 
+Version 0.2.4 (2026-11-09)
+--------------------------
+
+Added
+~~~~~
+
+- An optional Inspect AI extension, installed with ``scorio[inspect]`` on
+  Python 3.11 or later. It evaluates repeated binary scores with Bayes@N,
+  preserves epoch identity, and validates complete evaluation logs before
+  returning posterior mean and standard deviation. The extension uses the
+  existing Scorio estimator and public Inspect APIs.
+
 Version 0.2.3 (2026-10-04)
 --------------------------
 

@@ -1,6 +1,6 @@
 {
   "name": "scorio",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Bayesian evaluation, ranking, and answer aggregation toolkit — a zero-dependency TypeScript port of Scorio.",
   "keywords": [
     "bayesian",

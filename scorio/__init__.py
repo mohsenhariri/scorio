@@ -21,7 +21,7 @@ Modules
 
 """
 
-__version__ = "0.2.3"
+__version__ = "0.2.4"
 
 from . import aggregate, eval, rank, sinf, utils
 

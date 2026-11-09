@@ -85,12 +85,15 @@ pip install scorio
 pip install "git+https://github.com/mohsenhariri/scorio.git"
 
 # Install a specific tag
-pip install "git+https://github.com/mohsenhariri/scorio.git@python-v0.2.3"
+pip install "git+https://github.com/mohsenhariri/scorio.git@python-v0.2.4"
 
 # Install from local repository
 pip install -e .
 
 ```
+
+For Bayes@N metrics in Inspect AI, install `pip install "scorio[inspect]"`
+(Python 3.11+) and follow the [Inspect integration guide](https://scorio.readthedocs.io/en/latest/integrations/inspect.html).
 
 #### Basic Usage
 

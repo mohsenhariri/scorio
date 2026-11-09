@@ -20,7 +20,7 @@ if run_family("eval") || run_family("rank") || run_family("sinf")
 end
 
 @testset "Scorio.jl" begin
-    @test Scorio.VERSION == v"0.2.3"
+    @test Scorio.VERSION == v"0.2.4"
 
     @test isdefined(Scorio, :Eval)
     @test isdefined(Scorio, :Rank)

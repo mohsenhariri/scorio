@@ -1,7 +1,7 @@
 """Scorio Julia package."""
 module Scorio
 
-const VERSION = v"0.2.3"
+const VERSION = v"0.2.4"
 
 include("numpy_rng.jl")
 include("eval.jl")

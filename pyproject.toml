@@ -45,6 +45,11 @@ Issues = "https://github.com/mohsenhariri/scorio/issues"
 Documentation = "https://scorio.readthedocs.io/"
 
 [project.optional-dependencies]
+inspect = [
+    "inspect-ai>=0.3.288,<0.4",
+    "agent-client-protocol>=0.12,<1",
+    "packaging>=23",
+]
 dev = [
     "pytest>=9.0.2",
     "ruff>=0.9.0",
@@ -55,6 +60,9 @@ dev = [
     "sphinx-rtd-theme>=3.1.0",
     "sphinx-autodoc-typehints>=3.6.2",
 ]
+
+[project.entry-points.inspect_ai]
+scorio = "scorio.integrations._registry"
 
 [tool.setuptools.dynamic]
 version = { file = "VERSION" }
