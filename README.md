@@ -28,9 +28,9 @@
 
 | APIs | Documentation | Status |
 |----------|--------------|--------|
-| **Python** | [scorio.readthedocs.io](https://scorio.readthedocs.io/en/latest/) | [![ReadTheDocs](https://readthedocs.org/projects/scorio/badge/?version=latest)](https://scorio.readthedocs.io/en/latest/) |
-| **Julia** | [mohsenhariri.github.io/scorio/julia](https://mohsenhariri.github.io/scorio/julia/) | [![GitHub Pages](https://img.shields.io/badge/docs-stable-blue.svg)](https://mohsenhariri.github.io/scorio/julia/) |
-| **JavaScript/TypeScript** | [mohsenhariri.github.io/scorio/javascript](https://mohsenhariri.github.io/scorio/javascript/) | [![GitHub Pages](https://img.shields.io/badge/docs-stable-blue.svg)](https://mohsenhariri.github.io/scorio/javascript/) |
+| **[Python](https://pypi.org/project/scorio/)** | [scorio.readthedocs.io](https://scorio.readthedocs.io/en/latest/) | [![ReadTheDocs](https://readthedocs.org/projects/scorio/badge/?version=latest)](https://scorio.readthedocs.io/en/latest/) |
+| **[Julia](https://platform.juliahub.com/ui/Packages/General/Scorio)** | [mohsenhariri.github.io/scorio/julia](https://mohsenhariri.github.io/scorio/julia/) | [![GitHub Pages](https://img.shields.io/badge/docs-stable-blue.svg)](https://mohsenhariri.github.io/scorio/julia/) |
+| **[JavaScript/TypeScript](https://www.npmjs.com/package/scorio)** | [mohsenhariri.github.io/scorio/javascript](https://mohsenhariri.github.io/scorio/javascript/) | [![GitHub Pages](https://img.shields.io/badge/docs-stable-blue.svg)](https://mohsenhariri.github.io/scorio/javascript/) |
 
 ---
 
