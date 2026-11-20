@@ -97,8 +97,8 @@ def _scores_to_R(scored: list[tuple]) -> tuple[np.ndarray, np.ndarray]:
 
         * ``R_int`` is an M × N integer array (rows = problems, cols = trials)
           with each entry mapping to a category index.
-        * ``w`` is the weight vector — the sorted unique float scores — for use
-          with :func:`scorio.eval.bayes`.
+        * ``w`` contains the sorted unique float scores used as weights by
+          :func:`scorio.eval.bayes`.
     """
     problems = sorted({p for p, _, _ in scored})
     trials = sorted({t for _, t, _ in scored})

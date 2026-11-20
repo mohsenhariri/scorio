@@ -1,5 +1,5 @@
 /**
- * Generalized pass-family metrics for binary outcomes — G-Pass@k, the
+ * The generalized pass metrics for binary outcomes include G-Pass@k, the
  * thresholded G-Pass@k_τ (at least `ceil(τk)` successes), and mG-Pass@k
  * (the mean over thresholds `τ ∈ [0.5, 1.0]`), with Beta-posterior credible
  * intervals. Port of `scorio/eval/gpass.py`.

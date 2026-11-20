@@ -2,9 +2,9 @@
  * Paired-comparison probabilistic ranking models (Bradley-Terry, Davidson,
  * Rao-Kupper). Port of `scorio/rank/bradley_terry.py`.
  *
- * Latent strengths `pi_i = exp(theta_i)` are fit by minimizing a negative
- * (log-)likelihood — with an optional prior penalty for the MAP variants — over
- * mean-centered log-strengths.
+ * Fit latent strengths `pi_i = exp(theta_i)` by minimizing the negative
+ * log-likelihood over mean-centered log-strengths. The MAP variants include
+ * an optional prior penalty.
  */
 
 import { minimize } from "./internal/optimize.js";

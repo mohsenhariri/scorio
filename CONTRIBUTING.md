@@ -121,6 +121,8 @@ TagBot creates the Julia tag and GitHub release.
 
 ## Documentation
 
+Use commas, parentheses, or separate sentences in place of em dashes in documentation and Markdown.
+
 Build the Python, Julia, or JavaScript documentation locally:
 ```bash
 make py-docs-build

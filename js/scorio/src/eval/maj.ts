@@ -1,8 +1,8 @@
 /**
- * Majority-vote metrics for binary outcomes — Maj@k (probability that more
- * than half of `k` selected traces are correct) with a Bayesian credible
- * interval. A binary-outcome wrapper around the generalized threshold-pass
- * family (G-Pass@k_τ). Port of `scorio/eval/maj.py`.
+ * For binary outcomes, Maj@k gives the probability that more than half of
+ * `k` selected traces are correct. This module also computes its Bayesian
+ * credible interval. It uses the generalized threshold-pass family (G-Pass@k_τ).
+ * Port of `scorio/eval/maj.py`.
  *
  * Reference: Liu, J., Liu, H., Xiao, L., et al. (2024). Are Your LLMs Capable
  * of Stable Reasoning? arXiv:2412.13147.
@@ -18,9 +18,9 @@ function majorityTau(k: number): number {
 }
 
 /**
- * Maj@k: strict-majority correctness over `k` samples — probability that a
- * uniformly sampled subset of `k` observed traces contains strictly more than
- * half correct solutions. Equivalent to G-Pass@k_τ with τ = (⌊k/2⌋+1)/k.
+ * Maj@k gives the probability that a uniformly sampled subset of `k` observed
+ * traces contains a strict majority of correct solutions. Equivalent to
+ * G-Pass@k_τ with τ = (⌊k/2⌋+1)/k.
  */
 export function majAtK(R: Matrix, k: number): number {
   return gPassAtKTau(R, k, majorityTau(k));

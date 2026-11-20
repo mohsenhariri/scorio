@@ -1,5 +1,5 @@
 /**
- * HodgeRank — statistical ranking via combinatorial Hodge theory
+ * HodgeRank estimates ranks using combinatorial Hodge theory
  * (Jiang, Lim, Yao & Ye, 2009). Port of `scorio/rank/hodge_rank.py`.
  *
  * Treats aggregated pairwise outcomes as an edge flow and finds global

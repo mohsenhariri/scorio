@@ -1,7 +1,6 @@
 /**
- * Max@k family — the continuous-reward generalization of Pass@k. Instead of
- * asking whether at least one sampled response is correct, Max@k scores the
- * best response among `k` sampled traces under a user-specified reward scale.
+ * Max@k generalizes Pass@k to continuous rewards. It scores the best response
+ * among `k` sampled traces under a user-specified reward scale.
  * Port of `scorio/eval/max_reward.py`.
  *
  * The point estimator matches the appendix evaluation formula in Bagirov et

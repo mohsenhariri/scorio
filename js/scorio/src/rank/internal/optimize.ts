@@ -1,5 +1,5 @@
 /**
- * Unconstrained minimizer — a limited-memory BFGS (L-BFGS) with an Armijo
+ * Unconstrained minimization with limited-memory BFGS (L-BFGS), an Armijo
  * backtracking line search and forward-difference gradients.
  *
  * The Python reference fits its Bradley-Terry / Plackett-Luce / IRT estimators

@@ -25,8 +25,8 @@ const METHOD_TO_RANKDATA: Record<RankMethod, RankDataMethod> = {
 };
 
 /**
- * `scipy.stats.rankdata(values, method)` — ascending ranks (rank 1 = smallest),
- * ties resolved per `method`. Equal values are detected by exact equality.
+ * Assign ascending ranks (rank 1 = smallest) with the same tie rules as
+ * `scipy.stats.rankdata(values, method)`. Equal values are detected by exact equality.
  */
 export function rankdata(
   values: readonly number[],

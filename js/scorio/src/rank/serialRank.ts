@@ -1,5 +1,5 @@
 /**
- * SerialRank — spectral ranking by seriation (Fogel, d'Aspremont & Vojnovic).
+ * SerialRank estimates ranks by spectral seriation (Fogel, d'Aspremont & Vojnovic).
  * Port of `scorio/rank/serial_rank.py`.
  *
  * Builds a similarity matrix from pairwise comparisons, forms its graph

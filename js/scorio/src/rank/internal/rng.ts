@@ -4,9 +4,8 @@
  *
  * These methods are inherently Monte Carlo; the Python reference seeds NumPy's
  * PCG64 generator, which cannot be reproduced bit-for-bit here. This generator
- * is deterministic given a seed so results are reproducible, but it is not
- * expected to match NumPy — the corresponding tests assert structural ranking
- * properties rather than exact values.
+ * produces reproducible results for a given seed. The tests check structural
+ * ranking properties because the sequences differ between generators.
  */
 export class SeededRng {
   private state: number;

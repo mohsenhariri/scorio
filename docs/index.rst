@@ -67,6 +67,13 @@ Contents
    installation
    quickstart
    examples
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Integrations
+
+   Overview <integrations/index>
+   integrations/evalscope
    integrations/inspect
 
 .. toctree::

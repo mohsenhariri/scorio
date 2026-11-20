@@ -7,6 +7,10 @@ posterior mean and posterior standard deviation over a fixed set of questions.
 The uncertainty is conditional on those questions; Inspect's population
 standard error remains a separate quantity.
 
+|inspect-notebook|
+
+.. include:: notebooks.inc
+
 Installation
 ------------
 

@@ -1,7 +1,7 @@
 /**
- * Pass family — Pass@k (probability at least one of k samples passes) and
- * Pass^k / Pass-hat@k (probability all k pass), with Beta-posterior credible
- * intervals. Port of `scorio/eval/pass_at_k.py`.
+ * Pass@k gives the probability that at least one of k samples passes, and
+ * Pass^k / Pass-hat@k gives the probability that all k pass. Both have
+ * Beta-posterior credible intervals. Port of `scorio/eval/pass_at_k.py`.
  *
  * References: Chen et al. (2021), arXiv:2107.03374; Yao et al. (2024),
  * arXiv:2406.12045.

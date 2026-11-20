@@ -48,6 +48,69 @@
 
 ---
 
+## Integrations
+
+<table>
+<thead><tr><th>Tool and resources</th><th>Example</th></tr></thead>
+<tbody>
+<tr>
+<td>
+
+**[EvalScope][evalscope-home]**<br>
+[![Open the EvalScope notebook][notebook-badge]][evalscope-notebook]<br>
+[EvalScope guide][evalscope-guide]
+
+</td>
+<td>
+
+<pre><code class="language-python">from evalscope import run_task
+
+config.repeats = 4
+config.dataset_args["general_mcq"].update(
+    subset_list=["quiz"], aggregation="bayes_at_n"
+)
+report = run_task(config)["general_mcq"]</code></pre>
+</td>
+</tr>
+<tr>
+<td>
+
+**[Inspect AI][inspect-home]**<br>
+[![Open the Inspect AI notebook][notebook-badge]][inspect-notebook]<br>
+[Inspect AI guide][inspect-guide]
+
+</td>
+<td>
+
+<pre><code class="language-python">from inspect_ai import Task, eval as inspect_eval
+from inspect_ai.scorer import match
+from scorio.integrations.inspect import (
+    bayes_at_n, record_epochs, validate_bayes_at_n
+)
+
+task = Task(
+    dataset=samples, epochs=4,
+    scorer=record_epochs(match()),
+    metrics=[bayes_at_n(sample_ids, epochs=4)],
+)
+log = inspect_eval(task, model=model)[0]
+moments = validate_bayes_at_n(log, sample_ids, epochs=4)</code></pre>
+</td>
+</tr>
+</tbody>
+</table>
+
+
+[notebook-badge]: https://img.shields.io/badge/Open_notebook-30363D?logo=jupyter&logoColor=F37626
+[evalscope-home]: https://github.com/modelscope/evalscope
+[evalscope-notebook]: https://github.com/mohsenhariri/scorio/blob/main/notebooks/03_evalscope_bayes_at_n.ipynb
+[evalscope-guide]: https://scorio.readthedocs.io/en/latest/integrations/evalscope.html
+[inspect-home]: https://inspect.aisi.org.uk/
+[inspect-notebook]: https://github.com/mohsenhariri/scorio/blob/main/notebooks/02_inspect_ai_bayes_at_n.ipynb
+[inspect-guide]: https://scorio.readthedocs.io/en/latest/integrations/inspect.html
+
+---
+
 ## Packages
 
 This repository contains three packages:
@@ -60,14 +123,19 @@ This repository contains three packages:
 
 ## Datasets
 
-| Dataset | Attempts | Notebooks |
-| --- | ---: | --- |
-| [Scorio Trace](https://huggingface.co/datasets/harimo/scorio-trace) | 192,000 | [Explore](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/trace/trace.ipynb) - [Eval](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/trace/eval.ipynb) - [Rank](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/trace/rank.ipynb) - [Aggregate](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/trace/aggregate.ipynb) |
-| [Scorio Lite](https://huggingface.co/datasets/harimo/scorio-lite) | 1,211,520 | [Explore](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/lite/lite.ipynb) - [Eval](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/lite/eval.ipynb) - [Rank](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/lite/rank.ipynb) - [Aggregate](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/lite/aggregate.ipynb) |
-| [Scorio Math](https://huggingface.co/buckets/harimo/scorio-math) | 59,520 | [Explore](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/math/math.ipynb) - [Eval](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/math/eval.ipynb) - [Rank](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/math/rank.ipynb) - [Aggregate](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/math/aggregate.ipynb) |
-| [Scorio GPQA](https://huggingface.co/buckets/harimo/scorio-gpqa) | 1,152,000 | [Explore](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/gpqa/gpqa.ipynb) - [Eval](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/gpqa/eval.ipynb) - [Rank](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/gpqa/rank.ipynb) - [Aggregate](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/gpqa/aggregate.ipynb) |
+| Dataset | Open notebook |
+| --- | --- |
+| [Scorio Trace](https://huggingface.co/datasets/harimo/scorio-trace) | [![Open the Scorio Trace exploration notebook][notebook-explore-badge]](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/trace/trace.ipynb) [![Open the Scorio Trace evaluation notebook][notebook-eval-badge]](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/trace/eval.ipynb) [![Open the Scorio Trace ranking notebook][notebook-rank-badge]](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/trace/rank.ipynb) [![Open the Scorio Trace aggregation notebook][notebook-aggregate-badge]](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/trace/aggregate.ipynb) |
+| [Scorio Lite](https://huggingface.co/datasets/harimo/scorio-lite) | [![Open the Scorio Lite exploration notebook][notebook-explore-badge]](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/lite/lite.ipynb) [![Open the Scorio Lite evaluation notebook][notebook-eval-badge]](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/lite/eval.ipynb) [![Open the Scorio Lite ranking notebook][notebook-rank-badge]](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/lite/rank.ipynb) [![Open the Scorio Lite aggregation notebook][notebook-aggregate-badge]](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/lite/aggregate.ipynb) |
+| [Scorio Math](https://huggingface.co/buckets/harimo/scorio-math) | [![Open the Scorio Math exploration notebook][notebook-explore-badge]](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/math/math.ipynb) [![Open the Scorio Math evaluation notebook][notebook-eval-badge]](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/math/eval.ipynb) [![Open the Scorio Math ranking notebook][notebook-rank-badge]](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/math/rank.ipynb) [![Open the Scorio Math aggregation notebook][notebook-aggregate-badge]](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/math/aggregate.ipynb) |
+| [Scorio GPQA](https://huggingface.co/buckets/harimo/scorio-gpqa) | [![Open the Scorio GPQA exploration notebook][notebook-explore-badge]](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/gpqa/gpqa.ipynb) [![Open the Scorio GPQA evaluation notebook][notebook-eval-badge]](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/gpqa/eval.ipynb) [![Open the Scorio GPQA ranking notebook][notebook-rank-badge]](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/gpqa/rank.ipynb) [![Open the Scorio GPQA aggregation notebook][notebook-aggregate-badge]](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/gpqa/aggregate.ipynb) |
 
-Scorio Lite contains the same attempts as Scorio Math and Scorio GPQA without the top-20 candidate distributions; its `meta-*` configurations also omit token lists for smaller downloads. See the [dataset guide](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/README.md) for loading details and schemas.
+[notebook-explore-badge]: https://img.shields.io/badge/Explore-30363D?logo=jupyter&logoColor=F37626
+[notebook-eval-badge]: https://img.shields.io/badge/Eval-30363D?logo=jupyter&logoColor=F37626
+[notebook-rank-badge]: https://img.shields.io/badge/Rank-30363D?logo=jupyter&logoColor=F37626
+[notebook-aggregate-badge]: https://img.shields.io/badge/Aggregate-30363D?logo=jupyter&logoColor=F37626
+
+Scorio Lite contains the same attempts as Scorio Math and Scorio GPQA without the top-20 candidate distributions; its `meta-*` configurations omit token lists for smaller downloads. See the [dataset guide](https://github.com/mohsenhariri/scorio/blob/main/notebooks/datasets/README.md) for loading details and schemas.
 
 ---
 
@@ -91,9 +159,6 @@ pip install "git+https://github.com/mohsenhariri/scorio.git@python-v0.2.4"
 pip install -e .
 
 ```
-
-For Bayes@N metrics in Inspect AI, install `pip install "scorio[inspect]"`
-(Python 3.11+) and follow the [Inspect integration guide](https://scorio.readthedocs.io/en/latest/integrations/inspect.html).
 
 #### Basic Usage
 

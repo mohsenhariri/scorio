@@ -1,6 +1,6 @@
 /**
- * Avg@N family — weighted average with Bayes@N uncertainty rescaled to the
- * avg scale. Port of `scorio/eval/avg.py`.
+ * Avg@N reports a weighted average with Bayes@N uncertainty rescaled to the
+ * units of the average. Port of `scorio/eval/avg.py`.
  */
 
 import { scaledRewards, realVector } from "./internal/tailpass.js";

@@ -1,5 +1,5 @@
 /**
- * AUC@K — normalized area under the Pass@j curve for budgets j = 1, ..., k.
+ * AUC@K is the normalized area under the Pass@j curve for budgets j = 1, ..., k.
  *
  * For a binary outcome matrix `R` in {0,1}^(M x N), AUC@K averages per-question
  * Pass@j values using trapezoidal weights matching Eq. (7) of Hu et al. (2026).

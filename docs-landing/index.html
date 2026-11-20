@@ -79,8 +79,9 @@
     
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
+            --link-color: #245778;
+            --link-hover: #153e59;
+            --link-hover-bg: #e7f0f6;
             --python: #3776ab;
             --python-hover: #2b5d8b;
             --julia: #9558b2;
@@ -103,6 +104,9 @@
                 --text: #f9fafb;
                 --text-muted: #9ca3af;
                 --border: #374151;
+                --link-color: #a5d2f2;
+                --link-hover: #d7ebfa;
+                --link-hover-bg: #293c4e;
             }
         }
         
@@ -317,15 +321,87 @@
             gap: 1rem;
         }
 
+        .integrations,
         .papers {
             margin-bottom: 3rem;
             text-align: left;
         }
 
+        .integrations h2,
         .papers h2 {
             margin: 0 0 1rem;
             text-align: center;
             font-size: 1.5rem;
+        }
+
+        .integration-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+            gap: 1rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .integration {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding: 1.25rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow);
+        }
+
+        .integration h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .integration-logo {
+            flex: none;
+            width: 2.75rem;
+            height: 2.75rem;
+            padding: 0.375rem;
+            object-fit: contain;
+            background: #fff;
+            border: 1px solid rgba(17, 24, 39, 0.08);
+            border-radius: 0.5rem;
+        }
+
+        .integration-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.25rem 0.75rem;
+            margin-top: auto;
+        }
+
+        .notebook-link {
+            display: inline-flex;
+            align-items: center;
+            min-height: 2.5rem;
+            border-radius: 0.25rem;
+        }
+
+        .logo-credit {
+            margin: 0.875rem 0 0;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-align: center;
+        }
+
+        .logo-credit a {
+            color: var(--link-color);
+            text-underline-offset: 0.15em;
+        }
+
+        .logo-credit a:hover {
+            color: var(--link-hover);
         }
 
         .paper-list {
@@ -394,7 +470,7 @@
         }
         
         .link {
-            color: var(--primary);
+            color: var(--link-color);
             text-decoration: none;
             font-weight: 500;
             display: inline-flex;
@@ -406,7 +482,15 @@
         }
         
         .link:hover {
-            background: rgba(37, 99, 235, 0.1);
+            color: var(--link-hover);
+            background: var(--link-hover-bg);
+            text-decoration: underline;
+            text-underline-offset: 0.2em;
+        }
+
+        a:focus-visible {
+            outline: 2px solid var(--link-color);
+            outline-offset: 3px;
         }
         
         footer {
@@ -542,7 +626,36 @@
                 </article>
             </section>
 
-            <p><a href="./sitemap.html">Browse all Scorio documentation and API references</a></p>
+            <section class="integrations" aria-labelledby="integrations-heading">
+                <h2 id="integrations-heading">Integrations</h2>
+                <ul class="integration-list">
+                    <li class="integration">
+                        <h3>
+                            <img class="integration-logo" src="./assets/integrations/evalscope.svg" width="44" height="44" alt="">
+                            EvalScope
+                        </h3>
+                        <div class="integration-actions">
+                            <a class="notebook-link" href="https://github.com/mohsenhariri/scorio/blob/main/notebooks/03_evalscope_bayes_at_n.ipynb" target="_blank" rel="noopener">
+                                <img src="./assets/open-notebook.svg" width="124" height="22" alt="Open the EvalScope Bayes@N notebook">
+                            </a>
+                            <a class="link" href="https://scorio.readthedocs.io/en/latest/integrations/evalscope.html" target="_blank" rel="noopener">Read guide<span class="visually-hidden"> for EvalScope</span> <span aria-hidden="true">→</span></a>
+                        </div>
+                    </li>
+                    <li class="integration">
+                        <h3>
+                            <img class="integration-logo" src="./assets/integrations/inspect-ai.svg" width="44" height="44" alt="">
+                            Inspect AI
+                        </h3>
+                        <div class="integration-actions">
+                            <a class="notebook-link" href="https://github.com/mohsenhariri/scorio/blob/main/notebooks/02_inspect_ai_bayes_at_n.ipynb" target="_blank" rel="noopener">
+                                <img src="./assets/open-notebook.svg" width="124" height="22" alt="Open the Inspect AI Bayes@N notebook">
+                            </a>
+                            <a class="link" href="https://scorio.readthedocs.io/en/latest/integrations/inspect.html" target="_blank" rel="noopener">Read guide<span class="visually-hidden"> for Inspect AI</span> <span aria-hidden="true">→</span></a>
+                        </div>
+                    </li>
+                </ul>
+                <p class="logo-credit">The <a href="https://github.com/modelscope/evalscope">EvalScope</a> and <a href="https://inspect.aisi.org.uk/">Inspect AI</a> logos belong to their respective projects.</p>
+            </section>
 
             <section class="papers" aria-labelledby="papers-heading">
                 <h2 id="papers-heading">Papers</h2>
@@ -617,7 +730,8 @@
                 </div>
             </section> -->
             
-            <nav class="links" aria-label="External links">
+            <nav class="links" aria-label="Project resources">
+                <a href="./sitemap.html" class="link">Documentation index</a>
                 <a href="https://github.com/mohsenhariri/scorio" class="link" target="_blank" rel="noopener">
                     <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>

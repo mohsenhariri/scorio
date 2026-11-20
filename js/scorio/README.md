@@ -2,17 +2,17 @@
 
 [**JavaScript/TypeScript** documentation](https://mohsenhariri.github.io/scorio/javascript/)
 
-Bayesian evaluation toolkit for stochastic models — a TypeScript/JavaScript port of [Scorio](https://github.com/mohsenhariri/scorio).
+This TypeScript/JavaScript package ports the Bayesian evaluation tools for stochastic models from [Scorio](https://github.com/mohsenhariri/scorio).
 
 It provides these main API families:
 
-- **`scorio/eval`** — point estimates **and** Bayesian uncertainty for metrics used to evaluate LLMs and other stochastic models under repeated sampling: Bayes@N, Avg@N, Pass@k / Pass^k, G-Pass@k, Maj@k, AUC@K, Max@k, and the geometric/spectrum blends.
-- **`scorio/rank`** — 40+ ranking estimators that order multiple models from a binary (or categorical) response tensor: eval-metric, voting, pairwise-rating (Elo/Glicko/TrueSkill), Bradley-Terry / Plackett-Luce / Rao-Kupper, IRT (Rasch/2PL/3PL/MML and multidimensional MIRT), graph (PageRank/spectral/α-Rank/Nash), seriation, and Hodge-theoretic methods.
-- **`scorio/aggregate`** — test-time-scaling confidence signals, PRM reward reduction, Best-of-N and voting rules, and online early stopping over candidate answer pools.
-- **`scorio/utils`** — score-to-rank conversion, ranking correlation statistics, and collision-free hashes for permutations and rankings with ties.
+- **`scorio/eval`** computes point estimates **and** Bayesian uncertainty for LLMs and other stochastic models under repeated sampling. Metrics include Bayes@N, Avg@N, Pass@k / Pass^k, G-Pass@k, Maj@k, AUC@K, Max@k, and the geometric/spectrum blends.
+- **`scorio/rank`** provides 40+ estimators that rank models from a binary or categorical response tensor. These include eval-metric, voting, pairwise-rating (Elo/Glicko/TrueSkill), Bradley-Terry / Plackett-Luce / Rao-Kupper, IRT (Rasch/2PL/3PL/MML and multidimensional MIRT), graph (PageRank/spectral/α-Rank/Nash), seriation, and Hodge-theoretic methods.
+- **`scorio/aggregate`** implements test-time-scaling confidence signals, PRM reward reduction, Best-of-N and voting rules, and online early stopping over candidate answer pools.
+- **`scorio/utils`** converts scores to ranks, computes ranking correlations, and provides collision-free hashes for permutations and rankings with ties.
 - `scorio/sinf` provides stopping and allocation decisions from posterior means and standard deviations.
 
-- **Zero runtime dependencies** — pure TypeScript (special functions, linear algebra, optimization, and an LP solver reimplemented from `scipy`/`numpy`).
+- The package has **zero runtime dependencies**. It reimplements special functions, linear algebra, optimization, and an LP solver from `scipy`/`numpy` in TypeScript.
 - **Dual ESM + CommonJS** builds with full type declarations.
 - **Numerically faithful** to the Python reference (verified against generated ground-truth fixtures).
 - **Two naming styles**: idiomatic camelCase (`passAtK`, `bradleyTerry`) and snake_case aliases matching the Python/Julia API (`pass_at_k`, `bradley_terry`).
@@ -115,7 +115,7 @@ probability estimate.
 
 ## Ranking (`scorio/rank`)
 
-Ranking estimators take a response tensor `R` of shape `(L, M, N)` — `L` models, `M` questions, `N` trials — with binary entries (a 2-D `(L, M)` matrix is treated as `N = 1`). Each method returns `{ ranking, scores }`: `ranking[l]` is model `l`'s rank (1 = best) and `scores[l]` the raw method score (larger is better). The optional `method` selects the tie convention (`"competition"` by default; also `"competition_max"`, `"dense"`, `"avg"`).
+Ranking estimators take a binary response tensor `R` of shape `(L, M, N)` for `L` models, `M` questions, and `N` trials. A 2-D `(L, M)` matrix represents a single trial per question (`N = 1`). Each method returns `{ ranking, scores }`: `ranking[l]` is model `l`'s rank (1 = best) and `scores[l]` the raw method score (larger is better). The optional `method` selects the tie convention (`"competition"` by default; also `"competition_max"`, `"dense"`, `"avg"`).
 
 ```ts
 import { rank } from "scorio";
@@ -152,7 +152,7 @@ rank.rank_centrality(R);
 | Plackett-Luce | `plackettLuce`(`Map`), `davidsonLuce`(`Map`), `bradleyTerryLuce`(`Map`) |
 | Priors (for MAP) | abstract runtime `Prior`, `GaussianPrior`, `LaplacePrior`, `CauchyPrior`, `UniformPrior`, `CustomPrior`, `EmpiricalPrior` |
 
-The MAP estimators accept a `prior` option — either a variance (interpreted as a zero-mean `GaussianPrior`) or a `Prior` instance. The Monte-Carlo methods (`thompson`, `bayesianMcmc`) are seeded and reproducible but, since they use a different RNG, are not bit-identical to the Python reference.
+The MAP estimators accept either a variance (interpreted as a zero-mean `GaussianPrior`) or a `Prior` instance through the `prior` option. The Monte-Carlo methods (`thompson`, `bayesianMcmc`) are seeded and reproducible but, since they use a different RNG, are not bit-identical to the Python reference.
 
 ## Ranking utilities (`scorio/utils`)
 

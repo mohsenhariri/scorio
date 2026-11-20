@@ -183,4 +183,4 @@ all_results = evaluate_all(
 # }
 ```
 
-Each value is a `(mu, sigma)` pair — the posterior mean and standard deviation from the Dirichlet–Bayes model.
+Each `(mu, sigma)` pair gives the posterior mean and standard deviation from the Dirichlet–Bayes model.

@@ -8,9 +8,9 @@ Scorio is a research toolkit for **Bayesian evaluation and ranking of LLMs** (es
 
 The repo contains **three parallel implementations** of the same API, kept in version lockstep via the root `VERSION` file and `scripts/sync_version.py`:
 
-- `scorio/` — Python, the reference implementation (published to PyPI)
-- `julia/Scorio.jl/` — Julia, mirrors the Python `eval`/`rank`/`aggregate`/`sinf`/`utils` API (registered in the Julia General Registry)
-- `js/scorio/` — TypeScript, zero-dependency port (npm), currently centered on the `eval` APIs
+- `scorio/` contains the Python reference implementation, published to PyPI.
+- `julia/Scorio.jl/` mirrors the Python `eval`/`rank`/`aggregate`/`sinf`/`utils` API in Julia. The package is registered in the Julia General Registry.
+- `js/scorio/` contains the zero-dependency TypeScript port on npm, currently focused on the `eval` APIs.
 
 When changing the public API or fixing a bug in one implementation, check whether the equivalent should also change in the others.
 
@@ -37,7 +37,7 @@ make py-docs-build               # Sphinx docs -> docs/_build/html
 make py-docs-serve                # serve built docs on :4000
 ```
 
-Pytest marker `slow` is registered in `pyproject.toml` for heavy ranking APIs — use it on any new test that's expensive (MCMC, MILP solvers, etc.).
+The `slow` pytest marker is registered in `pyproject.toml` for heavy ranking APIs. Use it on any new test that's expensive (MCMC, MILP solvers, etc.).
 
 ### Julia (`julia/Scorio.jl/`)
 
@@ -74,36 +74,36 @@ Nearly every module operates on the same shapes, defined in the README and `scor
 - `w`: length-`C+1` float vector of rubric weights mapping categories to scores
 - `R0` (optional): `M × D` matrix of prior outcomes, same category set as `R`
 
-Understanding this convention is required before reading `eval`, `rank`, or `aggregate` — they all consume/produce data in this shape, and ranking methods construct pairwise/setwise comparisons *from* `R` rather than taking a different input format.
+Read this convention before working with `eval`, `rank`, or `aggregate`. All three modules use these shapes, and the ranking methods construct pairwise or setwise comparisons *from* `R`.
 
-### `scorio/eval/` — scalar evaluation metrics
+### Scalar evaluation metrics (`scorio/eval/`)
 
 `bayes.py` implements the Bayes@N posterior (mean, std) from `_posterior.py`, optionally combining prior outcomes `R0`. Other metrics (`avg`, `maj`, `pass_at_k`, `gpass`, `max_reward`, `auc`) are built on shared helpers in `_inputs.py` (shape/validation), `_count_score.py`, and `_categorical.py`.
 
-### `scorio/rank/` — model ranking, built on `eval` and pairwise construction
+### Model ranking with `eval` and pairwise comparisons (`scorio/rank/`)
 
 `_base.py` and `_types.py` hold shared ranking infrastructure. Method families each live in their own file and wrap a distinct statistical model, documented with paper references in `scorio/rank/README.md`:
 
-- `eval_ranking.py` — rank by an evaluation metric (`avg`, `bayes`, `pass_at_k`, `g_pass_at_k_tau`, ...)
-- `bradley_terry.py` / `pairwise.py` — Bradley-Terry family, Elo/TrueSkill/Glicko
-- `voting.py` — Borda, Copeland, Schulze, ranked pairs, Kemeny-Young, etc.
-- `irt.py` — Rasch/2PL/3PL, MML, dynamic/longitudinal IRT, `mirt`
-- `graph.py`, `rank_centrality.py`, `serial_rank.py`, `hodge_rank.py` — spectral/graph-theoretic methods
-- `listwise.py` — Plackett-Luce, Davidson-Luce and related choice models
-- `bayesian.py` — Thompson sampling estimator, Bradley-Terry MCMC
-- `priors.py` — shared prior/regularization helpers (MAP variants)
+- `eval_ranking.py` ranks models by an evaluation metric (`avg`, `bayes`, `pass_at_k`, `g_pass_at_k_tau`, ...).
+- `bradley_terry.py` and `pairwise.py` implement the Bradley-Terry family, Elo, TrueSkill and Glicko.
+- `voting.py` implements Borda, Copeland, Schulze, ranked pairs, Kemeny-Young and other voting methods.
+- `irt.py` implements Rasch/2PL/3PL, MML, dynamic/longitudinal IRT and `mirt`.
+- `graph.py`, `rank_centrality.py`, `serial_rank.py` and `hodge_rank.py` implement spectral and graph-theoretic methods.
+- `listwise.py` implements Plackett-Luce, Davidson-Luce and related choice models.
+- `bayesian.py` implements the Thompson sampling estimator and Bradley-Terry MCMC.
+- `priors.py` provides shared prior and regularization helpers for the MAP variants.
 
-Many of these methods raise rather than return a degenerate estimate (e.g. non-existent MLE under separated data, unproven MILP optimum) — see `scorio/rank/README.md` for the specific failure conditions before "fixing" a raised exception.
+Many of these methods raise an exception for cases such as separated data with no finite MLE or a MILP optimum the solver could not prove. Check `scorio/rank/README.md` for the method's failure conditions before changing this behavior.
 
-### `scorio/aggregate/` (aliased `scorio.agg`) — test-time-scaling answer selection
+### Test-time-scaling answer selection (`scorio/aggregate/`, aliased `scorio.agg`)
 
 Picks a final answer among `N` sampled completions per question. `_base.py` defines the shared interface; `confidence.py` derives confidence signals from token log-probs (self-certainty, DeepConf, entropy), `prm.py` aggregates via process reward models, `vote.py`/`best_of.py` implement offline selection (majority vote, weighted vote, Best-of-N, Majority-of-the-Bests), `online.py` implements early-stopping rules, `calibration.py` and `cges.py` support calibration/scoring.
 
-### `scorio/categorical/` — rubric-based evaluation pipeline
+### Rubric-based evaluation pipeline (`scorio/categorical/`)
 
 A higher-level pipeline over `eval.bayes`: `io.py` loads per-completion JSONL files, `thresholds.py` computes corpus-level thresholds, `schemas.py` defines rubric schemas, `evaluate.py` ties these together to classify completions and score models.
 
-### `scorio/sinf/` — sequential inference helpers (adaptive stopping/allocation)
+### Sequential inference helpers for adaptive stopping and allocation (`scorio/sinf/`)
 
 ### Notebooks and datasets (`notebooks/`)
 
@@ -111,21 +111,21 @@ A higher-level pipeline over `eval.bayes`: `io.py` loads per-completion JSONL fi
 
 ### `benchmarks/`
 
-`eval_runtime.py` plus checked-in baseline JSON in `benchmarks/baselines/` track performance regressions in the NumPy eval kernels — update baselines deliberately, not to silence a regression.
+`eval_runtime.py` and the checked-in JSON in `benchmarks/baselines/` track performance regressions in the NumPy eval kernels. Update baselines only for intentional performance changes.
 
 ### Test fixtures
 
-`tests/data/generate_simulation_data.py` regenerates the outcome-matrix fixtures (`R_greedy.npz`, `R_top_p.npz`) that several tests load — regenerate via that script rather than hand-editing the `.npz` files.
+Use `tests/data/generate_simulation_data.py` to regenerate the outcome-matrix fixtures (`R_greedy.npz`, `R_top_p.npz`) that several tests load.
 
 ### `citations/`
 
-`aggregate.bib`, `bayes_at_N.bib`, `rank.bib` are the bibliography sources backing the citation blocks in `README.md` — update both together when a method's citation changes.
+`aggregate.bib`, `bayes_at_N.bib` and `rank.bib` are the sources for the citation blocks in `README.md`. When a citation changes, update its bibliography entry and the corresponding README block together.
 
 ## Code style notes (Python)
 
-- Ruff config in `pyproject.toml` intentionally allows math-conventional short/uppercase names (`R`, `w`, `N803`/`N806` ignored) — don't "fix" these.
+- Keep conventional mathematical names such as `R` and `w`. The Ruff config in `pyproject.toml` ignores `N803`/`N806` to allow them.
 - Google-style docstrings, type hints on public APIs (per `CONTRIBUTING.md`).
 
 ## CI
 
-`.github/workflows/python-package.yml` runs on push/PR to `main`: `ruff format --check` + `ruff check` on `scorio/`, and `pytest` (`make test`) across Python 3.10–3.13. **mypy is not enforced in CI** — it's part of `make lint` locally only, so a mypy failure won't block a PR but should still be fixed.
+On pushes and PRs to `main`, `.github/workflows/python-package.yml` runs `ruff format --check` and `ruff check` on `scorio/`, and `pytest` (`make test`) across Python 3.10–3.13. The local `make lint` target also runs mypy. Fix mypy failures even though they do not block a PR.
